@@ -9,14 +9,14 @@ const Loading: FC = () => {
           className="card card-side bg-base-100 shadow-sm animate-pulse"
         >
           <div className="card-body w-70">
-            <h2 className="card-title bg-gray-200 h-6 w-2/3 mb-2"></h2>
-            <ul className="list gap-1">
-              <p className="bg-gray-200 h-4 w-1/3"></p>
-              <p className="bg-gray-200 h-4 w-2/3"></p>
-              <p className="bg-gray-200 h-4 w-1/3"></p>
+            <h2 className="card-title bg-gray-200 h-6 w-2/3 skeleton"></h2>
+            <p className="bg-gray-200 h-3 w-1/3 skeleton"></p>
+            <ul className="list gap-2">              
+              <p className="bg-gray-200 h-4 w-2/3 skeleton"></p>
+              <p className="bg-gray-200 h-4 w-1/3 skeleton"></p>
             </ul>
           </div>
-          <div className="bg-gray-200 w-45 h-40"></div>
+          <div className="bg-gray-200 w-45 h-40 skeleton"></div>
         </div>
       ))}
     </div>

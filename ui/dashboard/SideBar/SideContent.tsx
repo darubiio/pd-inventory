@@ -36,7 +36,7 @@ const SideContent: FC = () => {
         <h2 className={`menu-title ${orbitron.className}`}>Inventory</h2>
         <ul>
           {navItems.map(({ name, href, Icon }) => (
-            <li key={name}>
+            <li key={name} className="text-sm font-semibold">
               <Link href={href} className={pathname === href ? "menu-active" : ""}>
                 <Icon />
                 {name}

@@ -33,7 +33,7 @@ export const fetchToken = async (): Promise<string> => {
 };
 
 export const getAuthToken = async () => {
-  const token = await REDIS.get(ZOHO_TOKEN_KEY);
+  const token: string | null = await REDIS.get(ZOHO_TOKEN_KEY);
   if (!token) {
     const newToken = await fetchToken();
     await REDIS.set(ZOHO_TOKEN_KEY, newToken, { ex: 2700 });

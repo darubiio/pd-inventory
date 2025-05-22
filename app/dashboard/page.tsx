@@ -1,8 +1,8 @@
 import { FC } from "react";
-// import { getOrganizationDetails } from "../../lib/zohoData";
+import { getItemDetails } from "../../lib/zohoData";
 
 const DashboardPage: FC = async () => {
-  // const organization = await getOrganizationDetails();
+  const itemDetails = await getItemDetails();
   return (
     <div></div>
   );
