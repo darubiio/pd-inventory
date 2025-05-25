@@ -128,6 +128,8 @@ export interface ItemDetails {
   unit: string;
   unit_id: string;
   description: string;
+  category_id: string;
+  category_name: string;
   product_type: string;
   purchase_account_id: string;
   vendor_id: string;
@@ -209,4 +211,17 @@ export interface ItemDetails {
     warehouse_actual_available_for_sale_stock: number;
     is_storage_location_enabled: boolean;
   }[];
+}
+
+interface ItemCategories {
+  [category: string]: { [warehouse: string]: number | string; name: string };
+}
+
+interface WarehouseCategory {
+  [warehouse: string]: { [category: string]: number; name: string };
+}
+
+interface Categories {
+  category_id: string,
+  category_name: string
 }

@@ -5,7 +5,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="h-full flex-col p-3 hidden md:flex">
-        <div className="card h-full w-70 bg-base-200 shadow-md">
+        <div className="card h-full w-60 bg-base-200 shadow-md">
           <div className="card-body">
             <SideTitle>PERDOMO DISTRIBUITOR</SideTitle>
             <SideContent />
