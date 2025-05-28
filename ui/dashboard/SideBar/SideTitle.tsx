@@ -7,7 +7,7 @@ interface SideTitleProps {
 
 const SideTitle: FC<SideTitleProps> = ({ children }) => {
   return (
-    <h4 className={`card-title ml-4 ${orbitron.className}`}>{children}</h4>
+    <h4 className={`card-title p-3 ${orbitron.className}`}>{children}</h4>
   );
 };
 

@@ -214,14 +214,21 @@ export interface ItemDetails {
 }
 
 interface ItemCategories {
-  [category: string]: { [warehouse: string]: number | string; name: string };
+  [category: string]: {
+    [warehouse: string]: number | string;
+    name: string;
+    id: string;
+  };
 }
 
 interface WarehouseCategory {
-  [warehouse: string]: { [category: string]: number; name: string };
+  [warehouse: string]: {
+    [category: string]: number | string;
+    name: string;
+  };
 }
 
 interface Categories {
-  category_id: string,
-  category_name: string
+  category_id: string;
+  category_name: string;
 }
