@@ -9,7 +9,7 @@ interface TopBarProps {
 const TopBar: FC<TopBarProps> = ({ children }) => {
   return (
     <>
-      <div className="drawer md:hidden p-3">
+      <div className="drawer sticky top-0 z-50 md:hidden p-2">
         <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
           <div className="navbar bg-base-200 w-full rounded-box">
@@ -47,7 +47,7 @@ const TopBar: FC<TopBarProps> = ({ children }) => {
               </ul>
             </div>
           </div>
-          <div className="flex-grow p-6 md:overflow-y-auto md:p-12">
+          <div className="flex-grow md:overflow-y-auto md:p-12">
             {children}
           </div>
         </div>
@@ -68,7 +68,9 @@ const TopBar: FC<TopBarProps> = ({ children }) => {
           </ul>
         </div>
       </div>
+      <div className="h-full w-full hidden md:block">
       {children}
+      </div>
     </>
   );
 };

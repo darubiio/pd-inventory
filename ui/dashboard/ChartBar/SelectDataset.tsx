@@ -24,6 +24,8 @@ const SelectDataset: FC<SelectDatasetProps> = ({
   return (
     <Select
       isMulti
+      id="select-dataset"
+      className="uppercase mb-4"
       getOptionValue={(o) => o.category_id}
       getOptionLabel={(o) => o.category_name}
       value={value}

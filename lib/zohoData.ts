@@ -207,11 +207,11 @@ export const getItemsCategoriesStock = async () => {
   const data: ItemCategories = {};
 
   for (const item of itemDetails) {
-    const { category_id, warehouses } = item;
+    const { category_id, category_name, warehouses } = item;
 
     for (const warehouse of warehouses) {
       const { warehouse_name, warehouse_stock_on_hand } = warehouse;
-      if (!data[category_id]) data[category_id] = { name: category_id };
+      if (!data[category_id]) data[category_id] = { id: category_id, name: category_name };
       const warehouseName = warehouse_name.replace(/ /g, "_");
       data[category_id][warehouseName] =
         data[category_id][warehouseName] ?? 0 + Number(warehouse_stock_on_hand);
@@ -234,7 +234,7 @@ export const getWarehouseCategoryStock = async () => {
         data[warehouse_name] = { name: warehouse_name };
       }
       data[warehouse_name][category_id] =
-        (data[warehouse_name][category_id] ?? 0) + warehouse_stock_on_hand;
+        Number(data[warehouse_name][category_id] ?? 0) + warehouse_stock_on_hand;
     }
   }
 
