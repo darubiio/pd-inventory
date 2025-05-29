@@ -24,10 +24,8 @@ const DashboardPage: FC = async () => {
       <div className="flex h-2/12 gap-4 xl:overflow-x-visible pl-1 pb-3 overflow-x-auto">
         <TopProducts />
       </div>
-      <div className="card h-10/12 bg-base-200 shadow-md ml-1">
-        <div className="card-body">
+      <div className="card h-10/12 bg-base-200 shadow-md ml-1 p-4 pb-0">
           <ChartBar data={itemDetails} dataset={dataset} />
-        </div>
       </div>
     </div>
   );

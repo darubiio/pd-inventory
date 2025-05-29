@@ -211,6 +211,7 @@ export const getItemsCategoriesStock = async () => {
 
     for (const warehouse of warehouses) {
       const { warehouse_name, warehouse_stock_on_hand } = warehouse;
+      if (!category_id || !category_name || !warehouse_name) continue;
       if (!data[category_id]) data[category_id] = { id: category_id, name: category_name };
       const warehouseName = warehouse_name.replace(/ /g, "_");
       data[category_id][warehouseName] =

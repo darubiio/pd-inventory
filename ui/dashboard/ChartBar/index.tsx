@@ -34,7 +34,7 @@ export const ChartBar: FC<ChartBarProps> = ({ data, dataset }) => {
       <ResponsiveContainer
         width="100%"
         height="100%"
-        className={`${geistSans.className} uppercase antialiased font-semibold pt-6`}
+        className={`${geistSans.className} uppercase antialiased font-semibold`}
       >
         <BarChart width={150} height={40} data={data} barSize={30}>
           <XAxis dataKey="name" />
