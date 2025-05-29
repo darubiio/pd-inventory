@@ -213,12 +213,14 @@ export interface ItemDetails {
   }[];
 }
 
+export interface CategoryItem {
+  id: string;
+  name: string;
+  [warehouse: string]: number | string;
+};
+
 interface ItemCategories {
-  [category: string]: {
-    [warehouse: string]: number | string;
-    name: string;
-    id: string;
-  };
+  [category: string]: CategoryItem
 }
 
 interface WarehouseCategory {

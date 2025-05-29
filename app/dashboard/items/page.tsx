@@ -1,5 +1,14 @@
-"use client";
+import { getItemsCategoriesStock } from "../../../lib/zohoData";
+import { CategoriesTable } from "../../../ui/categories";
 
-export default function ItemsPage() {
-  return <div></div>;
-}
+export const ItemsPage = async () => {
+  const itemDetails = await getItemsCategoriesStock();
+
+  return (
+    <div className="overflow-x-auto w-full md:ml-3">
+      <CategoriesTable data={itemDetails} />
+    </div>
+  );
+};
+
+export default ItemsPage;

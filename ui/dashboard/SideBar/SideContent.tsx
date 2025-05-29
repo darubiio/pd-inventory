@@ -31,7 +31,7 @@ const navItems = [
 const SideContent: FC = () => {
   const pathname = usePathname();
   return (
-    <ul className="menu bg-base-200 h-full">
+    <ul className="menu bg-base-200 h-full w-full">
       <li>
         <h2 className={`menu-title ${orbitron.className}`}>Inventory</h2>
         <ul>
