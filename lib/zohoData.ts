@@ -72,28 +72,53 @@ export const getWarehouses = async (
   }
 };
 
-const getItems = async (accessToken?: string): Promise<Item[]> => {
+const getItems = async (
+  accessToken?: string,
+  page: number = 1
+): Promise<Item[]> => {
   try {
     const token = accessToken || (await getAuthToken());
+    const itemsCache: Item[] | null = await REDIS.get("items");
+    if (itemsCache) return itemsCache;
+    
+    let currPage = page;
+    let allItems: Item[] = [];
+    let hasMorePages = true;
 
-    const url = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1/items?organization_id=${ZOHO_ORG_ID}`;
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: `Zoho-oauthtoken ${token}` },
-    });
+    while (hasMorePages) {
+      const url = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1/items?organization_id=${ZOHO_ORG_ID}&page=${currPage}&per_page=800`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { Authorization: `Zoho-oauthtoken ${token}` },
+      });
 
-    const data = await res.json();
-    if (res.status !== 200) {
-      console.error("Error fetching items:", data);
-      throw new Error("Failed to fetch items");
+      const data = await res.json();
+      if (res.status !== 200) {
+        console.error("Error fetching items:", data);
+        throw new Error("Failed to fetch items");
+      }
+
+      if (Array.isArray(data.items)) {
+        allItems = allItems.concat(data.items);
+      }
+
+      hasMorePages = data.page_context?.has_more_page || false;
+      currPage += 1;
     }
 
-    if (data.items) return data.items;
+    if (allItems.length > 0) {
+      const stringItems = JSON.stringify(allItems);
+      await REDIS.set("items", stringItems, { ex: 5400 });
+    }
 
-    throw new Error("No items found in response");
+    if (allItems.length === 0) {
+      throw new Error("No items found in response");
+    }
+
+    return allItems;
   } catch (error) {
-    console.error("Error fetching token from Redis:", error);
-    throw new Error("Failed to fetch token from Redis");
+    console.error("Error fetching items:", error);
+    throw new Error("Failed to fetch items");
   }
 };
 
@@ -207,16 +232,28 @@ export const getItemsCategoriesStock = async () => {
   const data: ItemCategories = {};
 
   for (const item of itemDetails) {
-    const { category_id, category_name, warehouses } = item;
-
+    const { category_id, category_name, item_id, name, warehouses } = item;
+    if (!category_id || !category_name) continue;
+    if (!data[category_id]) {
+      data[category_id] = { id: category_id, name: category_name, items: [] };
+    }
+    // sum warehouse stock by categories
     for (const warehouse of warehouses) {
       const { warehouse_name, warehouse_stock_on_hand } = warehouse;
-      if (!category_id || !category_name || !warehouse_name) continue;
-      if (!data[category_id]) data[category_id] = { id: category_id, name: category_name };
+      if (!warehouse_name) continue;
       const warehouseName = warehouse_name.replace(/ /g, "_");
       data[category_id][warehouseName] =
-        data[category_id][warehouseName] ?? 0 + Number(warehouse_stock_on_hand);
+        Number(data[category_id][warehouseName] ?? 0) + Number(warehouse_stock_on_hand);
     }
+    // add item and warehouse stock
+    const itemStock: any = { id: item_id, name };
+    for (const warehouse of warehouses) {
+      const { warehouse_name, warehouse_stock_on_hand } = warehouse;
+      if (!warehouse_name) continue;
+      const warehouseName = warehouse_name.replace(/ /g, "_");
+      itemStock[warehouseName] = Number(warehouse_stock_on_hand);
+    }
+    data[category_id].items.push(itemStock);
   }
 
   return Object.values(data);
@@ -235,7 +272,8 @@ export const getWarehouseCategoryStock = async () => {
         data[warehouse_name] = { name: warehouse_name };
       }
       data[warehouse_name][category_id] =
-        Number(data[warehouse_name][category_id] ?? 0) + warehouse_stock_on_hand;
+        Number(data[warehouse_name][category_id] ?? 0) +
+        warehouse_stock_on_hand;
     }
   }
 
