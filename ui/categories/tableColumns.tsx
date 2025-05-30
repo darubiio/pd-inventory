@@ -3,6 +3,7 @@ import {
   ArrowRightCircleIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryItem } from "../../types";
+import { CellContext, Table } from "@tanstack/react-table";
 
 type CategoriesTableProps = {
   data: CategoryItem[];
@@ -10,17 +11,13 @@ type CategoriesTableProps = {
 
 export const getColumns = ({ data }: CategoriesTableProps) => {
   const locationKeys = Object.keys(data[0]).filter(
-    (key) => key !== "id" && key !== "name"
+    (key) => key !== "id" && key !== "name" && key !== "items"
   );
 
   return [
     {
       accessorKey: "name",
-      header: ({
-        table,
-      }: {
-        table: import("@tanstack/react-table").Table<CategoryItem>;
-      }) => (
+      header: ({ table }: { table: Table<CategoryItem> }) => (
         <button
           {...{
             onClick: table.getToggleAllRowsExpandedHandler(),
@@ -36,16 +33,19 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
           </div>
         </button>
       ),
-      cell: (
-        info: import("@tanstack/react-table").CellContext<CategoryItem, unknown>
-      ) => <span className="font-semibold">{info.getValue() as string}</span>,
+      cell: (info: CellContext<CategoryItem, unknown>) => (
+        <div
+          style={{ paddingLeft: `${info.row.depth * 1.5}rem` }}
+          className={`font-semibold`}
+        >
+          {info.getValue() as string}
+        </div>
+      ),
     },
     ...locationKeys.map((location) => ({
       accessorKey: location,
       header: location.replace(/_/g, " "),
-      cell: (
-        info: import("@tanstack/react-table").CellContext<CategoryItem, unknown>
-      ) => info.getValue(),
+      cell: (info: CellContext<CategoryItem, unknown>) => info.getValue(),
     })),
   ];
 };

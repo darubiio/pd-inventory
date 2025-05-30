@@ -1,7 +1,7 @@
 function Loading() {
   return (
     <div className="overflow-auto rounded-xl border border-base-100 shadow-sm ml-3">
-      <table className="table table-md table-pin-cols table-zebra">
+      <table className="table table-zebra">
         <thead>
           <tr>
             {Array.from({ length: 12 }).map((_, i) => (
@@ -12,7 +12,7 @@ function Loading() {
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: 12 }).map((_, rowIndex) => (
+          {Array.from({ length: 19 }).map((_, rowIndex) => (
             <tr key={rowIndex}>
               {Array.from({ length: 12 }).map((_, colIndex) => (
                 <td key={colIndex}>

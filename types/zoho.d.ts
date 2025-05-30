@@ -216,7 +216,8 @@ export interface ItemDetails {
 export interface CategoryItem {
   id: string;
   name: string;
-  [warehouse: string]: number | string;
+  items: Array<CategoryItem>;
+  [warehouse: string]: number | string | Array<any>;
 };
 
 interface ItemCategories {
