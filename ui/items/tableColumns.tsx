@@ -36,7 +36,7 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
       cell: (info: CellContext<CategoryItem, unknown>) => (
         <div
           style={{ paddingLeft: `${info.row.depth * 1.5}rem` }}
-          className={`font-semibold`}
+          className='font-semibold'
         >
           {info.getValue() as string}
         </div>
