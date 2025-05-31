@@ -6,27 +6,42 @@ import {
   MapPinIcon,
   PhoneIcon,
 } from "@heroicons/react/24/outline";
+import { getWarehouseGeolocation } from "../../../lib/zohoData";
+import { BuildingStorefrontIcon } from "@heroicons/react/16/solid";
 
-const WarehouseCard: FC<Warehouse> = ({
+const WarehouseCard: FC<Warehouse> = async ({
+  warehouse_id,
   warehouse_name,
   attention,
-  address,
-  phone,
   email,
+  phone,
+  address,
+  city,
+  state,
+  country,
 }) => {
+  const fullAddress = [address, city, state, country];
+  const { mapUrl } = await getWarehouseGeolocation(warehouse_id, fullAddress);
   return (
     <div className="card card-side bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer">
       <div className="w-75 p-3 flex flex-col justify-start gap-2">
-        <div className="badge badge-ghost">
-          <h2 className="font-bold opacity-90 uppercase">{warehouse_name}</h2>
-        </div>
-        {attention && (
-          <div className="badge badge-ghost mb-2">
-            <p className="text-xs uppercase font-semibold opacity-60">
-              {attention}
-            </p>
+        <div className="flex gap-2 justify-start items-center">
+          <BuildingStorefrontIcon width={20} />
+          <div className="flex justify-start gap-1 flex-wrap">
+            <div className="badge badge-ghost">
+              <h2 className="font-bold opacity-90 uppercase">
+                {warehouse_name}
+              </h2>
+            </div>
+            {attention && (
+              <div className="badge badge-ghost mb-2">
+                <p className="text-xs uppercase font-semibold opacity-60">
+                  {attention}
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
         <ul className="list gap-2">
           {address && (
             <li className="font-semibold opacity-70 flex gap-x-2">
@@ -57,11 +72,11 @@ const WarehouseCard: FC<Warehouse> = ({
       </div>
       <figure>
         <Image
-          className="rounded-lg w-45"
-          src="/map.png"
+          className="w-45 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_20%)] [--webkit-mask-image:linear-gradient(to_right,transparent_0%,black_20%)]"
+          src={mapUrl || "/map.png"}
           alt="Warehouse location"
-          width={100}
-          height={100}
+          width={200}
+          height={200}
         />
       </figure>
     </div>
