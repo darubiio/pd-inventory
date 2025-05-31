@@ -2,39 +2,26 @@ import { FC } from "react";
 
 const Loading: FC = () => {
   return (
-    <div className="flex-row md:flex-col h-full w-full md:pl-2 gap-1">
-      <TopCategoriesSkeleton />
-      <ChartBarSkeleton />
+    <div className="grid grid-cols-1 gap-2 m-2 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 11 }).map((_, index) => (
+        <div
+          key={index}
+          className="card card-side bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer"
+        >
+          <div className="w-75 p-3 flex flex-col justify-start gap-2">
+            <div className="badge badge-ghost h-5 w-2/3 skeleton" />
+            <div className="badge badge-ghost mb-2 h-3 w-1/3 skeleton" />
+            <ul className="list gap-2">
+              <li className="font-semibold opacity-70 flex gap-x-2 h-4 w-3/3 skeleton" />
+              <li className="font-semibold opacity-70 flex gap-x-2 h-4 w-2/3 skeleton" />
+              <li className="font-semibold opacity-70 flex gap-x-2 h-4 w-2/3 skeleton" />
+            </ul>
+          </div>
+          <div className="bg-gray-200 w-45 h-40 skeleton" />
+        </div>
+      ))}
     </div>
   );
 };
-
-export const TopCategoriesSkeleton: FC = () => (
-  <div className="flex h-2/12 gap-4 pl-1 pt-3 md:pt-0 pb-4 min-h-35">
-    {Array.from({ length: 5 }).map((_, index) => (
-      <div
-        key={index}
-        className="card bg-base-200 shadow-md w-1/5 min-w-35 p-4"
-      >
-        <div className="stat-title h-5 skeleton w-8/12 mb-3" />
-        <div className="stat-desc h-5 skeleton w-6/12 mb-3" />
-        <div className="stat-value h-15 skeleton w-3/12 mb-3" />
-      </div>
-    ))}
-  </div>
-);
-
-export const ChartBarSkeleton: FC = () => (
-  <div className="card bg-base-200 shadow-md h-10/12 min-h-120 mb-3 ml-1">
-    <div className="flex flex-col h-full gap-4 p-4">
-      <div className="flex gap-4 w-full">
-        <div className="h-10 skeleton w-2/12 mb-2" />
-        <div className="h-10 skeleton w-2/12 mb-2" />
-        <div className="h-10 skeleton w-8/12 mb-2" />
-      </div>
-      <div className="h-full skeleton w-full mb-2" />
-    </div>
-  </div>
-);
 
 export default Loading;

@@ -1,10 +1,10 @@
 function Loading() {
   return (
-    <div className="overflow-auto rounded-xl border border-base-100 shadow-sm ml-3">
+    <div className="rounded-xl border border-base-100 mt-3 shadow-sm ml-3">
       <table className="table table-zebra">
         <thead>
           <tr>
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 10 }).map((_, i) => (
               <th key={i}>
                 <div className="h-6 w-24 bg-base-300 rounded animate-pulse" />
               </th>
@@ -12,11 +12,11 @@ function Loading() {
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: 19 }).map((_, rowIndex) => (
+          {Array.from({ length: 17 }).map((_, rowIndex) => (
             <tr key={rowIndex}>
-              {Array.from({ length: 12 }).map((_, colIndex) => (
+              {Array.from({ length: 10 }).map((_, colIndex) => (
                 <td key={colIndex}>
-                  <div className="h-4 w-full bg-base-200 rounded animate-pulse" />
+                  <div className="h-4 bg-base-100 rounded animate-pulse" />
                 </td>
               ))}
             </tr>
