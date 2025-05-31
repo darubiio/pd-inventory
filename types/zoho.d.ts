@@ -235,3 +235,8 @@ interface Categories {
   category_id: string;
   category_name: string;
 }
+
+export interface GeolocationData {
+  coordinates: [number, number];
+  mapUrl: string;
+}
