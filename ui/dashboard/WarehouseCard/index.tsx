@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { getWarehouseGeolocation } from "../../../lib/zohoData";
 import { BuildingStorefrontIcon } from "@heroicons/react/16/solid";
+import Link from "next/link";
 
 const WarehouseCard: FC<Warehouse> = async ({
   warehouse_id,
@@ -23,7 +24,10 @@ const WarehouseCard: FC<Warehouse> = async ({
   const fullAddress = [address, city, state, country];
   const { mapUrl } = await getWarehouseGeolocation(warehouse_id, fullAddress);
   return (
-    <div className="card card-side bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer">
+    <Link
+      className="card card-side bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer"
+      href={`/dashboard/warehouse/${warehouse_id}`}
+    >
       <div className="w-75 p-3 flex flex-col justify-start gap-2">
         <div className="flex gap-2 justify-start items-center">
           <BuildingStorefrontIcon width={20} />
@@ -49,9 +53,9 @@ const WarehouseCard: FC<Warehouse> = async ({
             </li>
           )}
           {email && (
-            <li className="font-semibold opacity-70 flex gap-x-2">
+            <li className="font-semibold opacity-70 flex gap-x-2 transition-transform duration-300 hover:scale-102">
               <a
-                className="link link-neutral flex gap-x-2"
+                className="link link-hover flex gap-x-2 opacity-80 hover:opacity-100"
                 href={`mailto:${email}`}
               >
                 <EnvelopeIcon height={18} /> {email}
@@ -59,9 +63,9 @@ const WarehouseCard: FC<Warehouse> = async ({
             </li>
           )}
           {phone && (
-            <li className="font-semibold opacity-70 flex gap-x-2">
+            <li className="font-semibold opacity-70 flex gap-x-2 transition-transform duration-300 hover:scale-102">
               <a
-                className="link link-neutral flex gap-x-2"
+                className="link link-hover flex gap-x-2 opacity-80 hover:opacity-100"
                 href={`tel:${phone}`}
               >
                 <PhoneIcon height={18} /> {phone}
@@ -72,14 +76,14 @@ const WarehouseCard: FC<Warehouse> = async ({
       </div>
       <figure>
         <Image
-          className="w-45 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_20%)] [--webkit-mask-image:linear-gradient(to_right,transparent_0%,black_20%)]"
+          className="w-45 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_20%)] [--webkit-mask-image:linear-gradient(to_right,transparent_0%,black_20%)] transition-transform duration-500 ease-in-out hover:scale-110 dark:invert dark:brightness-90"
           src={mapUrl || "/map.png"}
           alt="Warehouse location"
           width={200}
           height={200}
         />
       </figure>
-    </div>
+    </Link>
   );
 };
 

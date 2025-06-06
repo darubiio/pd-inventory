@@ -1,5 +1,5 @@
 import { getItemsCategoriesStock } from "../../../lib/zohoData";
-import { CategoriesTable } from "../../../ui/items";
+import { CategoriesTable } from "../../../ui/items/CategoryItemsTable";
 
 export const ItemsPage = async () => {
   const itemDetails = await getItemsCategoriesStock();
