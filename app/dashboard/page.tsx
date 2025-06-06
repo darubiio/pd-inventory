@@ -6,8 +6,7 @@ import WarehouseCard from "../../ui/dashboard/WarehouseCard";
 const DashboardPage: FC = async () => {
   const warehouses = await getWarehouses();
   return (
-    <>
-      <div className="card bg-base-100 shadow-md m-2">
+    <div className="card bg-base-100 shadow-md m-2">
       <div className="card-title pl-4 pt-3">
         <h1 className="text-1xl font-bold">Warehouses</h1>
       </div>
@@ -16,8 +15,7 @@ const DashboardPage: FC = async () => {
           <WarehouseCard key={props.warehouse_id} {...props} />
         ))}
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 

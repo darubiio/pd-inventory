@@ -91,6 +91,7 @@ const TopBar: FC = () => {
             <div className="w-10 rounded-full">
               <Image
                 alt="pd-logo"
+                className="transition duration-300 dark:invert dark:grayscale"
                 src="/pd-logo.jpeg"
                 width={560}
                 height={620}

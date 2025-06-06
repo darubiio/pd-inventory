@@ -1,3 +1,5 @@
+"use server";
+
 import { getAuthToken } from "./zohoAuth";
 import { getItemCategories, getWarehousesByLocations } from "./zohoDataUtils";
 import {
@@ -185,7 +187,7 @@ export const getCategories = async () => {
           .filter(
             ({ category_id, category_name }) =>
               Boolean(category_id && category_id.trim()) &&
-              Boolean(category_name && category_name.trim())
+              Boolean(category_name && category_name.trim()) 
           )
           .map(({ category_id, category_name }) => [
             category_id,
