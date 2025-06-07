@@ -187,7 +187,7 @@ export const getCategories = async () => {
           .filter(
             ({ category_id, category_name }) =>
               Boolean(category_id && category_id.trim()) &&
-              Boolean(category_name && category_name.trim()) 
+              Boolean(category_name && category_name.trim())
           )
           .map(({ category_id, category_name }) => [
             category_id,
@@ -261,6 +261,21 @@ export const getItemsCategoriesStock = async () => {
   }
 
   return Object.values(data);
+};
+
+export const getItemsByWarehouseAndCategory = async (
+  warehouseId: string,
+  categoryId: string
+): Promise<ItemDetails[]> => {
+  const itemDetails = await getItemDetails();
+  return itemDetails.filter(
+    (item) =>
+      item.warehouses.some(
+        (warehouse) =>
+          warehouse.warehouse_id === warehouseId &&
+          item.category_id === categoryId
+      ) && item.category_id === categoryId
+  );
 };
 
 export const getWarehouseCategoryStock = async () => {

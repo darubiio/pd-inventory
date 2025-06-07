@@ -1,7 +1,4 @@
-import {
-  ArrowDownCircleIcon,
-  ArrowRightCircleIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { CategoryItem } from "../../types";
 import { CellContext, Table } from "@tanstack/react-table";
 
@@ -25,9 +22,9 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
         >
           <div className="flex items-center">
             {table.getIsAllRowsExpanded() ? (
-              <ArrowDownCircleIcon width={17} />
+              <ChevronDownIcon width={17} />
             ) : (
-              <ArrowRightCircleIcon width={17} />
+              <ChevronRightIcon width={17} />
             )}
             <span className="ml-2">Category</span>
           </div>
@@ -36,7 +33,7 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
       cell: (info: CellContext<CategoryItem, unknown>) => (
         <div
           style={{ paddingLeft: `${info.row.depth * 1.5}rem` }}
-          className='font-semibold'
+          className="font-semibold"
         >
           {info.getValue() as string}
         </div>
