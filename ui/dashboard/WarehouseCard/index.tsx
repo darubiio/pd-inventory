@@ -9,6 +9,7 @@ import {
 import { getWarehouseGeolocation } from "../../../lib/zohoData";
 import { BuildingStorefrontIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
+import { ContactLinks } from "./ContactLinks";
 
 const WarehouseCard: FC<Warehouse> = async ({
   warehouse_id,
@@ -52,26 +53,7 @@ const WarehouseCard: FC<Warehouse> = async ({
               <MapPinIcon height={18} /> {address}
             </li>
           )}
-          {email && (
-            <li className="font-semibold opacity-70 flex gap-x-2 transition-transform duration-300 hover:scale-102">
-              <a
-                className="link link-hover flex gap-x-2 opacity-80 hover:opacity-100"
-                href={`mailto:${email}`}
-              >
-                <EnvelopeIcon height={18} /> {email}
-              </a>
-            </li>
-          )}
-          {phone && (
-            <li className="font-semibold opacity-70 flex gap-x-2 transition-transform duration-300 hover:scale-102">
-              <a
-                className="link link-hover flex gap-x-2 opacity-80 hover:opacity-100"
-                href={`tel:${phone}`}
-              >
-                <PhoneIcon height={18} /> {phone}
-              </a>
-            </li>
-          )}
+          <ContactLinks email={email} phone={phone} />
         </ul>
       </div>
       <figure>
