@@ -7,9 +7,9 @@ type CategoriesTableProps = {
 };
 
 export const getColumns = ({ data }: CategoriesTableProps) => {
-  const locationKeys = Object.keys(data[0]).filter(
+  const locationKeys = data?.length ? Object.keys(data[0]).filter(
     (key) => key !== "id" && key !== "name" && key !== "items"
-  );
+  ) : [];
 
   return [
     {

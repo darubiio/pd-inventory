@@ -3,6 +3,7 @@
 import { getAuthToken } from "./zohoAuth";
 import { getItemCategories, getWarehousesByLocations } from "./zohoDataUtils";
 import {
+  CategoryItem,
   GeolocationData,
   Item,
   ItemCategories,
@@ -71,7 +72,7 @@ export const getWarehouses = async (
     throw new Error("No warehouses found in response");
   } catch (error) {
     console.error("Error fetching token from Redis:", error);
-    throw new Error("Failed to fetch token from Redis");
+    return [];
   }
 };
 
@@ -226,7 +227,7 @@ const getItemDetails = async (accessToken?: string) => {
     return itemDetailsCategories;
   } catch (error) {
     console.error("Error fetching token from Redis:", error);
-    throw new Error("Failed to fetch token from Redis");
+    return [];
   }
 };
 
@@ -250,7 +251,11 @@ export const getItemsCategoriesStock = async () => {
         Number(warehouse_stock_on_hand);
     }
     // add item and warehouse stock
-    const itemStock: any = { id: item_id, name };
+    const itemStock: CategoryItem = {
+      id: item_id,
+      name,
+      items: [],
+    };
     for (const warehouse of warehouses) {
       const { warehouse_name, warehouse_stock_on_hand } = warehouse;
       if (!warehouse_name) continue;
@@ -269,7 +274,7 @@ export const getItemsByWarehouseAndCategory = async (
 ): Promise<ItemDetails[]> => {
   const itemDetails = await getItemDetails();
   return itemDetails.filter(
-    (item) =>
+    (item: ItemDetails) =>
       item.warehouses.some(
         (warehouse) =>
           warehouse.warehouse_id === warehouseId &&
