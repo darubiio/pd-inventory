@@ -9,10 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { CategoryItem } from "../../types";
 import { getColumns } from "./tableColumns";
-import {
-  ArrowDownCircleIcon,
-  ArrowRightCircleIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 const defaultData: CategoryItem[] = [];
 
@@ -30,7 +27,7 @@ export const CategoriesTable: FC<CategoriesTableProps> = ({ data }) => {
   });
 
   return (
-    <div className="card bg-base-100 shadow-xl pt-3 h-screen">
+    <div className="card bg-base-100 shadow-xl pt-3 h-[calc(100vh-80px)] m-2">
       <div className="overflow-x-auto md:mx-3">
         <table className="table table-md table-pin-rows table-pin-cols table-zebra">
           <thead>
@@ -73,9 +70,9 @@ export const CategoriesTable: FC<CategoriesTableProps> = ({ data }) => {
                             }}
                           >
                             {row.getIsExpanded() ? (
-                              <ArrowDownCircleIcon width={17} />
+                              <ChevronDownIcon width={17} />
                             ) : (
-                              <ArrowRightCircleIcon width={17} />
+                              <ChevronRightIcon width={17} />
                             )}
                           </button>
                         ) : (

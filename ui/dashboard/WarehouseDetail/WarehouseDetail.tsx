@@ -11,11 +11,9 @@ function WarehouseDetail({
   warehouseId: string;
   categories: { category_id: string; category_name: string }[];
 }) {
-  const [selectedCategory, setSelectedCategory] = useState("");
-
-  useEffect(() => {
-    if (categories.length) setSelectedCategory(categories[0].category_id);
-  }, [categories]);
+  const [selectedCategory, setSelectedCategory] = useState(
+    categories.length ? categories[0].category_id : ""
+  );
 
   return (
     <div className="flex max-h-[calc(100vh-65px)] gap-2 p-2">
