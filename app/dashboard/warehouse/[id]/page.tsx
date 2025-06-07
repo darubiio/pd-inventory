@@ -8,6 +8,5 @@ export default async function WarehouseItems({
 }) {
   const { id: warehouseId } = await params;
   const categories = await getCategories();
-
   return <WarehouseDetail warehouseId={warehouseId} categories={categories} />;
 }
