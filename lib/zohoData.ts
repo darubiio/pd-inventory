@@ -99,7 +99,7 @@ const getItems = async (
       const data = await res.json();
       if (res.status !== 200) {
         console.error("Error fetching items:", data);
-        throw new Error("Failed to fetch items");
+        throw new Error(data.message || "Failed to fetch items");
       }
 
       if (Array.isArray(data.items)) {
@@ -143,7 +143,7 @@ const getItemsDetailByItemsId = async (
     const data = await res.json();
     if (res.status !== 200) {
       console.error("Error fetching items:", data);
-      throw new Error("Failed to fetch items");
+      throw new Error(data.message || "Failed to fetch itemsDetailByItemsId");
     }
 
     if (data.items) return data.items;
@@ -158,7 +158,7 @@ const getItemsDetailByItemsId = async (
 const getItemsDetail = async (
   itemIdList: string[],
   accessToken?: string,
-  chunkSize = 40
+  chunkSize = 80
 ) => {
   if (!itemIdList.length) return [];
   const token = accessToken || (await getAuthToken());
