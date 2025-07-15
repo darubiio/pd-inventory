@@ -78,13 +78,23 @@ export const getWarehouses = async (
 
 const getItems = async (
   accessToken?: string,
-  page: number = 1
+  page: number = 1,
+  CHUNK_SIZE = 900
 ): Promise<Item[]> => {
   try {
-    const token = accessToken || (await getAuthToken());
-    const itemsCache: Item[] | null = await REDIS.get("items");
-    if (itemsCache) return itemsCache;
+    // Try to get all chunks from cache
+    let allChunks: Item[] = [];
+    let chunkIndex = 0;
+    let chunk: Item[] | null = await REDIS.get(`items_chunk_${chunkIndex}`);
+    while (chunk && Array.isArray(chunk) && chunk.length > 0) {
+      allChunks = allChunks.concat(chunk);
+      chunkIndex++;
+      chunk = await REDIS.get(`items_chunk_${chunkIndex}`);
+    }
+    if (allChunks.length > 0) return allChunks;
 
+    // If not in cache, fetch from API
+    const token = accessToken || (await getAuthToken());
     let currPage = page;
     let allItems: Item[] = [];
     let hasMorePages = true;
@@ -111,8 +121,11 @@ const getItems = async (
     }
 
     if (allItems.length > 0) {
-      const stringItems = JSON.stringify(allItems);
-      await REDIS.set("items", stringItems, { ex: 5400 });
+      // Store in Redis in chunks
+      for (let i = 0; i < allItems.length; i += CHUNK_SIZE) {
+        const chunk = allItems.slice(i, i + CHUNK_SIZE);
+        await REDIS.set(`items_chunk_${i / CHUNK_SIZE}`, JSON.stringify(chunk), { ex: 5400 });
+      }
     }
 
     if (allItems.length === 0) {
@@ -204,14 +217,20 @@ export const getCategories = async () => {
 
 const getItemDetails = async (accessToken?: string) => {
   try {
+    const CHUNK_SIZE = 900;
+    // Check if chunked cache exists
+    let allChunks: ItemDetails[] = [];
+    let chunkIndex = 0;
+    let chunk: ItemDetails[] | null = await REDIS.get(`itemsDetail_chunk_${chunkIndex}`);
+    while (chunk && Array.isArray(chunk) && chunk.length > 0) {
+      allChunks = allChunks.concat(chunk);
+      chunkIndex++;
+      chunk = await REDIS.get(`itemsDetail_chunk_${chunkIndex}`);
+    }
+    if (allChunks.length > 0) return allChunks;
+
+    // If not in cache, fetch and store in chunks
     const token = accessToken || (await getAuthToken());
-
-    const itemDetailsCache: ItemDetails[] | null = await REDIS.get(
-      "itemsDetail"
-    );
-
-    if (itemDetailsCache) return itemDetailsCache;
-
     const itemList = await getItems(token);
     const itemCategories = getItemCategories(itemList);
     const itemIdList = Object.keys(itemCategories);
@@ -222,8 +241,11 @@ const getItemDetails = async (accessToken?: string) => {
       ...itemCategories[item["item_id"]],
     }));
 
-    const stringDetails = JSON.stringify(itemDetailsCategories);
-    await REDIS.set("itemsDetail", stringDetails, { ex: 2400 });
+    // Store in Redis in chunks
+    for (let i = 0; i < itemDetailsCategories.length; i += CHUNK_SIZE) {
+      const chunk = itemDetailsCategories.slice(i, i + CHUNK_SIZE);
+      await REDIS.set(`itemsDetail_chunk_${i / CHUNK_SIZE}`, JSON.stringify(chunk), { ex: 2400 });
+    }
     return itemDetailsCategories;
   } catch (error) {
     console.error("Error fetching token from Redis:", error);
