@@ -25,7 +25,7 @@ const WarehouseCard: FC<Warehouse> = async ({
       className="card card-side bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer"
       href={`/dashboard/warehouse/${warehouse_id}`}
     >
-      <div className="w-75 p-3 flex flex-col justify-start gap-2">
+      <div className="w-full p-3 flex flex-col justify-start gap-2">
         <div className="flex gap-2 justify-start items-center">
           <BuildingStorefrontIcon width={20} />
           <div className="flex justify-start gap-1 flex-wrap">
@@ -54,7 +54,7 @@ const WarehouseCard: FC<Warehouse> = async ({
       </div>
       <figure>
         <Image
-          className="w-45 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_20%)] [--webkit-mask-image:linear-gradient(to_right,transparent_0%,black_20%)] transition-transform duration-500 ease-in-out hover:scale-110 dark:invert dark:brightness-90"
+          className="w-50 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_20%)] [--webkit-mask-image:linear-gradient(to_right,transparent_0%,black_20%)] transition-transform duration-500 ease-in-out hover:scale-110 dark:invert dark:brightness-90"
           src={mapUrl || "/map.png"}
           alt="Warehouse location"
           width={200}
