@@ -24,7 +24,7 @@ const CategoryNameHeader: React.FC<CategoryNameHeaderProps> = ({
   };
 
   return (
-    <div className="flex items-center w-45">
+    <div className="flex items-center w-full">
       <button
         type="button"
         onClick={table.getToggleAllRowsExpandedHandler()}
@@ -73,7 +73,7 @@ function Filter({ column }: { column: Column<any, any>; table: Table<any> }) {
       value={(columnFilterValue ?? "") as string}
       onChange={(e) => column.setFilterValue(e.target.value)}
       placeholder={`Search item...`}
-      className="w-26 h-10 p-1"
+      className="w-full min-w-26 h-10 p-1"
     />
   );
 }
