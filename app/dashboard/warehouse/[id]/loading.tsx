@@ -6,7 +6,7 @@ function Loading() {
     <div className="flex-row lg:flex max-h-[calc(100vh-65px)] gap-2 p-2">
       <div className="h-8 m-2 skeleton lg:hidden" />
       <div className="hidden lg:block lg:w-1/5">
-        <ul className="menu card bg-base-100 shadow-md font-semibold h-[calc(100vh-80px)] flex flex-col">
+        <ul className="menu card bg-base-100 shadow-md font-semibold h-[calc(100vh-80px)] w-full flex flex-col">
           <li className="flex flex-col flex-1 min-h-0">
             <h2 className="menu-title sticky top-0 z-10 bg-base-100">
               Categories
