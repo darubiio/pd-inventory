@@ -1,11 +1,12 @@
 "use client";
 
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import {
   useReactTable,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 import { CategoryItem } from "../../types";
 import { getColumns } from "./tableColumns";
@@ -18,9 +19,12 @@ interface CategoriesTableProps {
 }
 
 export const CategoriesTable: FC<CategoriesTableProps> = ({ data }) => {
+  const columns = useMemo(() => getColumns({ data }), [data]);
+
   const table = useReactTable({
     data: data ?? defaultData,
-    columns: getColumns({ data }),
+    columns,
+    getFilteredRowModel: getFilteredRowModel(),
     getSubRows: (row) => row.items,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
