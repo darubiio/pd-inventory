@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getItemsByWarehouseAndCategory } from "../../../lib/zohoData";
 import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { getColumns } from "./tableColumns";
@@ -13,6 +15,7 @@ import {
   ArrowRightCircleIcon,
 } from "@heroicons/react/24/outline";
 import TableLoading from "../../loading/tableLoading";
+import { CategoryItem } from "../../../types";
 
 const defaultData: any[] = [];
 
@@ -26,10 +29,17 @@ export const ItemsTable = ({
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = React.useState<any[]>([]);
 
-  const table = useReactTable({
+  const columns = useMemo(
+    () => getColumns(warehouseId) as ColumnDef<CategoryItem>[],
+    [warehouseId]
+  );
+
+  const table = useReactTable<CategoryItem>({
     data: items ?? defaultData,
-    columns: getColumns(warehouseId),
+    columns: columns,
+    getSubRows: (row) => row.items,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   });
 
   useEffect(() => {

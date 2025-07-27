@@ -1,6 +1,33 @@
 "use client";
 import React from "react";
-import { Column, Table } from "@tanstack/react-table";
+import { Column, Row, Table } from "@tanstack/react-table";
+import { CategoryItem } from "../../types";
+
+export const filterBySubitemName = (
+  row: Row<CategoryItem>,
+  columnId: string,
+  filterValue: string
+) => {
+  if (!filterValue) return true;
+  const isStartsWith = filterValue.startsWith("^");
+  const search = isStartsWith
+    ? filterValue.slice(1).toLowerCase()
+    : filterValue.toLowerCase();
+  const hasMatchingSubitem = (item: CategoryItem): boolean => {
+    if (typeof item.name === "string") {
+      if (isStartsWith) {
+        if (item.name.toLowerCase().startsWith(search)) return true;
+      } else {
+        if (item.name.toLowerCase().includes(search)) return true;
+      }
+    }
+    if (Array.isArray(item.items) && item.items.length > 0) {
+      return item.items.some(hasMatchingSubitem);
+    }
+    return false;
+  };
+  return hasMatchingSubitem(row.original);
+};
 
 export const Filter = ({
   column,

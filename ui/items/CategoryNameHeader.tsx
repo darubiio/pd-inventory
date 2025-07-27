@@ -11,11 +11,13 @@ import { CategoryItem } from "../../types";
 interface CategoryNameHeaderProps {
   table: Table<CategoryItem>;
   column: Column<CategoryItem, string>;
+  dropIcon?: boolean;
 }
 
 const CategoryNameHeader: React.FC<CategoryNameHeaderProps> = ({
   table,
   column,
+  dropIcon = true,
 }) => {
   const [filterActive, setFilterActive] = useState(false);
   const toggleFilter = () => {
@@ -30,11 +32,11 @@ const CategoryNameHeader: React.FC<CategoryNameHeaderProps> = ({
         onClick={table.getToggleAllRowsExpandedHandler()}
         className="cursor-pointer"
       >
-        {table.getIsAllRowsExpanded() ? (
+        {dropIcon ? table.getIsAllRowsExpanded() ? (
           <ChevronDownIcon width={17} />
         ) : (
           <ChevronRightIcon width={17} />
-        )}
+        ) : null}
       </button>
       <div className="flex-1 justify-between flex items-center">
         {filterActive ? (

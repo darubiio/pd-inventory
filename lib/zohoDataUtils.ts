@@ -2,8 +2,12 @@ import { Item, Location } from "../types";
 
 const getWarehousesByLocation = (location: Location) => location.warehouses;
 
+const filterActives = <T extends { status: string }>(items: T[]) => {
+  return items.filter((item) => item.status === "active");
+};
+
 export const getWarehousesByLocations = (locations: Location[]) => {
-  return locations.flatMap(getWarehousesByLocation);
+  return filterActives(locations.flatMap(getWarehousesByLocation));
 };
 
 export const getItemCategories = (items: Item[]) => {
