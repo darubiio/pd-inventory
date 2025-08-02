@@ -1,4 +1,4 @@
-import { Item, Location } from "../types";
+import { Item, Location } from "../../../types";
 
 const getWarehousesByLocation = (location: Location) => location.warehouses;
 
