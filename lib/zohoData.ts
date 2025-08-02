@@ -1,7 +1,7 @@
 "use server";
 
-import { getAuthToken } from "./zohoAuth";
-import { getItemCategories, getWarehousesByLocations } from "./zohoDataUtils";
+import { getAccessToken } from "./api/clients/zoho/zohoAuth";
+import { getItemCategories, getWarehousesByLocations } from "./api/utils/zohoDataUtils";
 import {
   CategoryItem,
   GeolocationData,
@@ -19,7 +19,7 @@ const { ZOHO_ORG_ID, ZOHO_DOMAIN } = process.env;
 
 export const getOrganizationDetails = async (accessToken?: string) => {
   try {
-    const token = accessToken || (await getAuthToken());
+    const token = accessToken || (await getAccessToken());
 
     const url = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1/organizations/${ZOHO_ORG_ID}`;
     const res = await fetch(url, {
@@ -46,7 +46,7 @@ export const getWarehouses = async (
   accessToken?: string
 ): Promise<Warehouse[]> => {
   try {
-    const token = accessToken || (await getAuthToken());
+    const token = accessToken || (await getAccessToken());
 
     const warehousesCache: Warehouse[] | null = await REDIS.get("warehouses");
     if (warehousesCache) return warehousesCache;
@@ -94,7 +94,7 @@ const getItems = async (
     if (allChunks.length > 0) return allChunks;
 
     // If not in cache, fetch from API
-    const token = accessToken || (await getAuthToken());
+    const token = accessToken || (await getAccessToken());
     let currPage = page;
     let allItems: Item[] = [];
     let hasMorePages = true;
@@ -144,7 +144,7 @@ const getItemsDetailByItemsId = async (
   accessToken?: string
 ): Promise<ItemDetails> => {
   try {
-    const token = accessToken || (await getAuthToken());
+    const token = accessToken || (await getAccessToken());
 
     const itemIds = itemIdList.join("%2C");
     const url = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1/itemdetails?item_ids=${itemIds}&organization_id=${ZOHO_ORG_ID}`;
@@ -174,7 +174,7 @@ const getItemsDetail = async (
   chunkSize = 80
 ) => {
   if (!itemIdList.length) return [];
-  const token = accessToken || (await getAuthToken());
+  const token = accessToken || (await getAccessToken());
   const chunks = [];
   for (let i = 0; i < itemIdList.length; i += chunkSize) {
     chunks.push(itemIdList.slice(i, i + chunkSize));
@@ -230,7 +230,7 @@ const getItemDetails = async (accessToken?: string) => {
     if (allChunks.length > 0) return allChunks;
 
     // If not in cache, fetch and store in chunks
-    const token = accessToken || (await getAuthToken());
+    const token = accessToken || (await getAccessToken());
     const itemList = await getItems(token);
     const itemCategories = getItemCategories(itemList);
     const itemIdList = Object.keys(itemCategories);
