@@ -17,4 +17,5 @@ export interface FetchOptions extends RequestInit {
   auth?: AuthConfig;
   headers?: Record<string, string>;
   cacheCfg?: RedisConfig;
+  transform?: (data: any) => any;
 }

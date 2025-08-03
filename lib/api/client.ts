@@ -14,6 +14,7 @@ export async function apiFetch<T>(
     query,
     auth,
     cacheCfg,
+    transform,
     ...rest
   } = options;
 
@@ -37,16 +38,16 @@ export async function apiFetch<T>(
   });
 
   const data = await response.json();
+  const transformedData = transform ? transform(data) : data;
 
   if (response.status !== 200) {
     throw new Error(`${response.status}`);
   }
 
-
   if (cacheCfg) {
     const ttl = cacheCfg?.ttl ?? 600;
-    await setCache(cacheCfg.key, data, ttl);
+    await setCache(cacheCfg.key, transformedData, ttl);
   }
 
-  return data;
+  return transformedData as T;
 }

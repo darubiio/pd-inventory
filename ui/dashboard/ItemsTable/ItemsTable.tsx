@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { getItemsByWarehouseAndCategory } from "../../../lib/zohoData";
+import { getItemsByWarehouseAndCategory } from "../../../lib/api/clients/zoho/zohoData";
 import {
   ColumnDef,
   flexRender,
