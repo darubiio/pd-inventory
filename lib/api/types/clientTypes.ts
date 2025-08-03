@@ -10,12 +10,12 @@ export interface RedisConfig {
   ttl?: number;
 }
 
-export interface FetchOptions extends RequestInit {
+export interface FetchOptions<T, U> extends RequestInit {
   method?: HttpMethod;
-  body?: any;
+  body?: BodyInit | null;
   query?: Record<string, string | number | boolean>;
   auth?: AuthConfig;
   headers?: Record<string, string>;
   cacheCfg?: RedisConfig;
-  transform?: (data: any) => any;
+  transform?: (data: U) => T;
 }

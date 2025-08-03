@@ -64,7 +64,7 @@ const normalizeWarehouseName = (name?: string): string | undefined =>
   name?.replace(/ /g, "_");
 
 const addCategoryWarehouseStock = (
-  category: any,
+  category: CategoryItem,
   warehouseName: string,
   stock: number
 ) => {

@@ -218,10 +218,10 @@ export interface CategoryItem {
   name: string;
   items: Array<CategoryItem>;
   [warehouse: string]: number | string | Array<any>;
-};
+}
 
 interface ItemCategories {
-  [category: string]: CategoryItem
+  [category: string]: CategoryItem;
 }
 
 interface WarehouseCategory {
@@ -240,3 +240,11 @@ export interface GeolocationData {
   coordinates: [number, number];
   mapUrl: string;
 }
+
+export type LocationsResponse = {
+  locations: Location[];
+};
+
+export type ItemDetailsResponse = {
+  items: ItemDetails;
+};
