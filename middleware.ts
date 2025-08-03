@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { auth0 } from "./lib/api/clients/auth/auth0";
+import { auth0 } from "./lib/auth/auth0";
 import { isAuth, isPublic } from "./lib/api/utils/pathUtils";
 
 export async function middleware(request: NextRequest) {

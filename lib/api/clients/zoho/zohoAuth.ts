@@ -2,6 +2,7 @@
 
 import { ZohoAuthToken } from "../../../../types";
 import { apiFetch } from "../../client";
+import { AuthConfig } from "../../types/clientTypes";
 
 const URL = `https://accounts.zoho.${process.env.ZOHO_DOMAIN}/oauth/v2/token`;
 const HEADERS = { "Content-Type": "application/x-www-form-urlencoded" };
@@ -11,11 +12,11 @@ const BODY = new URLSearchParams({
   client_secret: process.env.ZOHO_CLIENT_SECRET!,
   grant_type: process.env.ZOHO_GRANT_TYPE!,
 });
-const CACHE_KEY = "zoho_auth_token";
+const TOKEN_HEADER = "Zoho-oauthtoken";
 
 export const getAuthToken = async (): Promise<ZohoAuthToken> => {
   return apiFetch<ZohoAuthToken>(URL, {
-    cacheCfg: { key: CACHE_KEY, ttl: 2700 },
+    cacheCfg: { key: TOKEN_HEADER, ttl: 2700 },
     method: "POST",
     headers: HEADERS,
     body: BODY,
@@ -27,3 +28,8 @@ export const getAccessToken = async (): Promise<string> => {
   if (access_token) return access_token;
   else throw new Error("No access token found");
 };
+
+export const getAuth = async (): Promise<AuthConfig> => ({
+  header: TOKEN_HEADER,
+  getToken: async () => await getAccessToken(),
+});
