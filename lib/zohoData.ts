@@ -1,6 +1,6 @@
 "use server";
 
-import { GeolocationData, ItemDetails, WarehouseCategory } from "../types";
+import { GeolocationData, WarehouseCategory } from "../types";
 import { Redis } from "@upstash/redis";
 import { getItemsDetail } from "./api/clients/zoho/zohoData";
 

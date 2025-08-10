@@ -4,6 +4,9 @@ import {
   Item,
   ItemCategories,
   ItemDetails,
+  ItemDetailsResponse,
+  ItemsResponse,
+  LocationsResponse,
   Warehouse,
 } from "../../../../types";
 import { getAllCacheChunks, setCacheChunks } from "../../cache";
@@ -25,15 +28,15 @@ const ZOHO_INVENTORY_URL = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1`;
 
 export const getOrganizations = async () => {
   const url = `${ZOHO_INVENTORY_URL}/organizations/${ZOHO_ORG_ID}`;
-  const key = `zoho_organizations`;
+  const key = `Zoho-organizations`;
   const auth = await getAuth();
   return apiFetch(url, { method: "GET", cacheCfg: { key }, auth });
 };
 
 export const getWarehousesByOrganization = async () => {
   const url = `${ZOHO_INVENTORY_URL}/locations?organization_id=${ZOHO_ORG_ID}`;
-  const key = `zoho_warehouses`;
-  return apiFetch<Warehouse[]>(url, {
+  const key = `Zoho-warehouses`;
+  return apiFetch<Warehouse[], LocationsResponse>(url, {
     method: "GET",
     cacheCfg: { key },
     auth: await getAuth(),
@@ -46,7 +49,7 @@ export const getItems = async () => {
   const buildPath = (page: number) => {
     return `${ZOHO_INVENTORY_URL}/items?organization_id=${ZOHO_ORG_ID}&page=${page}&per_page=800`;
   };
-  return apiFetchAllPaginated<Item>({
+  return apiFetchAllPaginated<Item, ItemsResponse>({
     buildPath,
     cacheKeyBase,
     auth: await getAuth(),
@@ -60,7 +63,7 @@ export const getItems = async () => {
 export const getItemDetailByItemsId = async (itemIdList: string[]) => {
   const itemIds = itemIdList.join("%2C");
   const url = `${ZOHO_INVENTORY_URL}/itemdetails?item_ids=${itemIds}&organization_id=${ZOHO_ORG_ID}`;
-  return apiFetch<ItemDetails>(url, {
+  return apiFetch<ItemDetails, ItemDetailsResponse>(url, {
     method: "GET",
     auth: await getAuth(),
     transform: (data) => data.items || [],

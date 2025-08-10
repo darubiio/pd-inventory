@@ -1,12 +1,12 @@
-// lib/api/paginatedApiFetch.ts
 "use server";
 
 import { getAllCacheChunks, setCacheChunks } from "./cache";
 import { apiFetch } from "./client";
 import { FetchOptions } from "./types/clientTypes";
 
-interface PaginatedApiOptions<T> extends Omit<FetchOptions, "transform"> {
-  extractPage: (response: any) => {
+interface PaginatedApiOptions<T, U>
+  extends Omit<FetchOptions<T, U>, "transform"> {
+  extractPage: (response: U) => {
     data: T[];
     has_more: boolean;
   };
@@ -15,7 +15,7 @@ interface PaginatedApiOptions<T> extends Omit<FetchOptions, "transform"> {
   cacheTTL?: number;
 }
 
-export async function apiFetchAllPaginated<T>({
+export async function apiFetchAllPaginated<T, U>({
   extractPage,
   buildPath,
   cacheKeyBase,
@@ -25,7 +25,7 @@ export async function apiFetchAllPaginated<T>({
   body,
   method = "GET",
   ...rest
-}: PaginatedApiOptions<T>): Promise<T[]> {
+}: PaginatedApiOptions<T, U>): Promise<T[]> {
   let allData: T[] = [];
   let hasMore = true;
   let page = 1;
@@ -35,7 +35,7 @@ export async function apiFetchAllPaginated<T>({
 
   while (hasMore) {
     const path = buildPath(page);
-    const response = await apiFetch<T>(path, {
+    const response = await apiFetch<U>(path, {
       method,
       headers,
       body,

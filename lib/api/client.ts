@@ -3,15 +3,14 @@
 import { getCache, setCache } from "./cache";
 import { FetchOptions } from "./types/clientTypes";
 
-export async function apiFetch<T>(
+export async function apiFetch<FinalResponse, ApiResponse = unknown>(
   path: string,
-  options: FetchOptions = {}
-): Promise<T> {
+  options: FetchOptions<FinalResponse, ApiResponse> = {}
+): Promise<FinalResponse> {
   const {
     method = "GET",
     headers = {},
     body,
-    query,
     auth,
     cacheCfg,
     transform,
@@ -19,7 +18,7 @@ export async function apiFetch<T>(
   } = options;
 
   if (cacheCfg) {
-    const cachedData = await getCache<T>(cacheCfg.key);
+    const cachedData = await getCache<FinalResponse>(cacheCfg.key);
     if (cachedData) return cachedData;
   }
 
@@ -37,7 +36,7 @@ export async function apiFetch<T>(
     ...rest,
   });
 
-  const data = await response.json();
+  const data: ApiResponse = await response.json();
   const transformedData = transform ? transform(data) : data;
 
   if (response.status !== 200) {
@@ -49,5 +48,5 @@ export async function apiFetch<T>(
     await setCache(cacheCfg.key, transformedData, ttl);
   }
 
-  return transformedData as T;
+  return transformedData as FinalResponse;
 }
