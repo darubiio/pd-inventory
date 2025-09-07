@@ -4,6 +4,7 @@ import {
   ItemCategories,
   ItemDetails,
   Location,
+  WarehouseCategory,
 } from "../../../types";
 
 const getWarehousesByLocation = (location: Location) => location.warehouses;
@@ -114,3 +115,39 @@ export const itemsByCategoryAndWarehouse = (
     (warehouse) =>
       warehouse.warehouse_id === warehouseId && item.category_id === categoryId
   ) && item.category_id === categoryId;
+
+const ensureWarehouseBucket = (
+  acc: WarehouseCategory,
+  warehouseName: string
+) => {
+  if (!acc[warehouseName]) {
+    acc[warehouseName] = { name: warehouseName };
+  }
+  return acc[warehouseName];
+};
+
+const addCategoryStock = (
+  bucket: Record<string, unknown>,
+  categoryId: string,
+  delta: number
+) => {
+  const current = Number((bucket as Record<string, number>)[categoryId] ?? 0);
+  (bucket as Record<string, number>)[categoryId] = current + delta;
+};
+
+export const buildWarehouseCategoryMap = (items: ItemDetails[]): WarehouseCategory => {
+  const acc: WarehouseCategory = {};
+  for (const item of items) {
+    const { category_id, warehouses } = item;
+    for (const wh of warehouses) {
+      const { warehouse_name, warehouse_stock_on_hand } = wh;
+      const bucket = ensureWarehouseBucket(acc, warehouse_name);
+      addCategoryStock(
+        bucket as Record<string, unknown>,
+        category_id,
+        warehouse_stock_on_hand
+      );
+    }
+  }
+  return acc;
+};

@@ -2,11 +2,11 @@ import { FC } from "react";
 
 const Loading: FC = () => {
   return (
-    <div className="grid grid-cols-1 m-2 gap-2 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 11 }).map((_, index) => (
+    <div className="grid grid-cols-1 m-2 gap-2 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-3">
+      {Array.from({ length: 10 }).map((_, index) => (
         <div
           key={index}
-          className="card card-side bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer"
+          className="card card-side bg-base-100 shadow-sm hover:shadow-lg cursor-pointer"
         >
           <div className="w-full p-3 flex flex-col justify-start gap-2">
             <div className="badge badge-ghost h-4 w-2/3 skeleton" />
@@ -17,7 +17,7 @@ const Loading: FC = () => {
               <li className="font-semibold opacity-70 flex gap-x-2 h-4 w-2/3 skeleton" />
             </ul>
           </div>
-          <div className="w-50 h-35 skeleton" />
+          <div className="w-50 h-41 skeleton" />
         </div>
       ))}
     </div>

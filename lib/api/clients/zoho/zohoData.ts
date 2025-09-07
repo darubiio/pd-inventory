@@ -13,6 +13,7 @@ import { getAllCacheChunks, setCacheChunks } from "../../cache";
 import { apiFetch } from "../../client";
 import { apiFetchAllPaginated } from "../../paginationClient";
 import {
+  buildWarehouseCategoryMap,
   chunkArray,
   extractUniqueCategories,
   getCategories,
@@ -121,4 +122,10 @@ export const getItemsByWarehouseAndCategory = async (
   return itemDetails.filter((item) =>
     itemsByCategoryAndWarehouse(item, warehouseId, categoryId)
   );
+};
+
+export const getWarehouseCategoryStock = async () => {
+  const itemDetails = await getItemsDetail();
+  const map = buildWarehouseCategoryMap(itemDetails);
+  return Object.values(map);
 };

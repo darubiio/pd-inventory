@@ -236,7 +236,7 @@ interface Categories {
   category_name: string;
 }
 
-export interface GeolocationData {
+export interface WarehouseAndPosition extends Warehouse {
   coordinates: [number, number];
   mapUrl: string;
 }
@@ -254,4 +254,10 @@ type ItemsResponse = {
   page_context?: {
     has_more_page: boolean;
   };
+};
+
+type MapBoxLocationResponse = {
+  features: {
+    center: [number, number];
+  }[];
 };
