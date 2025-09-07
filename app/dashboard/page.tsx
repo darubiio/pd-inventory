@@ -1,12 +1,13 @@
 import { FC } from "react";
 
 import WarehouseCard from "../../ui/dashboard/WarehouseCard";
-import { getWarehousesByOrganization } from "../../lib/api/clients/zoho/zohoData";
+import { getAllWarehouseData } from "../../lib/api/clients/mapbox/mapboxData";
 
 const DashboardPage: FC = async () => {
-  const warehouses = await getWarehousesByOrganization();
+  const warehouses = await getAllWarehouseData();
+
   return (
-    <div className="grid grid-cols-1 m-2 gap-2 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 m-2 gap-2 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-3">
       {warehouses?.map((props) => (
         <WarehouseCard key={props.warehouse_id} {...props} />
       ))}

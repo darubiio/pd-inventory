@@ -11,12 +11,10 @@ function Loading() {
             <h2 className="menu-title sticky top-0 z-10 bg-base-100">
               Categories
             </h2>
-            <ul className="flex-1 overflow-y-auto">
+            <ul className="flex-1 overflow-y-auto grid grid-rows-1fr gap-1">
               {Array.from({ length: 20 }).map((_, idx) => (
                 <li key={idx}>
-                  <a>
-                    <div className="skeleton h-6 w-57"></div>
-                  </a>
+                  <div className="skeleton h-9" />
                 </li>
               ))}
             </ul>
