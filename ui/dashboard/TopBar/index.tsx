@@ -7,8 +7,10 @@ import {
   ArrowRightEndOnRectangleIcon,
   InboxStackIcon,
   TableCellsIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
+import { useUser } from "../../../lib/hooks/useUser";
 
 const navItems = [
   {
@@ -25,6 +27,8 @@ const navItems = [
 
 const TopBar: FC = () => {
   const pathname = usePathname();
+  const { user, loading, error } = useUser();
+
   return (
     <div className="navbar sticky top-0 z-10 bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -99,6 +103,24 @@ const TopBar: FC = () => {
         </ul>
       </div>
       <div className="navbar-end">
+        {/* User info visible only on large screens */}
+        {user && !loading && (
+          <div className="hidden lg:flex flex-col items-end mr-3">
+            <span className="font-semibold text-sm text-base-content">
+              {user.name}
+            </span>
+            <span className="text-xs text-base-content/60">{user.email}</span>
+          </div>
+        )}
+
+        {/* Loading skeleton for large screens */}
+        {loading && (
+          <div className="hidden lg:flex flex-col items-end mr-3 gap-1">
+            <div className="skeleton h-4 w-24"></div>
+            <div className="skeleton h-3 w-32"></div>
+          </div>
+        )}
+
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
@@ -106,19 +128,59 @@ const TopBar: FC = () => {
             className="btn btn-ghost btn-circle avatar"
           >
             <div className="w-10 rounded-full">
-              <Image
-                alt="pd-logo"
-                className="transition duration-300 dark:invert dark:grayscale"
-                src="/pd-logo.jpeg"
-                width={560}
-                height={620}
-              />
+              {user?.photo_url ? (
+                <Image
+                  alt={user.name || "User avatar"}
+                  className="rounded-full"
+                  src={user.photo_url}
+                  width={40}
+                  height={40}
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center">
+                  <UserCircleIcon className="w-6 h-6 text-base-content/60" />
+                </div>
+              )}
             </div>
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-64 p-2 shadow"
           >
+            {/* User info only visible in dropdown on small screens */}
+            {user && !loading && (
+              <>
+                <li className="menu-title px-3 py-2 lg:hidden">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-semibold text-base-content">
+                      {user.name}
+                    </span>
+                    <span className="text-xs text-base-content/60">
+                      {user.email}
+                    </span>
+                    <span className="text-xs text-base-content/50 capitalize">
+                      {user.user_role}
+                    </span>
+                  </div>
+                </li>
+                <div className="divider my-1 lg:hidden"></div>
+              </>
+            )}
+            {loading && (
+              <li className="menu-title px-3 py-2 lg:hidden">
+                <div className="flex flex-col gap-1">
+                  <div className="skeleton h-4 w-24"></div>
+                  <div className="skeleton h-3 w-32"></div>
+                </div>
+              </li>
+            )}
+            {error && (
+              <li className="menu-title px-3 py-2 lg:hidden">
+                <span className="text-xs text-error">
+                  Error loading user info
+                </span>
+              </li>
+            )}
             <li>
               <a href="/auth/logout" className="justify-between font-bold">
                 Logout
