@@ -17,6 +17,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // For API routes that don't require auth (like debug endpoints), allow through
+  if (pathname.startsWith("/api/") && !pathname.startsWith("/api/user/")) {
+    console.log("✅ Public API route, allowing through:", pathname);
+    return NextResponse.next();
+  }
+
   // Check if user has a valid session
   console.log("🔍 Checking session...");
 
@@ -28,7 +34,16 @@ export async function middleware(request: NextRequest) {
   );
 
   if (!sessionId) {
-    console.log("❌ No session ID found, redirecting to login");
+    console.log("❌ No session ID found");
+
+    // For API routes, return 401 instead of redirect
+    if (pathname.startsWith("/api/")) {
+      console.log("❌ API route without session, returning 401");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // For pages, redirect to login
+    console.log("❌ Page route without session, redirecting to login");
     const { origin } = new URL(url);
     const returnTo = encodeURIComponent(pathname + search);
     return NextResponse.redirect(`${origin}/auth/login?returnTo=${returnTo}`);
@@ -38,11 +53,19 @@ export async function middleware(request: NextRequest) {
   const session = await zohoAuth.getSessionById(sessionId);
 
   if (!session) {
-    console.log("❌ No valid session found, redirecting to login");
+    console.log("❌ No valid session found");
+
+    // For API routes, return 401 instead of redirect
+    if (pathname.startsWith("/api/")) {
+      console.log("❌ API route with invalid session, returning 401");
+      return NextResponse.json({ error: "Session expired" }, { status: 401 });
+    }
+
+    // For pages, redirect to login and clear invalid cookie
+    console.log("❌ Page route with invalid session, redirecting to login");
     const { origin } = new URL(url);
     const returnTo = encodeURIComponent(pathname + search);
 
-    // Clear invalid session cookie
     const response = NextResponse.redirect(
       `${origin}/auth/login?returnTo=${returnTo}`
     );
@@ -68,6 +91,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp).*)",
   ],
 };
