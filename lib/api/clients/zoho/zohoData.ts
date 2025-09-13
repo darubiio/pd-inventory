@@ -22,15 +22,18 @@ import {
   itemsByCategoryAndWarehouse,
   processItem,
 } from "../../utils/zohoDataUtils";
-import { getAuth } from "./zohoAuth";
+import { getUserAuth } from "./zohoUserAuth"; // Usando tokens de usuario individuales
 
-const { ZOHO_ORG_ID, ZOHO_DOMAIN } = process.env;
+const { ZOHO_ORG_ID } = process.env;
+const ZOHO_DOMAIN = process.env.ZOHO_DOMAIN || "com"; // Default to .com
 const ZOHO_INVENTORY_URL = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1`;
+
+console.log("🌐 Zoho API URL:", ZOHO_INVENTORY_URL);
 
 export const getOrganizations = async () => {
   const url = `${ZOHO_INVENTORY_URL}/organizations/${ZOHO_ORG_ID}`;
   const key = `Zoho-organizations`;
-  const auth = await getAuth();
+  const auth = await getUserAuth();
   return apiFetch(url, { method: "GET", cacheCfg: { key }, auth });
 };
 
@@ -40,7 +43,7 @@ export const getWarehousesByOrganization = async () => {
   return apiFetch<Warehouse[], LocationsResponse>(url, {
     method: "GET",
     cacheCfg: { key },
-    auth: await getAuth(),
+    auth: await getUserAuth(),
     transform: (data) => getWarehousesByLocations(data.locations),
   });
 };
@@ -53,7 +56,7 @@ export const getItems = async () => {
   return apiFetchAllPaginated<Item, ItemsResponse>({
     buildPath,
     cacheKeyBase,
-    auth: await getAuth(),
+    auth: await getUserAuth(),
     extractPage: (response) => ({
       data: response.items || [],
       has_more: response.page_context?.has_more_page ?? false,
@@ -66,7 +69,7 @@ export const getItemDetailByItemsId = async (itemIdList: string[]) => {
   const url = `${ZOHO_INVENTORY_URL}/itemdetails?item_ids=${itemIds}&organization_id=${ZOHO_ORG_ID}`;
   return apiFetch<ItemDetails, ItemDetailsResponse>(url, {
     method: "GET",
-    auth: await getAuth(),
+    auth: await getUserAuth(),
     transform: (data) => data.items || [],
   });
 };

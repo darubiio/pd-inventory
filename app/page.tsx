@@ -1,11 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useUser } from "@auth0/nextjs-auth0";
+import { useUser } from "../lib/auth/UserProvider";
 import Link from "next/link";
 
 export default function Home() {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="hero bg-base-300 min-h-screen">
+        <div className="hero-content text-center">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="hero bg-base-300 min-h-screen">
       <div className="hero-content text-center">
@@ -19,6 +30,11 @@ export default function Home() {
             priority
           />
           <h1 className="text-5xl font-bold">Welcome!</h1>
+          {user && (
+            <p className="text-lg">
+              Hello, <strong>{user.name}</strong>!
+            </p>
+          )}
           <p className="text-lg">
             to <strong>Perdomo Distribuitor</strong> inventory management.
           </p>
@@ -42,11 +58,18 @@ export default function Home() {
             </a>
           </p>
 
-          <Link href="/dashboard">
-            <button className="btn btn-md btn-primary">
-              {user ? "Go to Dashboard" : "Login to Dashboard"}
-            </button>
-          </Link>
+          <div className="space-x-4">
+            <Link href="/dashboard">
+              <button className="btn btn-md btn-primary">
+                {user ? "Go to Dashboard" : "Login to Dashboard"}
+              </button>
+            </Link>
+            {user && (
+              <Link href="/auth/logout">
+                <button className="btn btn-ghost">Logout</button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>
