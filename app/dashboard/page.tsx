@@ -3,6 +3,9 @@ import { FC } from "react";
 import WarehouseCard from "../../ui/dashboard/WarehouseCard";
 import { getAllWarehouseData } from "../../lib/api/clients/mapbox/mapboxData";
 
+// Force dynamic rendering since this requires authentication and real-time data
+export const dynamic = "force-dynamic";
+
 const DashboardPage: FC = async () => {
   const warehouses = await getAllWarehouseData();
 

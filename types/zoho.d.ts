@@ -4,6 +4,37 @@ export interface ZohoAuthToken {
   api_domain: string;
   token_type: string;
   expires_in: number;
+  refresh_token?: string;
+}
+
+export interface ZohoUser {
+  user_id: string;
+  name: string;
+  email_ids: Array<{
+    email: string;
+    is_selected: boolean;
+  }>;
+  status: string;
+  user_role: string;
+  user_type: string;
+  role_id: string;
+  photo_url: string;
+  is_claimant: boolean;
+  created_time: string;
+  custom_fields: string;
+}
+
+export interface ZohoUserResponse {
+  code: number;
+  message: string;
+  user: ZohoUser;
+}
+
+export interface UserSession {
+  user: ZohoUser;
+  access_token: string;
+  expires_at: number;
+  refresh_token?: string;
 }
 
 export interface Location {

@@ -1,7 +1,7 @@
 "use server";
 
 import { Redis } from "@upstash/redis";
-const { get, set, keys } = Redis.fromEnv();
+const { get, set, keys, del } = Redis.fromEnv();
 
 export async function getCache<T>(key: string): Promise<T | null> {
   try {
@@ -21,6 +21,14 @@ export async function setCache<T>(
     await set(key, value, { ex: ttlSeconds });
   } catch (err) {
     console.warn("Redis SET failed:", err);
+  }
+}
+
+export async function deleteCache(key: string): Promise<void> {
+  try {
+    await del(key);
+  } catch (err) {
+    console.warn("Redis DELETE failed:", err);
   }
 }
 
