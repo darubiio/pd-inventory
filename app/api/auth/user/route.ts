@@ -3,23 +3,20 @@ import { zohoAuth } from "../../../../lib/auth/zohoAuth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get session ID from cookie
     const sessionId = request.cookies.get("zoho-session-id")?.value;
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
+    const notAuthenticated = NextResponse.json(
+      { error: "Not authenticated" },
+      { status: 401 }
+    );
 
-    // Get session from Redis
-    const session = await zohoAuth.getSessionById(sessionId);
+    if (!sessionId) return notAuthenticated;
 
-    if (!session) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
+    const redisSession = await zohoAuth.getSessionById(sessionId);
+    const user = redisSession?.user;
 
-    return NextResponse.json({
-      user: session.user,
-    });
+    if (user) return NextResponse.json({ user });
+    return notAuthenticated;
   } catch (error) {
     console.error("Error getting user:", error);
     return NextResponse.json(

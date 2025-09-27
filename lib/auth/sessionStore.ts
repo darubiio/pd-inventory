@@ -5,20 +5,13 @@ import { UserSession } from "../../types/zoho";
 
 const redis = Redis.fromEnv();
 
-// Session configuration
 const SESSION_PREFIX = "zoho_session:";
 const SESSION_TTL = 24 * 60 * 60; // 24 hours in seconds
 
-/**
- * Generate a unique session ID
- */
 export function generateSessionId(): string {
   return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 }
 
-/**
- * Store a user session in Redis
- */
 export async function storeSession(session: UserSession): Promise<string> {
   try {
     const sessionId = generateSessionId();
@@ -35,9 +28,6 @@ export async function storeSession(session: UserSession): Promise<string> {
   }
 }
 
-/**
- * Retrieve a user session from Redis
- */
 export async function getSession(
   sessionId: string
 ): Promise<UserSession | null> {
@@ -69,9 +59,6 @@ export async function getSession(
   }
 }
 
-/**
- * Update a session (useful for token refresh)
- */
 export async function updateSession(
   sessionId: string,
   session: UserSession
@@ -90,9 +77,6 @@ export async function updateSession(
   }
 }
 
-/**
- * Delete a session from Redis
- */
 export async function deleteSession(sessionId: string): Promise<void> {
   try {
     const key = `${SESSION_PREFIX}${sessionId}`;
@@ -106,9 +90,6 @@ export async function deleteSession(sessionId: string): Promise<void> {
   }
 }
 
-/**
- * Get all active sessions (for admin/debugging purposes)
- */
 export async function getAllSessions(): Promise<
   { sessionId: string; session: UserSession }[]
 > {

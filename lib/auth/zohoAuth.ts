@@ -14,23 +14,12 @@ const ZOHO_ACCOUNTS_BASE =
 const ZOHO_ORG_ID = process.env.ZOHO_ORG_ID!;
 const SESSION_TTL = 24 * 60 * 60; // 24 hours in seconds
 
-// Session utilities
 function generateSessionId(): string {
   return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 }
 
 export class ZohoAuthClient {
   constructor() {
-    console.log("ZohoAuth Environment Variables:", {
-      ZOHO_CLIENT_ID: ZOHO_CLIENT_ID
-        ? `${ZOHO_CLIENT_ID.substring(0, 10)}...`
-        : "MISSING",
-      ZOHO_CLIENT_SECRET: ZOHO_CLIENT_SECRET ? "SET" : "MISSING",
-      ZOHO_REDIRECT_URI,
-      ZOHO_ACCOUNTS_BASE,
-      ZOHO_ORG_ID,
-    });
-
     if (
       !ZOHO_CLIENT_ID ||
       !ZOHO_CLIENT_SECRET ||
@@ -41,7 +30,6 @@ export class ZohoAuthClient {
     }
   }
 
-  // Generate OAuth authorization URL
   getAuthorizationUrl(state?: string) {
     const params = new URLSearchParams({
       scope: "ZohoInventory.FullAccess.all,ZohoInventory.settings.READ",
@@ -55,7 +43,6 @@ export class ZohoAuthClient {
     return `${ZOHO_ACCOUNTS_BASE}/oauth/v2/auth?${params.toString()}`;
   }
 
-  // Exchange authorization code for tokens
   async exchangeCodeForTokens(code: string): Promise<ZohoAuthToken> {
     console.log("🔄 Token exchange starting...");
 
@@ -92,7 +79,6 @@ export class ZohoAuthClient {
     return result;
   }
 
-  // Refresh access token using refresh token
   async refreshToken(refreshToken: string): Promise<ZohoAuthToken> {
     const params = new URLSearchParams({
       refresh_token: refreshToken,
@@ -115,10 +101,11 @@ export class ZohoAuthClient {
       throw new Error(`Token refresh failed: ${response.status} ${errorText}`);
     }
 
+    console.log("🔄 Token refreshed successfully updated");
+
     return response.json();
   }
 
-  // Get current user information from Zoho
   async getCurrentUser(accessToken: string): Promise<ZohoUser> {
     const url = `https://www.zohoapis.com/inventory/v1/users/me?organization_id=${ZOHO_ORG_ID}`;
     console.log("👤 Fetching user info from:", url);
@@ -151,7 +138,6 @@ export class ZohoAuthClient {
     return data.user;
   }
 
-  // Create and store session - returns session ID
   async createSession(tokens: ZohoAuthToken): Promise<string> {
     console.log("👤 Getting user info...");
     const user = await this.getCurrentUser(tokens.access_token);
@@ -165,7 +151,7 @@ export class ZohoAuthClient {
     };
 
     console.log("📦 Storing session in Redis...");
-    // Store session in Redis using cache.ts and return session ID
+
     const sessionId = generateSessionId();
     const sessionKey = `zoho_session:${sessionId}`;
     await setCache(sessionKey, session, SESSION_TTL);
@@ -177,7 +163,6 @@ export class ZohoAuthClient {
     return sessionId;
   }
 
-  // Get session by ID from Redis
   async getSessionById(sessionId: string): Promise<UserSession | null> {
     if (!sessionId) {
       console.log("🔍 No session ID provided");
@@ -247,7 +232,6 @@ export class ZohoAuthClient {
     }
   }
 
-  // Delete session by ID from Redis
   async deleteSessionById(sessionId: string): Promise<void> {
     try {
       console.log("🗑️ Deleting session from Redis...");
@@ -259,7 +243,6 @@ export class ZohoAuthClient {
     }
   }
 
-  // Get authorization URL for login
   getLoginUrl(returnTo?: string): string {
     const state = returnTo
       ? Buffer.from(returnTo).toString("base64")
@@ -267,16 +250,14 @@ export class ZohoAuthClient {
     return this.getAuthorizationUrl(state);
   }
 
-  // Handle OAuth callback - returns session ID
   async processCallback(
     code: string,
-    state?: string
+    state: string | null
   ): Promise<{ sessionId: string; returnTo: string }> {
     try {
       const tokens = await this.exchangeCodeForTokens(code);
       const sessionId = await this.createSession(tokens);
 
-      // Decode return URL from state
       const returnTo = state
         ? Buffer.from(state, "base64").toString()
         : "/dashboard";
@@ -289,5 +270,4 @@ export class ZohoAuthClient {
   }
 }
 
-// Export singleton instance
 export const zohoAuth = new ZohoAuthClient();

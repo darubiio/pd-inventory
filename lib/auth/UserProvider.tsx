@@ -39,7 +39,6 @@ export function UserProvider({ children }: UserProviderProps) {
           const userData = await response.json();
           setUser(userData.user);
         } else if (response.status === 401) {
-          // Not authenticated, which is fine
           setUser(null);
         } else {
           setError("Failed to fetch user information");

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { zohoAuth } from "../../../lib/auth/zohoAuth";
 
 export async function GET(request: NextRequest) {
-  console.log("🔄 CALLBACK STARTED");
+  console.log("🔄 Callback started");
 
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -27,19 +27,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log("🔗 Processing OAuth callback...");
-    const { sessionId, returnTo } = await zohoAuth.processCallback(
-      code,
-      state || undefined
-    );
-    console.log("✅ Session created successfully");
+    const { sessionId, returnTo } = await zohoAuth.processCallback(code, state);
 
-    console.log("🎯 Redirecting to:", returnTo);
-
-    // Create response with redirect and set session ID cookie
     const response = NextResponse.redirect(new URL(returnTo, request.url));
 
-    // Set session ID cookie (simple, not httpOnly)
     response.cookies.set("zoho-session-id", sessionId, {
       httpOnly: false,
       secure: false,

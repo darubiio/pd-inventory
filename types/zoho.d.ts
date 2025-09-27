@@ -10,6 +10,7 @@ export interface ZohoAuthToken {
 export interface ZohoUser {
   user_id: string;
   name: string;
+  email: string;
   email_ids: Array<{
     email: string;
     is_selected: boolean;

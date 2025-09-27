@@ -6,4 +6,5 @@ export interface UserProfile {
   user_role: string;
   user_type: string;
   status: string;
+  email: string;
 }

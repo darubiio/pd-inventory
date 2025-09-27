@@ -103,7 +103,6 @@ const TopBar: FC = () => {
         </ul>
       </div>
       <div className="navbar-end">
-        {/* User info visible only on large screens */}
         {user && !loading && (
           <div className="hidden lg:flex flex-col items-end mr-3">
             <span className="font-semibold text-sm text-base-content">
@@ -112,15 +111,12 @@ const TopBar: FC = () => {
             <span className="text-xs text-base-content/60">{user.email}</span>
           </div>
         )}
-
-        {/* Loading skeleton for large screens */}
         {loading && (
           <div className="hidden lg:flex flex-col items-end mr-3 gap-1">
             <div className="skeleton h-4 w-24"></div>
             <div className="skeleton h-3 w-32"></div>
           </div>
         )}
-
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
@@ -147,7 +143,6 @@ const TopBar: FC = () => {
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-64 p-2 shadow"
           >
-            {/* User info only visible in dropdown on small screens */}
             {user && !loading && (
               <>
                 <li className="menu-title px-3 py-2 lg:hidden">
