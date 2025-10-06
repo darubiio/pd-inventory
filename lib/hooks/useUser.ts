@@ -1,32 +1,31 @@
 import { useState, useEffect } from "react";
-import { UserProfile } from "../../types/user";
+import { ZohoUserData } from "../../types/user";
 
 export function useUser() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<ZohoUserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        console.log("🧑‍💼 useUser: Starting fetch user");
         setLoading(true);
-        const response = await fetch("/api/user/profile");
 
-        console.log("🧑‍💼 useUser: Response status:", response.status);
+        let response = await fetch("/api/auth/user");
+
+        if (!response.ok && response.status === 404) {
+          response = await fetch("/api/user/profile");
+        }
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("🧑‍💼 useUser: Error response:", errorText);
-          throw new Error("Failed to fetch user profile");
+          throw new Error("Failed to fetch user profile " + errorText);
         }
 
         const userData = await response.json();
-        console.log("🧑‍💼 useUser: User data received:", userData);
         setUser(userData);
         setError(null);
       } catch (err) {
-        console.error("🧑‍💼 useUser: Error fetching user:", err);
         setError(err instanceof Error ? err.message : "Failed to fetch user");
         setUser(null);
       } finally {
@@ -37,5 +36,5 @@ export function useUser() {
     fetchUser();
   }, []);
 
-  return { user, loading, error };
+  return { user, isLoading: loading, error };
 }

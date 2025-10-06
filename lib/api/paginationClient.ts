@@ -4,6 +4,8 @@ import { getAllCacheChunks, setCacheChunks } from "./cache";
 import { apiFetch } from "./client";
 import { FetchOptions } from "./types/clientTypes";
 
+const THREE_HOURS_IN_SECONDS = 3 * 60 * 60;
+
 interface PaginatedApiOptions<T, U>
   extends Omit<FetchOptions<T, U>, "transform"> {
   extractPage: (response: U) => {
@@ -26,31 +28,40 @@ export async function apiFetchAllPaginated<T, U>({
   method = "GET",
   ...rest
 }: PaginatedApiOptions<T, U>): Promise<T[]> {
+  const cachedData = await getAllCacheChunks<T>(cacheKeyBase);
+  if (cachedData.length) return cachedData;
+
   let allData: T[] = [];
   let hasMore = true;
   let page = 1;
 
-  const cachedData = await getAllCacheChunks<T>(cacheKeyBase);
-  if (cachedData.length) return cachedData;
+  try {
+    while (hasMore) {
+      const path = buildPath(page);
+      const response = await apiFetch<U>(path, {
+        method,
+        headers,
+        body,
+        auth,
+        ...rest,
+      });
 
-  while (hasMore) {
-    const path = buildPath(page);
-    const response = await apiFetch<U>(path, {
-      method,
-      headers,
-      body,
-      auth,
-      ...rest,
-    });
+      const { data, has_more } = extractPage(response);
 
-    const { data, has_more } = extractPage(response);
+      allData = allData.concat(data);
+      hasMore = has_more;
+      page++;
+    }
 
-    allData = allData.concat(data);
-    hasMore = has_more;
-    page++;
+    await setCacheChunks<T>(
+      cacheKeyBase,
+      allData,
+      THREE_HOURS_IN_SECONDS,
+      cacheTTL
+    );
+
+    return allData;
+  } catch (error) {
+    throw error;
   }
-
-  setCacheChunks<T>(cacheKeyBase, allData, 900, cacheTTL);
-
-  return allData;
 }

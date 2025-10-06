@@ -1,7 +1,7 @@
 import { getItemCategories } from "../../../../lib/api/clients/zoho/zohoData";
-import WarehouseDetail from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
+import { ProtectedWarehousePage } from "../../../../ui/dashboard/ProtectedWarehousePage";
+import { WarehouseDetail } from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
 
-// Force dynamic rendering since this requires authentication and real-time data
 export const dynamic = "force-dynamic";
 
 export default async function WarehouseItems({
@@ -11,5 +11,10 @@ export default async function WarehouseItems({
 }) {
   const { id: warehouseId } = await params;
   const categories = await getItemCategories();
-  return <WarehouseDetail warehouseId={warehouseId} categories={categories} />;
+
+  return (
+    <ProtectedWarehousePage warehouseId={warehouseId}>
+      <WarehouseDetail warehouseId={warehouseId} categories={categories} />
+    </ProtectedWarehousePage>
+  );
 }
