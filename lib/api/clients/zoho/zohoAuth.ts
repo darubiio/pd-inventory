@@ -1,8 +1,10 @@
 "use server";
 
+import { headers } from "next/headers";
 import { ZohoAuthToken } from "../../../../types";
 import { apiFetch } from "../../client";
 import { AuthConfig } from "../../types/clientTypes";
+import { zohoAuth } from "../../../auth/zohoAuth";
 
 const URL = `https://accounts.zoho.${process.env.ZOHO_DOMAIN}/oauth/v2/token`;
 const HEADERS = { "Content-Type": "application/x-www-form-urlencoded" };
@@ -32,4 +34,26 @@ export const getAccessToken = async (): Promise<string> => {
 export const getAuth = async (): Promise<AuthConfig> => ({
   header: TOKEN_HEADER,
   getToken: async () => await getAccessToken(),
+});
+
+export const getUserAccessToken = async (): Promise<string> => {
+  const headersList = await headers();
+  const sessionId = headersList.get("x-session-id");
+
+  const userAuthError = (msg: string) => {
+    throw new Error(`User not authenticated: ${msg}`);
+  };
+
+  if (!sessionId) return userAuthError("no session ID in headers");
+
+  const session = await zohoAuth.getSessionById(sessionId);
+  if (!session) return userAuthError("invalid session");
+
+  console.log("🔑 Access token retrieved for user:", session.user.name);
+  return session.access_token;
+};
+
+export const getUserAuth = async (): Promise<AuthConfig> => ({
+  header: TOKEN_HEADER,
+  getToken: async () => await getUserAccessToken(),
 });

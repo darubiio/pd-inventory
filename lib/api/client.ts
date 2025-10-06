@@ -36,12 +36,12 @@ export async function apiFetch<FinalResponse, ApiResponse = unknown>(
     ...rest,
   });
 
-  const data: ApiResponse = await response.json();
-  const transformedData = transform ? transform(data) : data;
-
   if (response.status !== 200) {
     throw new Error(`${response.status}`);
   }
+
+  const data: ApiResponse = await response.json();
+  const transformedData = transform ? transform(data) : data;
 
   if (cacheCfg) {
     const ttl = cacheCfg?.ttl ?? 600;

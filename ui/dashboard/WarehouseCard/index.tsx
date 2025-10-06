@@ -7,7 +7,7 @@ import { ContactLinks } from "./ContactLinks";
 import Link from "next/link";
 import Image from "next/image";
 
-const WarehouseCard: FC<WarehouseAndPosition> = ({
+export const WarehouseCard: FC<WarehouseAndPosition> = ({
   warehouse_name,
   warehouse_id,
   attention,
@@ -56,5 +56,3 @@ const WarehouseCard: FC<WarehouseAndPosition> = ({
     </figure>
   </Link>
 );
-
-export default WarehouseCard;

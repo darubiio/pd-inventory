@@ -4,13 +4,13 @@ import { Suspense, useEffect, useState } from "react";
 import { ItemsTable } from "../ItemsTable/ItemsTable";
 import { CategoriesMenu } from "../CategoriesMenu/CategoriesMenu";
 
-function WarehouseDetail({
+export const WarehouseDetail = ({
   warehouseId,
   categories,
 }: {
   warehouseId: string;
   categories: { category_id: string; category_name: string }[];
-}) {
+}) => {
   const [selectedCategory, setSelectedCategory] = useState(
     categories.length ? categories[0].category_id : ""
   );
@@ -52,6 +52,4 @@ function WarehouseDetail({
       </div>
     </div>
   );
-}
-
-export default WarehouseDetail;
+};

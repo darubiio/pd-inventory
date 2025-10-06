@@ -22,13 +22,12 @@ import {
   itemsByCategoryAndWarehouse,
   processItem,
 } from "../../utils/zohoDataUtils";
-import { getUserAuth } from "./zohoUserAuth"; // Usando tokens de usuario individuales
+import { getUserAuth } from "./zohoAuth";
 
 const { ZOHO_ORG_ID } = process.env;
-const ZOHO_DOMAIN = process.env.ZOHO_DOMAIN || "com"; // Default to .com
+const ZOHO_DOMAIN = process.env.ZOHO_DOMAIN || "com";
 const ZOHO_INVENTORY_URL = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1`;
-
-console.log("🌐 Zoho API URL:", ZOHO_INVENTORY_URL);
+const ONE_DAY_IN_SECONDS = 86400;
 
 export const getOrganizations = async () => {
   const url = `${ZOHO_INVENTORY_URL}/organizations/${ZOHO_ORG_ID}`;
@@ -42,7 +41,7 @@ export const getWarehousesByOrganization = async () => {
   const key = `Zoho-warehouses`;
   return apiFetch<Warehouse[], LocationsResponse>(url, {
     method: "GET",
-    cacheCfg: { key },
+    cacheCfg: { key, ttl: ONE_DAY_IN_SECONDS },
     auth: await getUserAuth(),
     transform: (data) => getWarehousesByLocations(data.locations),
   });

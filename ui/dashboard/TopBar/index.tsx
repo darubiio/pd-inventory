@@ -27,7 +27,7 @@ const navItems = [
 
 const TopBar: FC = () => {
   const pathname = usePathname();
-  const { user, loading, error } = useUser();
+  const { user, isLoading, error } = useUser();
 
   return (
     <div className="navbar sticky top-0 z-10 bg-base-100 shadow-sm">
@@ -103,7 +103,7 @@ const TopBar: FC = () => {
         </ul>
       </div>
       <div className="navbar-end">
-        {user && !loading && (
+        {user && !isLoading && (
           <div className="hidden lg:flex flex-col items-end mr-3">
             <span className="font-semibold text-sm text-base-content">
               {user.name}
@@ -111,7 +111,7 @@ const TopBar: FC = () => {
             <span className="text-xs text-base-content/60">{user.email}</span>
           </div>
         )}
-        {loading && (
+        {isLoading && (
           <div className="hidden lg:flex flex-col items-end mr-3 gap-1">
             <div className="skeleton h-4 w-24"></div>
             <div className="skeleton h-3 w-32"></div>
@@ -143,7 +143,7 @@ const TopBar: FC = () => {
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-64 p-2 shadow"
           >
-            {user && !loading && (
+            {user && !isLoading && (
               <>
                 <li className="menu-title px-3 py-2 lg:hidden">
                   <div className="flex flex-col gap-1">
@@ -161,7 +161,7 @@ const TopBar: FC = () => {
                 <div className="divider my-1 lg:hidden"></div>
               </>
             )}
-            {loading && (
+            {isLoading && (
               <li className="menu-title px-3 py-2 lg:hidden">
                 <div className="flex flex-col gap-1">
                   <div className="skeleton h-4 w-24"></div>
