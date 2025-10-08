@@ -1,4 +1,7 @@
-import { getItemCategories } from "../../../../lib/api/clients/zoho/zohoData";
+import {
+  getItemCategories,
+  getWarehouseById,
+} from "../../../../lib/api/clients/zoho/zohoData";
 import { ProtectedWarehousePage } from "../../../../ui/dashboard/ProtectedWarehousePage";
 import { WarehouseDetail } from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
 
@@ -10,11 +13,18 @@ export default async function WarehouseItems({
   params: Promise<{ id: string }>;
 }) {
   const { id: warehouseId } = await params;
-  const categories = await getItemCategories();
+  const [categories, warehouse] = await Promise.all([
+    getItemCategories(),
+    getWarehouseById(warehouseId),
+  ]);
 
   return (
     <ProtectedWarehousePage warehouseId={warehouseId}>
-      <WarehouseDetail warehouseId={warehouseId} categories={categories} />
+      <WarehouseDetail
+        warehouseId={warehouseId}
+        categories={categories}
+        warehouse={warehouse}
+      />
     </ProtectedWarehousePage>
   );
 }

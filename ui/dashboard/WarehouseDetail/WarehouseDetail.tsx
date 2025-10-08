@@ -1,15 +1,18 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useState } from "react";
 import { ItemsTable } from "../ItemsTable/ItemsTable";
 import { CategoriesMenu } from "../CategoriesMenu/CategoriesMenu";
+import { Warehouse } from "../../../types";
 
 export const WarehouseDetail = ({
   warehouseId,
   categories,
+  warehouse,
 }: {
   warehouseId: string;
   categories: { category_id: string; category_name: string }[];
+  warehouse?: Warehouse;
 }) => {
   const [selectedCategory, setSelectedCategory] = useState(
     categories.length ? categories[0].category_id : ""
@@ -23,7 +26,7 @@ export const WarehouseDetail = ({
           htmlFor="my-drawer-2"
           className="btn btn-primary drawer-button lg:hidden w-full mb-2"
         >
-          Categories
+          {warehouse?.warehouse_name}
         </label>
         <div className="drawer-side z-10 border-l-0">
           <label
@@ -35,6 +38,7 @@ export const WarehouseDetail = ({
           <CategoriesMenu
             categories={categories}
             selectedCategory={selectedCategory}
+            warehouseName={warehouse?.warehouse_name}
             onChangeCategory={(id) => {
               setSelectedCategory(id);
               if (typeof window !== "undefined" && window.innerWidth < 1024) {

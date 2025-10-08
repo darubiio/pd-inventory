@@ -131,3 +131,8 @@ export const getWarehouseCategoryStock = async () => {
   const map = buildWarehouseCategoryMap(itemDetails);
   return Object.values(map);
 };
+
+export const getWarehouseById = async (warehouseId: string) => {
+  const warehouses = await getWarehousesByOrganization();
+  return warehouses.find(warehouse => warehouse.warehouse_id === warehouseId);
+};

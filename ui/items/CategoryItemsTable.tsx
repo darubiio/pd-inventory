@@ -36,27 +36,25 @@ export const CategoriesTable: FC<CategoriesTableProps> = ({ data }) => {
         <table className="table table-md table-pin-rows table-pin-cols table-zebra">
           <thead>
             <tr>
-              {table
-                .getFlatHeaders()
-                .map((header, idx) =>
-                  idx === 0 ? (
-                    <th key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ) : (
-                    <td key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </td>
-                  )
-                )}
+              {table.getFlatHeaders().map((header, idx) =>
+                idx === 0 ? (
+                  <th key={header.id} className="pr-1">
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ) : (
+                  <td key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </td>
+                )
+              )}
             </tr>
           </thead>
           <tbody>

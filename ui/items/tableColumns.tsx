@@ -24,11 +24,19 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
       }: {
         table: Table<CategoryItem>;
         column: Column<CategoryItem, string>;
-      }) => <CategoryNameHeader table={table} column={column} />,
+      }) => (
+        <CategoryNameHeader
+          table={table}
+          column={column}
+          isStatusTable={false}
+        />
+      ),
       cell: (info: CellContext<CategoryItem, ReactNode>) => (
         <div
           style={{ paddingLeft: `${info.row.depth * 1.5}rem` }}
-          className="font-semibold"
+          className={`font-semibold ${
+            info.row.depth > 0 ? "text-gray-600 dark:text-gray-300" : ""
+          }`}
         >
           {info.getValue()}
         </div>
@@ -40,8 +48,9 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
       header: location.replace(/_/g, " "),
       cell: (info: CellContext<CategoryItem, ReactNode>) => (
         <div
-          style={{ paddingLeft: `${info.row.depth * 1.5}rem` }}
-          className="font-semibold flex justify-center align-middle"
+          className={`flex justify-center align-middle font-semibold ${
+            info.row.depth > 0 ? "text-gray-600 dark:text-gray-300" : ""
+          }`}
         >
           {info.getValue()}
         </div>

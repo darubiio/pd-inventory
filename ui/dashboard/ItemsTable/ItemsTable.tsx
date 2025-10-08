@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { getItemsByWarehouseAndCategory } from "../../../lib/api/clients/zoho/zohoData";
 import {
   ColumnDef,
@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import TableLoading from "../../loading/tableLoading";
 import { CategoryItem } from "../../../types";
+import { useAbortableRequest } from "../../../lib/hooks/useAbortableRequest";
 
 const defaultData: any[] = [];
 
@@ -26,8 +27,13 @@ export const ItemsTable = ({
   warehouseId: string;
   categoryId: string;
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [items, setItems] = React.useState<any[]>([]);
+  const {
+    reset,
+    cleanup,
+    isLoading,
+    data: items,
+    execute: loadItems,
+  } = useAbortableRequest(getItemsByWarehouseAndCategory, { debounceMs: 300 });
 
   const columns = useMemo(
     () => getColumns(warehouseId) as ColumnDef<CategoryItem>[],
@@ -43,12 +49,11 @@ export const ItemsTable = ({
   });
 
   useEffect(() => {
-    if (!categoryId || !warehouseId) return;
-    setIsLoading(true);
-    getItemsByWarehouseAndCategory(warehouseId, categoryId)
-      .then(setItems)
-      .finally(() => setIsLoading(false));
-  }, [categoryId, warehouseId]);
+    if (!categoryId || !warehouseId) return reset();
+
+    loadItems(warehouseId, categoryId);
+    return cleanup;
+  }, [categoryId, warehouseId, loadItems, reset, cleanup]);
 
   return (
     <div className="card bg-base-100 shadow-xl pt-3 h-[calc(100vh-80px)]">
