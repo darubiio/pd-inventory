@@ -11,22 +11,22 @@ export async function middleware(request: NextRequest) {
 
   console.log("🛡️ Middleware checking:", pathname);
 
-  // Allow auth routes and public routes to pass through
   if (isAuth(pathname) || isPublic(pathname)) {
     console.log("✅ Auth/public route, allowing through:", pathname);
     return NextResponse.next();
   }
 
-  // For API routes that don't require auth (like debug endpoints), allow through
-  if (pathname.startsWith("/api/") && !pathname.startsWith("/api/user/")) {
+  const publicApiRoutes = ["/api/auth/"];
+
+  const isPublicApiRoute = publicApiRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isPublicApiRoute) {
     console.log("✅ Public API route, allowing through:", pathname);
     return NextResponse.next();
   }
 
-  // Check if user has a valid session
-  console.log("🔍 Checking session...");
-
-  // Get session ID from cookie
   const sessionId = request.cookies.get("zoho-session-id")?.value;
   console.log(
     "🍪 Session ID from cookie:",

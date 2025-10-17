@@ -7,14 +7,15 @@ import {
   WarehouseCategory,
 } from "../../../types";
 
-const getWarehousesByLocation = (location: Location) => location.warehouses;
+const withLocationId = (location: Location) =>
+  location.warehouses.map((w) => ({ ...w, location_id: location.location_id }));
 
 const filterActives = <T extends { status: string }>(items: T[]) => {
   return items.filter((item) => item.status === "active");
 };
 
 export const getWarehousesByLocations = (locations: Location[]) => {
-  return filterActives(locations.flatMap(getWarehousesByLocation));
+  return filterActives(locations.flatMap(withLocationId));
 };
 
 export const getCategories = (items: Item[]) => {
@@ -135,7 +136,9 @@ const addCategoryStock = (
   (bucket as Record<string, number>)[categoryId] = current + delta;
 };
 
-export const buildWarehouseCategoryMap = (items: ItemDetails[]): WarehouseCategory => {
+export const buildWarehouseCategoryMap = (
+  items: ItemDetails[]
+): WarehouseCategory => {
   const acc: WarehouseCategory = {};
   for (const item of items) {
     const { category_id, warehouses } = item;

@@ -16,7 +16,7 @@ export const ProtectedWarehousePage = ({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -24,7 +24,7 @@ export const ProtectedWarehousePage = ({
 
   if (!hasAccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
+      <div className="flex flex-col items-center justify-center p-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             Access Restricted

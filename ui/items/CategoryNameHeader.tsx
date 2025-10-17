@@ -49,7 +49,7 @@ const CategoryNameHeader: React.FC<CategoryNameHeaderProps> = ({
           <Filter column={column} table={table} />
         ) : (
           <span className="font-semibold text-base leading-5 h-10 p-1 inline-flex items-center w-30">
-            Categories
+            Items
           </span>
         )}
 

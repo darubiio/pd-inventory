@@ -56,7 +56,7 @@ export const ItemsTable = ({
   }, [categoryId, warehouseId, loadItems, reset, cleanup]);
 
   return (
-    <div className="card bg-base-100 shadow-xl pt-3 h-[calc(100vh-80px)]">
+    <div className="card bg-base-100 shadow-xl">
       <div className="overflow-x-auto md:mx-3">
         {isLoading ? (
           <TableLoading cols={6} />
