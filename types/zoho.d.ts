@@ -71,6 +71,7 @@ export interface Location {
 export interface Warehouse {
   warehouse_id: string;
   warehouse_name: string;
+  location_id: string;
   attention: string;
   address: string;
   address1: string;

@@ -1,0 +1,273 @@
+"use client";
+
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useMemo, useState } from "react";
+import DateRangeInput from "../../components/DateRangeInput";
+
+type PackageRow = {
+  package_id: string;
+  package_number: string;
+  salesorder_id: string;
+  salesorder_number: string;
+  date: string;
+  customer_name: string;
+  status: string;
+  total_quantity?: string | number;
+  created_time?: string;
+  shipment_order?: { tracking_number?: string; carrier?: string };
+};
+
+const statusOptions = {
+  all: { label: "All", value: "all" },
+  not_shipped: { label: "NotShipped", value: "not_shipped" },
+  shipped: { label: "Shipped", value: "shipped" },
+  delivered: { label: "Delivered", value: "delivered" },
+};
+
+const normalizeStatus = (s?: string) => (s || "").trim();
+
+export function PackagesTable({
+  data,
+  onDateChange,
+  defaultDateStart,
+  defaultDateEnd,
+  loading = false,
+}: {
+  data: PackageRow[];
+  onDateChange?: (start: string, end: string) => void;
+  defaultDateStart?: string;
+  defaultDateEnd?: string;
+  loading?: boolean;
+}) {
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("not_shipped");
+  const [dateStart, setDateStart] = useState<string>(defaultDateStart || "");
+  const [dateEnd, setDateEnd] = useState<string>(defaultDateEnd || "");
+
+  const columns = useMemo<ColumnDef<PackageRow>[]>(
+    () => [
+      {
+        accessorKey: "package_number",
+        header: "Package",
+        cell: (ctx) => (
+          <div className="font-semibold">{ctx.getValue() as string}</div>
+        ),
+      },
+      {
+        accessorKey: "package_id",
+        header: "ID",
+        cell: (ctx) => (
+          <span className="text-xs opacity-70">{ctx.getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: "customer_name",
+        header: "Customer",
+      },
+      {
+        accessorKey: "salesorder_number",
+        header: "Sales Order",
+      },
+      {
+        accessorKey: "date",
+        header: "Date",
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: (ctx) => {
+          const v = String(ctx.getValue() ?? "") as
+            | "shipped"
+            | "not_shipped"
+            | "delivered";
+          const isPending = normalizeStatus(v).toLowerCase() === "not_shipped";
+          const badgeClass = isPending
+            ? "badge-warning"
+            : v === "shipped"
+            ? "badge-primary"
+            : v === "delivered"
+            ? "badge-success"
+            : "";
+          return (
+            <span className={`badge ${badgeClass}`}>
+              {statusOptions[v].label}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "total_quantity",
+        header: "Qty",
+      },
+      {
+        accessorKey: "shipment_order.tracking_number",
+        header: "Tracking",
+        cell: ({ row }) => (
+          <span className="text-xs">
+            {row.original.shipment_order?.tracking_number || "-"}
+          </span>
+        ),
+      },
+    ],
+    []
+  );
+
+  const filtered = useMemo(() => {
+    const text = globalFilter.trim().toLowerCase();
+    return (data || [])
+      .filter((p) => {
+        if (!statusFilter || statusFilter === "all") return true;
+        const s = normalizeStatus(p.status);
+        if (statusFilter === "not_shipped")
+          return s.toLowerCase() === "not_shipped";
+        return s === statusFilter;
+      })
+      .filter((p) => {
+        if (!text) return true;
+        return (
+          p.package_number?.toLowerCase().includes(text) ||
+          p.package_id?.toLowerCase().includes(text)
+        );
+      });
+  }, [data, globalFilter, statusFilter]);
+
+  const table = useReactTable<PackageRow>({
+    data: filtered,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+
+  return (
+    <div className="card bg-base-100 shadow-xl pt-3 h-full md:h-[calc(100vh-6.9rem)]">
+      <div className="px-4 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="join w-full md:w-1/2">
+          <label className="input w-full rounded-sm">
+            <svg
+              className="h-[1em] opacity-50"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <g
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeWidth="2.5"
+                fill="none"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </g>
+            </svg>
+            <input
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Search by package number or ID"
+              aria-label="Search packages"
+            />
+          </label>
+        </div>
+        <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center md:gap-2 md:justify-end">
+          <DateRangeInput
+            defaultStart={defaultDateStart}
+            defaultEnd={defaultDateEnd}
+            onChange={(start?: string, end?: string) => {
+              setDateStart(start || "");
+              setDateEnd(end || "");
+              if (start && end) onDateChange?.(start, end);
+            }}
+            label="Dates"
+            loading={loading}
+            className="w-full"
+            buttonClassName="w-full justify-between"
+          />
+          <label className="select">
+            <span className="label">Status</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter status"
+            >
+              {Object.values(statusOptions).map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+      {loading ? (
+        <div className="flex justify-center items-center py-10">
+          <span className="loading loading-spinner loading-lg" />
+        </div>
+      ) : (
+        <>
+          <div className="md:hidden px-4 pb-4 flex flex-col gap-3">
+            {filtered.map((p) => (
+              <div key={p.package_id} className="border rounded-box p-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold">{p.package_number}</div>
+                  <span className="badge">{p.status}</span>
+                </div>
+                <div className="text-sm opacity-80">{p.customer_name}</div>
+                <div className="text-xs opacity-70">
+                  SO: {p.salesorder_number}
+                </div>
+                <div className="text-xs opacity-70">ID: {p.package_id}</div>
+                <div className="text-xs opacity-70">
+                  Qty: {p.total_quantity ?? "-"}
+                </div>
+                <div className="text-xs opacity-70">
+                  Tracking: {p.shipment_order?.tracking_number || "-"}
+                </div>
+              </div>
+            ))}
+            {!filtered.length && (
+              <div className="px-1 pb-4 text-sm opacity-75">
+                No packages found
+              </div>
+            )}
+          </div>
+
+          <div className="overflow-x-auto md:mx-3 hidden md:block">
+            <table className="table table-md table-zebra">
+              <thead>
+                <tr>
+                  {table.getFlatHeaders().map((header) => (
+                    <th key={header.id}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

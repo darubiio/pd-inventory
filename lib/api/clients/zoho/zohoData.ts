@@ -38,13 +38,14 @@ export const getOrganizations = async () => {
 
 export const getWarehousesByOrganization = async () => {
   const url = `${ZOHO_INVENTORY_URL}/locations?organization_id=${ZOHO_ORG_ID}`;
-  const key = `Zoho-warehouses`;
-  return apiFetch<Warehouse[], LocationsResponse>(url, {
+  const key = `Zoho-warehousesDEV`;
+  const data = await apiFetch<Warehouse[], LocationsResponse>(url, {
     method: "GET",
     cacheCfg: { key, ttl: ONE_DAY_IN_SECONDS },
     auth: await getUserAuth(),
     transform: (data) => getWarehousesByLocations(data.locations),
   });
+  return data;
 };
 
 export const getItems = async () => {
@@ -132,7 +133,231 @@ export const getWarehouseCategoryStock = async () => {
   return Object.values(map);
 };
 
+export const getWarehouseDetailCategories = async (warehouseId: string) => {
+  return Promise.all([getItemCategories(), getWarehouseById(warehouseId)]);
+};
+
 export const getWarehouseById = async (warehouseId: string) => {
   const warehouses = await getWarehousesByOrganization();
-  return warehouses.find(warehouse => warehouse.warehouse_id === warehouseId);
+  return warehouses.find((warehouse) => warehouse.warehouse_id === warehouseId);
+};
+
+interface SalesOrdersResponse {
+  salesorders: SalesOrder[];
+  page_context: {
+    page: number;
+    per_page: number;
+    has_more_page: boolean;
+    report_name: string;
+    applied_filter: string;
+    sort_column: string;
+    sort_order: string;
+  };
+}
+
+interface SalesOrder {
+  salesorder_id: string;
+  customer_name: string;
+  customer_id: string;
+  status: string;
+  salesorder_number: string;
+  reference_number: string;
+  date: string;
+  shipment_date: string;
+  location_id: string;
+  location_name: string;
+  total: number;
+  currency_code: string;
+  created_time: string;
+  last_modified_time: string;
+}
+
+interface PackagesResponse {
+  packages: Package[];
+  page_context: {
+    page: number;
+    per_page: number;
+    has_more_page: boolean;
+    report_name: string;
+    applied_filter: string;
+    sort_column: string;
+    sort_order: string;
+  };
+}
+
+interface Package {
+  package_id: string;
+  package_number: string;
+  salesorder_id: string;
+  salesorder_number: string;
+  date: string;
+  customer_id: string;
+  customer_name: string;
+  status: string;
+  total_quantity: string;
+  shipping_address: {
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    fax: string;
+    phone: string;
+  };
+  billing_address: {
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    fax: string;
+    phone: string;
+  };
+  line_items: PackageLineItem[];
+  shipment_order?: {
+    shipment_id: string;
+    shipment_number: string;
+    carrier: string;
+    service: string;
+    tracking_number: string;
+    shipping_date: string;
+    delivery_days: number;
+    delivery_guarantee: boolean;
+    shipment_rate: number;
+    status: string;
+    detailed_status: string;
+  };
+  created_time: string;
+  last_modified_time: string;
+  template_id: string;
+  template_name: string;
+  template_type: string;
+  is_emailed: boolean;
+  notes: string;
+  contact_persons: ContactPerson[];
+  custom_fields: CustomField[];
+}
+
+interface PackageLineItem {
+  line_item_id: string;
+  so_line_item_id: string;
+  item_id: string;
+  name: string;
+  description: string;
+  sku: string;
+  quantity: number;
+  unit: string;
+  is_invoiced: boolean;
+  item_custom_fields: CustomField[];
+}
+
+interface ContactPerson {
+  contact_person_id: string;
+}
+
+interface CustomField {
+  customfield_id: string;
+  label: string;
+  value: string;
+  index: number;
+  data_type: string;
+}
+
+const getDefaultDateRange = () => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 5);
+
+  return {
+    dateStart: startDate.toISOString().split("T")[0],
+    dateEnd: endDate.toISOString().split("T")[0],
+  };
+};
+
+interface SalesOrderSearchParams {
+  locationId?: string;
+  dateStart?: string;
+  dateEnd?: string;
+  status?: string;
+}
+
+export const getAllSalesOrders = async (
+  searchParams: SalesOrderSearchParams = {}
+) => {
+  const { dateStart: defaultStart, dateEnd: defaultEnd } =
+    getDefaultDateRange();
+  const { dateStart = defaultStart, dateEnd = defaultEnd } = searchParams;
+  const cacheKeyBase = `Zoho-sales-orders-${dateStart}-${dateEnd}`;
+
+  const buildPath = (page: number) => {
+    let path = `${ZOHO_INVENTORY_URL}/salesorders?organization_id=${ZOHO_ORG_ID}&page=${page}`;
+    if (dateStart) path += `&date_start=${dateStart}`;
+    if (dateEnd) path += `&date_end=${dateEnd}`;
+    return path;
+  };
+
+  return apiFetchAllPaginated<SalesOrder, SalesOrdersResponse>({
+    buildPath,
+    cacheKeyBase,
+    auth: await getUserAuth(),
+    extractPage: ({ salesorders: data, page_context }) => ({
+      has_more: page_context?.has_more_page,
+      data,
+    }),
+  });
+};
+
+export const getSalesOrdersByLocationId = async (locationId: string) => {
+  const salesOrders = await getAllSalesOrders({ locationId });
+  return salesOrders.filter((so) => so.location_id === locationId);
+};
+
+export const getAllPackages = async (
+  searchParams: { dateStart?: string; dateEnd?: string } = {}
+) => {
+  const { dateStart: defaultStart, dateEnd: defaultEnd } =
+    getDefaultDateRange();
+  const { dateStart = defaultStart, dateEnd = defaultEnd } = searchParams;
+  const cacheKeyBase = `Zoho-packages-${dateStart}-${dateEnd}`;
+
+  const buildPath = (page: number) => {
+    let path = `${ZOHO_INVENTORY_URL}/packages?organization_id=${ZOHO_ORG_ID}&page=${page}&per_page=200`;
+    if (dateStart) path += `&date_start=${dateStart}`;
+    if (dateEnd) path += `&date_end=${dateEnd}`;
+    return path;
+  };
+
+  return apiFetchAllPaginated<Package, PackagesResponse>({
+    buildPath,
+    cacheKeyBase,
+    auth: await getUserAuth(),
+    extractPage: (response) => ({
+      data: response.packages || [],
+      has_more: response.page_context?.has_more_page ?? false,
+    }),
+  });
+};
+
+export const getPackagesByLocationId = async (locationId: string) => {
+  const salesOrders = await getSalesOrdersByLocationId(locationId);
+  const salesOrderIds = new Set(salesOrders.map((so) => so.salesorder_id));
+  const packages = await getAllPackages();
+
+  return packages.filter((pkg) => salesOrderIds.has(pkg.salesorder_id));
+};
+
+export const getPackagesByLocationIdRange = async (
+  locationId: string,
+  dateStart?: string,
+  dateEnd?: string
+) => {
+  const salesOrders = await getAllSalesOrders({ dateStart, dateEnd });
+  const locationSalesOrders = salesOrders.filter(
+    (so) => so.location_id === locationId
+  );
+  const salesOrderIds = new Set(
+    locationSalesOrders.map((so) => so.salesorder_id)
+  );
+  const packages = await getAllPackages({ dateStart, dateEnd });
+  return packages.filter((pkg) => salesOrderIds.has(pkg.salesorder_id));
 };

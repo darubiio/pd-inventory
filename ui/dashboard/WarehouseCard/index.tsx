@@ -10,6 +10,7 @@ import Image from "next/image";
 export const WarehouseCard: FC<WarehouseAndPosition> = ({
   warehouse_name,
   warehouse_id,
+  location_id,
   attention,
   address,
   email,
@@ -18,7 +19,7 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
 }) => (
   <Link
     className="card card-side bg-base-100 shadow-sm hover:shadow-lg duration-500 ease-in-out cursor-pointer"
-    href={`/dashboard/warehouse/${warehouse_id}`}
+    href={`/dashboard/warehouse/${warehouse_id}?location_id=${location_id}`}
   >
     <div className="w-full p-3 flex flex-col justify-start gap-2">
       <div className="flex gap-2 justify-start items-center">

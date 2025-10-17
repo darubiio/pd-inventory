@@ -30,7 +30,7 @@ const TopBar: FC = () => {
   const { user, isLoading, error } = useUser();
 
   return (
-    <div className="navbar sticky top-0 z-10 bg-base-100 shadow-sm">
+    <div className="navbar sticky top-0 z-100 bg-base-100">
       <div className="navbar-start">
         <a className="btn btn-ghost text-xl hidden md:flex p-0 pl-2 min-h-0 h-auto">
           <span className="flex flex-col items-end leading-tight font-bold">
