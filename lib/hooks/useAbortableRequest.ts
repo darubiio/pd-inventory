@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 
 type AsyncFunction<TArgs extends readonly unknown[], TReturn> = (
-  ...args: TArgs
+  ...args: [...TArgs, AbortSignal?]
 ) => Promise<TReturn>;
 
 interface UseAbortableRequestOptions {
@@ -41,7 +41,7 @@ export function useAbortableRequest<TArgs extends readonly unknown[], TReturn>(
       try {
         setIsLoading(true);
         setError(null);
-        const result = await asyncFunction(...args);
+        const result = await asyncFunction(...args, currentController.signal);
 
         if (
           !currentController.signal.aborted &&

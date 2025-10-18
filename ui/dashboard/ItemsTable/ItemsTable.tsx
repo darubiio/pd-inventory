@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { getItemsByWarehouseAndCategory } from "../../../lib/api/clients/zoho/zohoData";
 import {
   ColumnDef,
@@ -27,13 +27,25 @@ export const ItemsTable = ({
   warehouseId: string;
   categoryId: string;
 }) => {
+  const fetchItems = useCallback(
+    async (warehouseId: string, categoryId: string, signal?: AbortSignal) => {
+      const items = await getItemsByWarehouseAndCategory(
+        warehouseId,
+        categoryId
+      );
+      return items;
+    },
+    []
+  );
+
   const {
     reset,
     cleanup,
     isLoading,
+    error,
     data: items,
     execute: loadItems,
-  } = useAbortableRequest(getItemsByWarehouseAndCategory, { debounceMs: 300 });
+  } = useAbortableRequest(fetchItems, { debounceMs: 300 });
 
   const columns = useMemo(
     () => getColumns(warehouseId) as ColumnDef<CategoryItem>[],
@@ -58,7 +70,33 @@ export const ItemsTable = ({
   return (
     <div className="card bg-base-100 shadow-xl">
       <div className="overflow-x-auto md:mx-3">
-        {isLoading ? (
+        {error ? (
+          <div className="flex flex-col items-center justify-center py-10 px-4">
+            <div className="alert alert-error max-w-md">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>Failed to load items. Please try again.</span>
+            </div>
+            <button
+              onClick={() => loadItems(warehouseId, categoryId)}
+              className="btn btn-primary mt-4"
+              aria-label="Retry loading items"
+            >
+              Try again
+            </button>
+          </div>
+        ) : isLoading ? (
           <TableLoading cols={6} />
         ) : (
           <table className="table table-md table-pin-rows table-pin-cols table-zebra">

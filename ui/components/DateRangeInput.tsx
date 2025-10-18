@@ -82,7 +82,7 @@ export default function DateRangeInput({
             }
           }}
           weekStartsOn={1}
-          numberOfMonths={2}
+          numberOfMonths={1}
           captionLayout="dropdown"
         />
       </div>

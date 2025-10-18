@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import DateRangeInput from "../../components/DateRangeInput";
+import TableLoading from "../../loading/tableLoading";
+import { PackageListingLoading } from "../../../app/dashboard/warehouse/[id]/loading";
 
 type PackageRow = {
   package_id: string;
@@ -38,17 +40,19 @@ export function PackagesTable({
   defaultDateStart,
   defaultDateEnd,
   loading = false,
+  error,
+  onRetry,
 }: {
   data: PackageRow[];
   onDateChange?: (start: string, end: string) => void;
   defaultDateStart?: string;
   defaultDateEnd?: string;
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateStart, setDateStart] = useState<string>(defaultDateStart || "");
-  const [dateEnd, setDateEnd] = useState<string>(defaultDateEnd || "");
 
   const getStatusBadgeClass = (status: string) => {
     const isPending = normalizeStatus(status).toLowerCase() === "not_shipped";
@@ -100,10 +104,6 @@ export function PackagesTable({
             </span>
           );
         },
-      },
-      {
-        accessorKey: "total_quantity",
-        header: "Qty",
       },
       {
         accessorKey: "shipment_order.tracking_number",
@@ -178,8 +178,6 @@ export function PackagesTable({
             defaultStart={defaultDateStart}
             defaultEnd={defaultDateEnd}
             onChange={(start?: string, end?: string) => {
-              setDateStart(start || "");
-              setDateEnd(end || "");
               if (start && end) onDateChange?.(start, end);
             }}
             label="Dates"
@@ -203,17 +201,48 @@ export function PackagesTable({
           </label>
         </div>
       </div>
-      {loading ? (
-        <div className="flex justify-center items-center py-10">
-          <span className="loading loading-spinner loading-lg" />
+      {error ? (
+        <div className="flex flex-col items-center justify-center py-10 px-4">
+          <div className="alert alert-error max-w-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>{error}</span>
+          </div>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="btn btn-primary mt-4"
+              aria-label="Retry loading packages"
+            >
+              Try again
+            </button>
+          )}
         </div>
+      ) : loading ? (
+        <>
+          <PackageListingLoading />
+          <div className="overflow-x-auto md:mx-3 hidden md:block">
+            <TableLoading cols={8} rows={14} />
+          </div>
+        </>
       ) : (
         <>
           <div className="md:hidden px-4 pb-4 flex flex-col gap-3">
             {filtered.map((p) => (
               <div
                 key={p.package_id}
-                className="card bg-base-100 shadow-sm border border-gray-300 p-3"
+                className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3"
               >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{p.package_number}</div>
