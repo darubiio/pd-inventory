@@ -46,9 +46,20 @@ export function PackagesTable({
   loading?: boolean;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("not_shipped");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dateStart, setDateStart] = useState<string>(defaultDateStart || "");
   const [dateEnd, setDateEnd] = useState<string>(defaultDateEnd || "");
+
+  const getStatusBadgeClass = (status: string) => {
+    const isPending = normalizeStatus(status).toLowerCase() === "not_shipped";
+    return isPending
+      ? "badge-warning"
+      : status === "shipped"
+      ? "badge-primary"
+      : status === "delivered"
+      ? "badge-success"
+      : "";
+  };
 
   const columns = useMemo<ColumnDef<PackageRow>[]>(
     () => [
@@ -82,20 +93,9 @@ export function PackagesTable({
         accessorKey: "status",
         header: "Status",
         cell: (ctx) => {
-          const v = String(ctx.getValue() ?? "") as
-            | "shipped"
-            | "not_shipped"
-            | "delivered";
-          const isPending = normalizeStatus(v).toLowerCase() === "not_shipped";
-          const badgeClass = isPending
-            ? "badge-warning"
-            : v === "shipped"
-            ? "badge-primary"
-            : v === "delivered"
-            ? "badge-success"
-            : "";
+          const v = String(ctx.getValue() ?? "") as keyof typeof statusOptions;
           return (
-            <span className={`badge ${badgeClass}`}>
+            <span className={`badge ${getStatusBadgeClass(v)}`}>
               {statusOptions[v].label}
             </span>
           );
@@ -145,7 +145,7 @@ export function PackagesTable({
   });
 
   return (
-    <div className="card bg-base-100 shadow-xl pt-3 h-full md:h-[calc(100vh-6.9rem)]">
+    <div className="card bg-base-100 shadow-xl pt-3 h-screen md:h-[calc(100vh-6.9rem)]">
       <div className="px-4 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="join w-full md:w-1/2">
           <label className="input w-full rounded-sm">
@@ -211,19 +211,23 @@ export function PackagesTable({
         <>
           <div className="md:hidden px-4 pb-4 flex flex-col gap-3">
             {filtered.map((p) => (
-              <div key={p.package_id} className="border rounded-box p-3">
+              <div
+                key={p.package_id}
+                className="card bg-base-100 shadow-sm border border-gray-300 p-3"
+              >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{p.package_number}</div>
-                  <span className="badge">{p.status}</span>
+                  <span className={`badge ${getStatusBadgeClass(p.status)}`}>
+                    {statusOptions[p.status as keyof typeof statusOptions]
+                      ?.label || p.status}
+                  </span>
                 </div>
                 <div className="text-sm opacity-80">{p.customer_name}</div>
                 <div className="text-xs opacity-70">
                   SO: {p.salesorder_number}
                 </div>
                 <div className="text-xs opacity-70">ID: {p.package_id}</div>
-                <div className="text-xs opacity-70">
-                  Qty: {p.total_quantity ?? "-"}
-                </div>
+                <div className="text-xs opacity-70">Date: {p.date}</div>
                 <div className="text-xs opacity-70">
                   Tracking: {p.shipment_order?.tracking_number || "-"}
                 </div>

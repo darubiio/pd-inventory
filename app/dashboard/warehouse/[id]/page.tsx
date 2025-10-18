@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Packages } from "../../../../ui/dashboard/Packages/Packages";
 import { WarehouseDetail } from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
 import { getWarehouseById } from "../../../../lib/api/clients/zoho/zohoData";
+import { PackageLoading, WarehouseDetailLoading } from "./loading";
 
 export default async function WarehouseItems({
   params,
@@ -25,7 +26,9 @@ export default async function WarehouseItems({
       </label>
       <div className="tab-content bg-base-100 border-base-300">
         <div className="grid md:grid-cols-[250px_1fr] h-[calc(100vh-6.9rem)]">
-          <WarehouseDetail warehouseId={id} warehouse={warehouse} />
+          <Suspense fallback={<WarehouseDetailLoading />}>
+            <WarehouseDetail warehouseId={id} warehouse={warehouse} />
+          </Suspense>
         </div>
       </div>
       <label className="tab">
@@ -33,7 +36,7 @@ export default async function WarehouseItems({
         <span className="font-semibold">📦 Packages</span>
       </label>
       <div className="tab-content bg-base-100 border-base-300 h-full md:h-[calc(100vh-6.9rem)]">
-        <Suspense fallback={<div>Loading packages...</div>}>
+        <Suspense fallback={<PackageLoading />}>
           <Packages locationId={location_id} />
         </Suspense>
       </div>
