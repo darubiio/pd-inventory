@@ -13,11 +13,9 @@ import {
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300">
-      {/* Hero Section */}
       <div className="hero min-h-screen">
         <div className="hero-content text-center max-w-4xl px-6">
           <div className="space-y-12 pt-8 md:pt-16">
-            {/* Logo and Brand */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
               <div className="flex flex-col items-center md:items-end space-y-2 order-2 md:order-1">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-blue-900">
@@ -38,7 +36,6 @@ export default function Home() {
               />
             </div>
 
-            {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
               <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="card-body items-center text-center p-6">
@@ -72,7 +69,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Call to Action */}
             <div className="space-y-6">
               <div className="bg-base-100/50 backdrop-blur-sm rounded-2xl p-8 border border-base-200">
                 <h2 className="text-2xl font-bold mb-4">
@@ -94,13 +90,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* External Link Section */}
               <div className="divider">Looking for our products?</div>
 
               <div className="bg-base-100/30 backdrop-blur-sm rounded-xl p-6 border border-base-200">
                 <p className="text-base-content/70 mb-4">
-                  If you&apos;re looking for our products and services, visit our
-                  main store:
+                  If you&apos;re looking for our products and services, visit
+                  our main store:
                 </p>
                 <a
                   href="https://www.perdomodistributor.com/"

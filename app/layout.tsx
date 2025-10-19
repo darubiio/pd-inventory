@@ -2,7 +2,6 @@ import "./globals.css";
 import { geistMono, geistSans } from "../ui/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { UserProvider } from "../lib/auth/UserProvider";
-import { PermissionsProvider } from "../lib/auth/PermissionsProvider";
 
 export default function RootLayout({
   children,
@@ -15,9 +14,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Analytics />
-        <UserProvider>
-          <PermissionsProvider>{children}</PermissionsProvider>
-        </UserProvider>
+        <UserProvider>{children}</UserProvider>
       </body>
     </html>
   );

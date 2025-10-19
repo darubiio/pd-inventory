@@ -1,70 +1,27 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
-import { ZohoUser } from "../../types/zoho";
+import useSWR, { SWRConfig } from "swr";
+import { createContext, useContext } from "react";
+import { PermissionsProvider } from "./PermissionsProvider";
+import { UserContextType, UserProviderProps } from "./authTypes";
+import { fetcher } from "../api/swr/swrConfig";
 
-interface UserContextType {
-  user: ZohoUser | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-const UserContext = createContext<UserContextType>({
-  user: null,
-  isLoading: true,
-  error: null,
-});
-
-interface UserProviderProps {
-  children: ReactNode;
-}
+const initialState = { user: null, isLoading: true, error: null };
+const UserContext = createContext<UserContextType>(initialState);
 
 export function UserProvider({ children }: UserProviderProps) {
-  const [user, setUser] = useState<ZohoUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const response = await fetch("/api/auth/user");
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData.user);
-        } else if (response.status === 401) {
-          setUser(null);
-        } else {
-          setError("Failed to fetch user information");
-        }
-      } catch (err) {
-        setError("Network error while fetching user");
-        console.error("Error fetching user:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchUser();
-  }, []);
-
+  const { data, error, isLoading } = useSWR("/api/auth/user");
   return (
-    <UserContext.Provider value={{ user, isLoading, error }}>
-      {children}
-    </UserContext.Provider>
+    <SWRConfig value={{ fetcher }}>
+      <UserContext.Provider value={{ user: data, isLoading, error }}>
+        <PermissionsProvider>{children}</PermissionsProvider>
+      </UserContext.Provider>
+    </SWRConfig>
   );
 }
 
 export function useUser() {
   const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
+  if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
 }

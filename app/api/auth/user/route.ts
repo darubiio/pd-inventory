@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { zohoAuth } from "../../../../lib/auth/zohoAuth";
 import { getWarehousesByOrganization } from "../../../../lib/api/clients/zoho/zohoData";
 
+const getUserData = async (sessionId: string) => {
+  const { user } = (await zohoAuth.getSessionById(sessionId)) || {};
+  const warehouses = await getWarehousesByOrganization();
+
+  const userBranches = warehouses.map((warehouse) => ({
+    is_default: false,
+    is_primary_branch: false,
+    is_primary_location: false,
+    branch_id: warehouse.warehouse_id,
+    location_id: warehouse.warehouse_id,
+    branch_name: warehouse.warehouse_name,
+    location_name: warehouse.warehouse_name,
+  }));
+
+  return {
+    ...user,
+    branches: userBranches,
+    is_admin: user?.user_role === "admin",
+    locations: userBranches,
+  };
+};
+
 export async function GET(request: NextRequest) {
   try {
     const sessionId =
@@ -15,42 +37,10 @@ export async function GET(request: NextRequest) {
 
     if (!sessionId) return notAuthenticated;
 
-    const redisSession = await zohoAuth.getSessionById(sessionId);
-    const user = redisSession?.user;
+    const userData = await getUserData(sessionId);
+    if (!userData) return notAuthenticated;
 
-    if (!user) return notAuthenticated;
-
-    const warehouses = await getWarehousesByOrganization();
-
-    const userBranches = warehouses.map((warehouse) => ({
-      location_name: warehouse.warehouse_name,
-      is_primary_branch: false,
-      branch_id: warehouse.warehouse_id,
-      branch_name: warehouse.warehouse_name,
-      is_primary_location: false,
-      is_default: false,
-      location_id: warehouse.warehouse_id,
-    }));
-
-    const enhancedUserData = {
-      user_id: user.user_id,
-      name: user.name,
-      email_ids: [{ is_selected: true, email: user.email }],
-      status: user.status,
-      user_role: user.user_role,
-      user_type: user.user_type,
-      role_id: user.role_id,
-      is_super_admin: false,
-      is_admin: user.user_role === "admin",
-      photo_url: user.photo_url,
-      email: user.email,
-      mobile: "",
-      created_time: user.created_time,
-      branches: userBranches,
-      locations: userBranches,
-    };
-
-    return NextResponse.json(enhancedUserData);
+    return NextResponse.json(userData);
   } catch (error) {
     console.error("Error getting user:", error);
     return NextResponse.json(
