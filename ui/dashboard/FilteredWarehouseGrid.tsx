@@ -70,7 +70,7 @@ export const FilteredWarehouseGrid = ({
 
   return (
     <div className="m-2">
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-4">
         {allowedWarehouses.map((warehouse) => (
           <WarehouseCard key={warehouse.warehouse_id} {...warehouse} />
         ))}

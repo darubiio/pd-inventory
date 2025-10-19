@@ -27,8 +27,8 @@ function Loading() {
 
 export const WarehouseDetailLoading = () => (
   <div className="grid md:grid-cols-[250px_1fr] h-[calc(100vh-6.9rem)]">
-    <MobileMenuLoading />
     <MenuLoading />
+    <MobileMenuLoading />
     <div className="overflow-y-auto h-[calc(100vh-9.5rem)]">
       <TableLoading cols={6} />
     </div>
@@ -53,7 +53,7 @@ const MenuLoading = () => (
         <ul className="flex-1 overflow-y-auto grid grid-rows-1fr gap-2 w-full">
           {Array.from({ length: 20 }).map((_, idx) => (
             <li key={idx}>
-              <div className="skeleton h-8 w-50" />
+              <div className="skeleton h-8 w-53" />
             </li>
           ))}
         </ul>

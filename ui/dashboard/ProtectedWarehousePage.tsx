@@ -1,7 +1,7 @@
 "use client";
 
 import { useWarehouseAccess } from "../../lib/hooks/useWarehousePermissions";
-import { LocationProtected } from "../../lib/components/ProtectedComponent";
+import { WarehouseDetailLoading } from "../../app/dashboard/warehouse/[id]/loading";
 
 interface ProtectedWarehousePageProps {
   warehouseId: string;
@@ -14,13 +14,7 @@ export const ProtectedWarehousePage = ({
 }: ProtectedWarehousePageProps) => {
   const { hasAccess, isLoading } = useWarehouseAccess(warehouseId);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  if (isLoading) return <WarehouseDetailLoading />;
 
   if (!hasAccess) {
     return (

@@ -13,7 +13,7 @@ export const ContactLinks = ({
   <>
     {email && (
       <li
-        className="font-semibold opacity-70 flex gap-x-2 transition-transform duration-300 hover:scale-102"
+        className="font-semibold opacity-70 flex gap-x-2"
         onClick={(e) => {
           e.stopPropagation();
           window.location.href = `mailto:${email}`;
@@ -29,7 +29,7 @@ export const ContactLinks = ({
     )}
     {phone && (
       <li
-        className="font-semibold opacity-70 flex gap-x-2 transition-transform duration-300 hover:scale-102"
+        className="font-semibold opacity-70 flex gap-x-2"
         onClick={(e) => {
           e.stopPropagation();
           window.location.href = `tel:${phone}`;

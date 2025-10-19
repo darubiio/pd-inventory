@@ -78,7 +78,7 @@ export function PackagesTable({
         accessorKey: "package_id",
         header: "ID",
         cell: (ctx) => (
-          <span className="text-xs opacity-70">{ctx.getValue() as string}</span>
+          <span className="opacity-70">{ctx.getValue() as string}</span>
         ),
       },
       {
