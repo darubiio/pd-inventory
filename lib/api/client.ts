@@ -24,9 +24,11 @@ export async function apiFetch<FinalResponse, ApiResponse = unknown>(
 
   const apiHeaders: Record<string, string> = { ...headers };
 
-  if (auth) {
+  if (auth && auth.getToken) {
     const token = await auth.getToken();
     if (token) apiHeaders.Authorization = `${auth.header} ${token}`;
+  } else if (auth && auth.accessToken) {
+    apiHeaders.Authorization = `${auth.header} ${auth.accessToken}`;
   }
 
   const response = await fetch(path, {

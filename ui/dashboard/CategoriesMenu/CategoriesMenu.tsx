@@ -12,27 +12,30 @@ export const CategoriesMenu = ({
   onChangeCategory?: (categoryId: string) => void;
 }) => {
   return (
-    <ul className="menu card bg-base-100 shadow-md font-semibold flex flex-col h-full">
-      <li className="flex flex-col flex-1 min-h-0">
-        <h2 className="menu-title sticky top-0 z-10 bg-base-100">Categories</h2>
-        <ul className="flex-1 overflow-y-auto">
-          {categories.map(({ category_id, category_name }) => (
+    <div className="menu card border-1 rounded-sm border-gray-300 dark:border-gray-700 p-3 bg-base-100 shadow-sm font-semibold h-full">
+      <h2 className="menu-title sticky top-0 z-10 bg-base-100">Categories</h2>
+      <ul className="flex-1 overflow-y-auto gap-2">
+        {categories.map(({ category_id, category_name }) => {
+          const isActive = selectedCategory === category_id;
+          return (
             <li
               key={category_id}
               onClick={() => onChangeCategory?.(category_id)}
             >
               <a
-                className={
-                  selectedCategory === category_id ? "menu-active" : ""
-                }
+                className={`flex items-center gap-2 cursor-pointer ${
+                  isActive
+                    ? "bg-primary text-primary-content"
+                    : "hover:bg-base-200"
+                }`}
               >
                 <TagIcon width={16} />
                 {category_name}
               </a>
             </li>
-          ))}
-        </ul>
-      </li>
-    </ul>
+          );
+        })}
+      </ul>
+    </div>
   );
 };

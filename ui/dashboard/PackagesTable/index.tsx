@@ -146,7 +146,7 @@ export function PackagesTable({
 
   return (
     <div className="card bg-base-100 shadow-xl pt-3 h-screen md:h-[calc(100vh-6.9rem)]">
-      <div className="px-4 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="px-1 md:px-3 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="join w-full md:w-1/2">
           <label className="input w-full rounded-sm">
             <svg
@@ -238,7 +238,7 @@ export function PackagesTable({
         </>
       ) : (
         <>
-          <div className="md:hidden px-4 pb-4 flex flex-col gap-3">
+          <div className="md:hidden px-1 pb-1 flex flex-col gap-3">
             {filtered.map((p) => (
               <div
                 key={p.package_id}

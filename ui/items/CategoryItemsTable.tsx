@@ -31,7 +31,7 @@ export const CategoriesTable: FC<CategoriesTableProps> = ({ data }) => {
   });
 
   return (
-    <div className="card bg-base-100 shadow-xl pt-3 h-[calc(100vh-80px)] m-2">
+    <div className="card border-1 border-gray-300 dark:border-gray-700 bg-base-100 shadow-xl h-[calc(100vh-5.5rem)] m-2">
       <div className="overflow-x-auto md:mx-3">
         <table className="table table-md table-pin-rows table-pin-cols table-zebra">
           <thead>

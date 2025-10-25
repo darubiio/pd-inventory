@@ -57,3 +57,18 @@ export const getUserAuth = async (): Promise<AuthConfig> => ({
   header: TOKEN_HEADER,
   getToken: async () => await getUserAccessToken(),
 });
+
+const getUserAuthStatic = async (accessToken: string): Promise<AuthConfig> => ({
+  header: TOKEN_HEADER,
+  accessToken,
+});
+
+export const getAuthByToken = async (
+  accessToken?: string
+): Promise<AuthConfig> => {
+  if (accessToken) {
+    return getUserAuthStatic(accessToken);
+  } else {
+    return getUserAuth();
+  }
+};

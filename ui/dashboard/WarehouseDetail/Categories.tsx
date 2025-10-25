@@ -38,7 +38,7 @@ export const Categories = ({ categories, warehouse }: CategoriesProps) => {
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
       />
-      <div className="hidden md:block md:overflow-auto">
+      <div className="hidden md:block md:overflow-auto p-3">
         <CategoriesMenu
           categories={categories}
           selectedCategory={selectedCategory}
@@ -53,11 +53,13 @@ export const Categories = ({ categories, warehouse }: CategoriesProps) => {
           }}
         />
       </div>
-      <div className="overflow-y-auto h-[calc(100vh-9.5rem)]">
-        <ItemsTable
-          warehouseId={warehouse.warehouse_id}
-          categoryId={selectedCategory}
-        />
+      <div className="pt-2 md:p-3 md:pl-0 overflow-hidden">
+        <div className="menu card w-full border-t-1 border-b-1 md:border-1 rounded-none md:rounded-sm border-gray-300 dark:border-gray-700 p-0 bg-base-100 shadow-sm overflow-y-auto h-[calc(100vh-8.4rem)]">
+          <ItemsTable
+            warehouseId={warehouse.warehouse_id}
+            categoryId={selectedCategory}
+          />
+        </div>
       </div>
     </>
   );

@@ -22,7 +22,7 @@ import {
   itemsByCategoryAndWarehouse,
   processItem,
 } from "../../utils/zohoDataUtils";
-import { getUserAuth } from "./zohoAuth";
+import { getAuthByToken, getUserAuth } from "./zohoAuth";
 
 const { ZOHO_ORG_ID } = process.env;
 const ZOHO_DOMAIN = process.env.ZOHO_DOMAIN || "com";
@@ -36,13 +36,13 @@ export const getOrganizations = async () => {
   return apiFetch(url, { method: "GET", cacheCfg: { key }, auth });
 };
 
-export const getWarehousesByOrganization = async () => {
+export const getWarehousesByOrganization = async (accessToken?: string) => {
   const url = `${ZOHO_INVENTORY_URL}/locations?organization_id=${ZOHO_ORG_ID}`;
-  const key = `Zoho-warehousesDEV`;
+  const key = `Zoho-warehouses`;
   const data = await apiFetch<Warehouse[], LocationsResponse>(url, {
     method: "GET",
     cacheCfg: { key, ttl: ONE_DAY_IN_SECONDS },
-    auth: await getUserAuth(),
+    auth: await getAuthByToken(accessToken),
     transform: (data) => getWarehousesByLocations(data.locations),
   });
   return data;

@@ -3,8 +3,8 @@ import { zohoAuth } from "../../../../lib/auth/zohoAuth";
 import { getWarehousesByOrganization } from "../../../../lib/api/clients/zoho/zohoData";
 
 const getUserData = async (sessionId: string) => {
-  const { user } = (await zohoAuth.getSessionById(sessionId)) || {};
-  const warehouses = await getWarehousesByOrganization();
+  const session = await zohoAuth.getSessionById(sessionId);
+  const warehouses = await getWarehousesByOrganization(session?.access_token);
 
   const userBranches = warehouses.map((warehouse) => ({
     is_default: false,
@@ -17,9 +17,9 @@ const getUserData = async (sessionId: string) => {
   }));
 
   return {
-    ...user,
+    ...session?.user,
     branches: userBranches,
-    is_admin: user?.user_role === "admin",
+    is_admin: session?.user?.user_role === "admin",
     locations: userBranches,
   };
 };
