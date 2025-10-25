@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import DateRangeInput from "../../components/DateRangeInput";
 import TableLoading from "../../loading/tableLoading";
 import { PackageListingLoading } from "../../../app/dashboard/warehouse/[id]/loading";
+import { PackageDetail } from "../PackageDetail";
 
 type PackageRow = {
   package_id: string;
@@ -53,6 +54,9 @@ export function PackagesTable({
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
+    null
+  );
 
   const getStatusBadgeClass = (status: string) => {
     const isPending = normalizeStatus(status).toLowerCase() === "not_shipped";
@@ -112,6 +116,38 @@ export function PackagesTable({
           <span className="text-xs">
             {row.original.shipment_order?.tracking_number || "-"}
           </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <button
+            onClick={() => setSelectedPackageId(row.original.package_id)}
+            className="btn btn-sm btn-ghost"
+            aria-label="View details"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+          </button>
         ),
       },
     ],
@@ -242,7 +278,8 @@ export function PackagesTable({
             {filtered.map((p) => (
               <div
                 key={p.package_id}
-                className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3"
+                onClick={() => setSelectedPackageId(p.package_id)}
+                className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3 cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{p.package_number}</div>
@@ -300,6 +337,12 @@ export function PackagesTable({
             </table>
           </div>
         </>
+      )}
+      {selectedPackageId && (
+        <PackageDetail
+          packageId={selectedPackageId}
+          onClose={() => setSelectedPackageId(null)}
+        />
       )}
     </div>
   );
