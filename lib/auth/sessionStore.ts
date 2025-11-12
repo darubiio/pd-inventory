@@ -1,9 +1,13 @@
 "use server";
 
-import { Redis } from "@upstash/redis";
 import { UserSession } from "../../types/zoho";
-
-const redis = Redis.fromEnv();
+import {
+  getCache,
+  setCache,
+  deleteCache,
+  getCacheKeys,
+  stripEnvPrefix,
+} from "../api/cache";
 
 const SESSION_PREFIX = "zoho_session:";
 const SESSION_TTL = 24 * 60 * 60; // 24 hours in seconds
@@ -16,8 +20,8 @@ export async function storeSession(session: UserSession): Promise<string> {
   try {
     const sessionId = generateSessionId();
     const key = `${SESSION_PREFIX}${sessionId}`;
-    await redis.set(key, session, { ex: SESSION_TTL });
-    console.log("� Session stored in Redis:", {
+    await setCache(key, session, SESSION_TTL);
+    console.log("💾 Session stored in Redis:", {
       sessionId: sessionId.substring(0, 20) + "...",
       userId: session.user.user_id,
     });
@@ -38,11 +42,11 @@ export async function getSession(
     }
 
     const key = `${SESSION_PREFIX}${sessionId}`;
-    const session = await redis.get<UserSession>(key);
+    const session = await getCache<UserSession>(key);
 
     if (!session) {
       console.log(
-        "� Session not found in Redis:",
+        "🔍 Session not found in Redis:",
         sessionId.substring(0, 20) + "..."
       );
       return null;
@@ -65,9 +69,8 @@ export async function updateSession(
 ): Promise<void> {
   try {
     const key = `${SESSION_PREFIX}${sessionId}`;
-    // Reset TTL when updating
-    await redis.set(key, session, { ex: SESSION_TTL });
-    console.log("� Session updated in Redis:", {
+    await setCache(key, session, SESSION_TTL);
+    console.log("🔄 Session updated in Redis:", {
       sessionId: sessionId.substring(0, 20) + "...",
       userId: session.user.user_id,
     });
@@ -80,7 +83,7 @@ export async function updateSession(
 export async function deleteSession(sessionId: string): Promise<void> {
   try {
     const key = `${SESSION_PREFIX}${sessionId}`;
-    await redis.del(key);
+    await deleteCache(key);
     console.log(
       "🗑️ Session deleted from Redis:",
       sessionId.substring(0, 20) + "..."
@@ -94,12 +97,14 @@ export async function getAllSessions(): Promise<
   { sessionId: string; session: UserSession }[]
 > {
   try {
-    const keys = await redis.keys(`${SESSION_PREFIX}*`);
-    console.log("🔍 Found sessions in Redis:", keys.length);
+    const pattern = `${SESSION_PREFIX}*`;
+    const foundKeys = await getCacheKeys(pattern);
+    console.log("🔍 Found sessions in Redis:", foundKeys.length);
 
-    const sessionPromises = keys.map(async (key) => {
-      const sessionId = key.replace(SESSION_PREFIX, "");
-      const session = await redis.get<UserSession>(key);
+    const sessionPromises = foundKeys.map(async (key) => {
+      const cleanKey = await stripEnvPrefix(key);
+      const sessionId = cleanKey.replace(SESSION_PREFIX, "");
+      const session = await getCache<UserSession>(cleanKey);
       return session ? { sessionId, session } : null;
     });
 

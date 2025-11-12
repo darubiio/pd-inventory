@@ -1,8 +1,6 @@
 "use server";
 
-import { Redis } from "@upstash/redis";
-
-const REDIS = Redis.fromEnv();
+import { getCache, setCache } from "./api/cache";
 
 function buildAddress(addressArray: string[]) {
   return addressArray.filter(Boolean).join(", ");
@@ -13,7 +11,8 @@ export const getWarehouseGeolocation = async (
   addressArray: string[]
 ) => {
   try {
-    const cachedData = await REDIS.get(`warehouse_geolocation-${warehouseId}`);
+    const cacheKey = `warehouse_geolocation-${warehouseId}`;
+    const cachedData = await getCache(cacheKey);
     if (cachedData) return cachedData;
 
     const token = process.env.MAPBOX_ACCESS_TOKEN;
@@ -34,11 +33,8 @@ export const getWarehouseGeolocation = async (
         coordinates: [lon, lat],
         mapUrl,
       };
-      await REDIS.set(
-        `warehouse_geolocation-${warehouseId}`,
-        JSON.stringify(geolocationData),
-        { ex: 10800 }
-      );
+      const cacheKey = `warehouse_geolocation-${warehouseId}`;
+      await setCache(cacheKey, geolocationData, 10800);
       return geolocationData;
     } else {
       return { mapUrl: "/map.png" };
