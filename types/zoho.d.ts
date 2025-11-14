@@ -322,3 +322,47 @@ type MapBoxLocationResponse = {
     center: [number, number];
   }[];
 };
+
+export interface PackageLineItem {
+  line_item_id: string;
+  so_line_item_id: string;
+  item_id: string;
+  name: string;
+  description: string;
+  sku: string;
+  quantity: number;
+  unit: string;
+  is_invoiced: boolean;
+  item_custom_fields?: Array<{
+    customfield_id: string;
+    label: string;
+    value: string;
+  }>;
+}
+
+export interface PackageDetail {
+  package_id: string;
+  package_number: string;
+  salesorder_id: string;
+  salesorder_number: string;
+  date: string;
+  customer_id: string;
+  customer_name: string;
+  status: string;
+  total_quantity: string;
+  line_items: PackageLineItem[];
+  shipment_order?: {
+    carrier?: string;
+    tracking_number?: string;
+    shipping_date?: string;
+    status?: string;
+  };
+  shipping_address?: {
+    address?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+  };
+  notes?: string;
+}

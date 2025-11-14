@@ -1,151 +1,222 @@
 "use client";
 
 import useSWR from "swr";
-
-interface PackageLineItem {
-  line_item_id: string;
-  so_line_item_id: string;
-  item_id: string;
-  name: string;
-  description: string;
-  sku: string;
-  quantity: number;
-  unit: string;
-  is_invoiced: boolean;
-}
-
-interface PackageDetail {
-  package_id: string;
-  package_number: string;
-  salesorder_id: string;
-  salesorder_number: string;
-  date: string;
-  customer_id: string;
-  customer_name: string;
-  status: string;
-  total_quantity: string;
-  line_items: PackageLineItem[];
-  shipment_order?: {
-    carrier?: string;
-    tracking_number?: string;
-    shipping_date?: string;
-    status?: string;
-  };
-  shipping_address?: {
-    address?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  notes?: string;
-}
+import { useMemo, useCallback, useReducer } from "react";
+import { clsx } from "clsx";
+import { useBarcodeScan } from "../../../lib/hooks/useBarcodeScan";
+import {
+  clearResult,
+  finishUpdate,
+  scanItem,
+  setLastScannedCode,
+  setScanError,
+  startUpdate,
+  toggleScanMode,
+  updateError,
+  updateSuccess,
+} from "./state/scannerActions";
+import { initialState, scannerReducer } from "./state/scannerReducer";
+import {
+  PackageDetail as PackageDetailTypes,
+  PackageLineItem,
+} from "../../../types";
+import {
+  fetcher,
+  findItemByCode,
+  getItemStatus,
+  getPartNumber,
+  getStatusBadgeClass,
+  getStatusColor,
+} from "./utils/utils";
+import { Button } from "../../components/inputs/Button";
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  QrCodeIcon,
+} from "@heroicons/react/24/outline";
+import { OnlyIf } from "../../components/layout/OnlyIf/OnlyIf";
+import { ScanBadges } from "./components/ScanBadges";
 
 interface PackageDetailProps {
   packageId: string;
   onClose: () => void;
 }
 
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Failed to fetch package details");
-  }
-  const { data } = await response.json();
-  return data as PackageDetail;
-};
-
 export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
-  const { data, error, isLoading } = useSWR<PackageDetail>(
+  const [state, dispatch] = useReducer(scannerReducer, initialState);
+
+  const { data, error, isLoading } = useSWR<PackageDetailTypes>(
     packageId ? `/api/zoho/packages/${packageId}` : null,
     fetcher
   );
 
-  const getStatusBadgeClass = (status: string) => {
-    const normalizedStatus = status?.toLowerCase() || "";
-    if (normalizedStatus === "not_shipped") return "badge-warning";
-    if (normalizedStatus === "shipped") return "badge-primary";
-    if (normalizedStatus === "delivered") return "badge-success";
-    return "";
+  const onCompleteItemsScan = async () => {
+    if (!packageId) return;
+
+    dispatch(startUpdate());
+
+    try {
+      const response = await fetch(`/api/zoho/packages/${packageId}/ship`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update package status");
+      }
+
+      dispatch(updateSuccess("Package marked as shipped"));
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error) {
+      dispatch(updateError("Error updating package"));
+    } finally {
+      dispatch(finishUpdate());
+    }
   };
+
+  const onItemScan = useCallback(
+    (barcode: string) => {
+      dispatch(setLastScannedCode(barcode));
+
+      const item = findItemByCode(barcode, data);
+
+      if (!item) {
+        dispatch(setScanError(barcode));
+        setTimeout(() => dispatch(clearResult()), 3000);
+        return;
+      }
+
+      const currentScanned = state.scannedItems.get(item.line_item_id) || 0;
+      const newScanned = currentScanned + 1;
+
+      dispatch(scanItem({ ...item, newScanned }));
+
+      setTimeout(() => dispatch(clearResult()), 2000);
+    },
+    [findItemByCode, state.scannedItems]
+  );
+
+  useBarcodeScan({ enabled: state.scanMode, onScan: onItemScan });
+
+  const scanProgress = useMemo(() => {
+    if (!data?.line_items) return { completed: 0, total: 0, isComplete: false };
+
+    const total = data.line_items.reduce((sum, item) => sum + item.quantity, 0);
+    const completed = Array.from(state.scannedItems.values()).reduce(
+      (sum, qty) => sum + qty,
+      0
+    );
+
+    return {
+      completed,
+      total,
+      isComplete: completed >= total && total > 0,
+    };
+  }, [data?.line_items, state.scannedItems]);
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box p-0 border-1 border-gray-300 dark:border-gray-700 max-w-4xl w-full h-[100dvh] max-h-[100dvh] m-0 rounded-none flex flex-col md:w-auto md:h-auto md:max-h-[90vh] md:m-4 md:rounded-lg">
-        <div className="flex items-center justify-between px-6 py-4 bg-base-100 border-b border-base-300 shrink-0">
-          <h3 className="font-bold text-lg">Package Details</h3>
-          <button
-            onClick={onClose}
-            className="btn btn-sm btn-circle btn-ghost"
-            aria-label="Close"
-          >
-            ✕
-          </button>
+      <div
+        className={clsx(
+          "modal-box p-0 border-1 w-full h-[100dvh] max-h-[100dvh] m-0 rounded-none flex flex-col",
+          "md:min-w-[50rem] md:h-auto md:max-h-[90vh] md:m-4 md:rounded-lg",
+          state.scanMode
+            ? "border-info bg-blue-50 dark:bg-blue-950"
+            : "border-gray-300 dark:border-gray-700"
+        )}
+      >
+        <div
+          className={clsx(
+            "flex items-center justify-between px-6 py-4 border-b shrink-0",
+            state.scanMode ? "bg-blue-100 dark:bg-blue-900" : "bg-base-100",
+            state.scanMode ? "border-info" : "border-base-300"
+          )}
+        >
+          <h3 className="font-bold text-lg">Details</h3>
+          <div className="flex items-center gap-2">
+            <OnlyIf condition={state.scanMode}>
+              <ScanBadges scanProgress={scanProgress} />
+            </OnlyIf>
+            <Button
+              onClick={onClose}
+              size="sm"
+              variant="ghost"
+              circle
+              aria-label="Close"
+            >
+              ✕
+            </Button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          {isLoading && (
+          <OnlyIf condition={isLoading}>
             <div className="flex justify-center py-8">
               <span className="loading loading-spinner loading-lg"></span>
             </div>
-          )}
+          </OnlyIf>
 
-          {error && (
+          <OnlyIf condition={!!error}>
             <div className="alert alert-error">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="stroke-current shrink-0 h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>{error.message}</span>
+              <XCircleIcon className="h-6 w-6" />
+              <span>{error?.message}</span>
             </div>
-          )}
+          </OnlyIf>
 
-          {!isLoading && !error && data && (
+          <OnlyIf condition={!!state?.scanResult}>
+            <div
+              className={clsx(
+                "alert mb-4",
+                state.scanResult?.type === "success" && "alert-success",
+                state.scanResult?.type === "warning" && "alert-warning",
+                state.scanResult?.type === "error" && "alert-error"
+              )}
+            >
+              <span>{state.scanResult?.message}</span>
+            </div>
+          </OnlyIf>
+
+          <OnlyIf condition={!isLoading && !error && !!data}>
             <div className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm opacity-70">Package Number</p>
-                  <p className="font-semibold">{data.package_number}</p>
+                  <p className="font-semibold">{data?.package_number}</p>
                 </div>
                 <div>
                   <p className="text-sm opacity-70">Sales Order</p>
-                  <p className="font-semibold">{data.salesorder_number}</p>
+                  <p className="font-semibold">{data?.salesorder_number}</p>
                 </div>
                 <div>
                   <p className="text-sm opacity-70">Status</p>
-                  <span className={`badge ${getStatusBadgeClass(data.status)}`}>
-                    {data.status.replace("_", " ").toUpperCase()}
+                  <span
+                    className={clsx("badge", getStatusBadgeClass(data?.status))}
+                  >
+                    {data?.status.replace("_", " ").toUpperCase()}
                   </span>
                 </div>
                 <div>
                   <p className="text-sm opacity-70">Customer</p>
-                  <p className="font-semibold">{data.customer_name}</p>
+                  <p className="font-semibold">{data?.customer_name}</p>
                 </div>
 
                 <div>
                   <p className="text-sm opacity-70">Date</p>
-                  <p>{data.date}</p>
+                  <p>{data?.date}</p>
                 </div>
                 <div>
                   <p className="text-sm opacity-70">Total Quantity</p>
-                  <p>{data.total_quantity}</p>
+                  <p>{data?.total_quantity}</p>
                 </div>
               </div>
 
-              {data.shipment_order && (
+              {data?.shipment_order && (
                 <div className="divider">Shipment Information</div>
               )}
 
-              {data.shipment_order && (
+              {data?.shipment_order && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {data.shipment_order.carrier && (
                     <div>
@@ -187,41 +258,76 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
 
               {/* Mobile: cards */}
               <div className="md:hidden space-y-3">
-                {data.line_items.map((item) => (
-                  <div key={item.line_item_id} className="card bg-base-200">
-                    <div className="card-body p-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="card-title text-base">{item.name}</h4>
-                          {item.sku && (
-                            <p className="text-xs opacity-70">{item.sku}</p>
-                          )}
+                {data?.line_items.map((item) => {
+                  const status = getItemStatus(item, state.scannedItems);
+                  const scanned =
+                    state.scannedItems.get(item.line_item_id) || 0;
+                  const partNumber = getPartNumber(item);
+
+                  return (
+                    <div
+                      key={item.line_item_id}
+                      className={clsx(
+                        "card",
+                        state.scanMode ? getStatusColor(status) : "bg-base-200",
+                        state.scanMode && "border-2"
+                      )}
+                    >
+                      <div className="card-body p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="card-title text-base">
+                              {item.name}
+                            </h4>
+                            {item.sku && (
+                              <p className="text-xs opacity-70">
+                                SKU: {item.sku}
+                              </p>
+                            )}
+                            {partNumber && (
+                              <p className="text-xs opacity-70">
+                                P/N: {partNumber}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            {state.scanMode && scanned > 0 && (
+                              <span
+                                className={clsx(
+                                  "badge badge-sm",
+                                  status === "complete" && "badge-success",
+                                  status === "partial" && "badge-warning",
+                                  status === "excess" && "badge-error"
+                                )}
+                              >
+                                {scanned}/{item.quantity}
+                              </span>
+                            )}
+                            {item.is_invoiced ? (
+                              <span className="badge badge-success badge-sm">
+                                Invoiced
+                              </span>
+                            ) : (
+                              <span className="badge badge-ghost badge-sm">
+                                Pending
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          {item.is_invoiced ? (
-                            <span className="badge badge-success badge-sm">
-                              Invoiced
-                            </span>
-                          ) : (
-                            <span className="badge badge-ghost badge-sm">
-                              Pending
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <p className="opacity-70">Quantity</p>
-                          <p className="font-semibold">{item.quantity}</p>
-                        </div>
-                        <div>
-                          <p className="opacity-70">Unit</p>
-                          <p>{item.unit}</p>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <p className="opacity-70">Quantity</p>
+                            <p className="font-semibold">{item.quantity}</p>
+                          </div>
+                          <div>
+                            <p className="opacity-70">Unit</p>
+                            <p>{item.unit}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Desktop: table */}
@@ -229,40 +335,87 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
                 <table className="table table-sm">
                   <thead>
                     <tr>
+                      {state.scanMode && <th>Status</th>}
                       <th>Item</th>
                       <th>SKU</th>
+                      <th>Part Number</th>
                       <th className="text-right">Quantity</th>
+                      {state.scanMode && (
+                        <th className="text-right">Scanned</th>
+                      )}
                       <th>Unit</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.line_items.map((item) => (
-                      <tr key={item.line_item_id}>
-                        <td className="font-semibold">{item.name}</td>
-                        <td className="text-xs opacity-70">{item.sku}</td>
-                        <td className="text-right font-semibold">
-                          {item.quantity}
-                        </td>
-                        <td className="text-xs">{item.unit}</td>
-                        <td>
-                          {item.is_invoiced ? (
-                            <span className="badge badge-success badge-sm">
-                              Invoiced
-                            </span>
-                          ) : (
-                            <span className="badge badge-ghost badge-sm">
-                              Pending
-                            </span>
+                    {data?.line_items.map((item) => {
+                      const status = getItemStatus(item, state.scannedItems);
+                      const scanned =
+                        state.scannedItems.get(item.line_item_id) || 0;
+                      const partNumber = getPartNumber(item);
+
+                      return (
+                        <tr
+                          key={item.line_item_id}
+                          className={clsx(
+                            state.scanMode && getStatusColor(status)
                           )}
-                        </td>
-                      </tr>
-                    ))}
+                        >
+                          {state.scanMode && (
+                            <td>
+                              {status === "complete" && (
+                                <span className="text-success">✓</span>
+                              )}
+                              {status === "partial" && (
+                                <span className="text-warning">◐</span>
+                              )}
+                              {status === "excess" && (
+                                <span className="text-error">!</span>
+                              )}
+                            </td>
+                          )}
+                          <td className="font-semibold">{item.name}</td>
+                          <td className="text-xs opacity-70">{item.sku}</td>
+                          <td className="text-xs opacity-70">
+                            {partNumber || "-"}
+                          </td>
+                          <td className="text-right font-semibold">
+                            {item.quantity}
+                          </td>
+                          {state.scanMode && (
+                            <td className="text-right">
+                              <span
+                                className={clsx(
+                                  scanned > 0 && "font-bold",
+                                  status === "complete" && "text-success",
+                                  status === "partial" && "text-warning",
+                                  status === "excess" && "text-error"
+                                )}
+                              >
+                                {scanned}
+                              </span>
+                            </td>
+                          )}
+                          <td className="text-xs">{item.unit}</td>
+                          <td>
+                            {item.is_invoiced ? (
+                              <span className="badge badge-success badge-sm">
+                                Invoiced
+                              </span>
+                            ) : (
+                              <span className="badge badge-ghost badge-sm">
+                                Pending
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
-              {data.notes && (
+              {data?.notes && (
                 <>
                   <div className="divider">Notes</div>
                   <div className="text-sm bg-base-200 p-3 rounded">
@@ -271,16 +424,48 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
                 </>
               )}
             </div>
-          )}
+          </OnlyIf>
         </div>
 
-        <div className="px-6 py-4 bg-base-100 border-t border-base-300 shrink-0">
-          <button onClick={onClose} className="btn w-full md:w-auto">
-            Close
-          </button>
+        <div
+          className={clsx(
+            "px-6 py-4 border-t shrink-0",
+            state.scanMode ? "bg-blue-100 dark:bg-blue-900" : "bg-base-100",
+            state.scanMode ? "border-info" : "border-base-300"
+          )}
+        >
+          <div className="flex flex-col md:flex-row gap-2 md:justify-between">
+            {data && (
+              <Button
+                onClick={() => dispatch(toggleScanMode())}
+                variant={state.scanMode ? "error" : "primary"}
+                className="md:w-auto"
+                icon={<QrCodeIcon className="h-4 w-4" />}
+              >
+                {state.scanMode ? "Stop Scanning" : "Scan Items"}
+              </Button>
+            )}
+            <div className="flex flex-col md:flex-row gap-2">
+              {state.scanMode && scanProgress.isComplete && (
+                <Button
+                  onClick={onCompleteItemsScan}
+                  disabled={state.isUpdatingStatus}
+                  variant="success"
+                  loading={state.isUpdatingStatus}
+                  className="flex-1 md:flex-initial"
+                  icon={
+                    !state.isUpdatingStatus && (
+                      <CheckCircleIcon className="h-5 w-5" />
+                    )
+                  }
+                >
+                  {state.isUpdatingStatus ? "Updating..." : "Mark as Shipped"}
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-      <div className="modal-backdrop hidden md:block" onClick={onClose}></div>
     </div>
   );
 }
