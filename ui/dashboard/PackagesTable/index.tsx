@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import DateRangeInput from "../../components/DateRangeInput";
 import TableLoading from "../../loading/tableLoading";
 import { PackageListingLoading } from "../../../app/dashboard/warehouse/[id]/loading";
-import { PackageDetail } from "../PackageDetail";
+import { PackageDetail } from "../PackageDetail/PackageDetail";
 
 type PackageRow = {
   package_id: string;
