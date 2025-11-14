@@ -274,12 +274,40 @@ export interface WarehouseAndPosition extends Warehouse {
   mapUrl: string;
 }
 
+export interface ZohoOrganization {
+  organization_id: string;
+  name: string;
+  contact_name: string;
+  email: string;
+  is_default_org: boolean;
+  plan_type: number;
+  tax_group_enabled: boolean;
+  zi_migration_status: number;
+  plan_name: string;
+  plan_period: string;
+  language_code: string;
+  fiscal_year_start_month: number;
+  account_created_date: string;
+  account_created_date_formatted: string;
+  time_zone: string;
+  is_org_active: boolean;
+  currency_id: string;
+  currency_code: string;
+  currency_symbol: string;
+  currency_format: string;
+  price_precision: number;
+}
+
 export type LocationsResponse = {
   locations: Location[];
 };
 
 export type ItemDetailsResponse = {
   items: ItemDetails;
+};
+
+export type OrganizationsResponse = {
+  organizations: ZohoOrganization[];
 };
 
 type ItemsResponse = {

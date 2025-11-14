@@ -85,26 +85,49 @@ const buildCategoryItem = (item: ItemDetails): CategoryItem => {
   return itemStock;
 };
 
-export const processItem = (item: ItemDetails, data: ItemCategories) => {
-  const { category_id, category_name, warehouses } = item;
-  if (!category_id || !category_name) return;
+const DEFAULT_CATEGORY = {
+  id: "others",
+  name: "Others",
+} as const;
 
-  if (!data[category_id]) {
-    data[category_id] = { id: category_id, name: category_name, items: [] };
+const handleCategories = (
+  data: ItemCategories,
+  categoryId: string,
+  categoryName: string
+) => {
+  if (!data[categoryId]) {
+    data[categoryId] = { id: categoryId, name: categoryName, items: [] };
   }
+};
 
+const addWarehouseStock = (
+  category: CategoryItem,
+  warehouses: ItemDetails["warehouses"]
+) => {
   warehouses.forEach((warehouse) => {
     const warehouseName = normalizeWarehouseName(warehouse.warehouse_name);
     if (warehouseName) {
       addCategoryWarehouseStock(
-        data[category_id],
+        category,
         warehouseName,
         Number(warehouse.warehouse_stock_on_hand)
       );
     }
   });
+};
 
-  data[category_id].items.push(buildCategoryItem(item));
+export const processItem = (item: ItemDetails, data: ItemCategories) => {
+  const categoryId = item.category_id || DEFAULT_CATEGORY.id;
+  const categoryName = item.category_name || DEFAULT_CATEGORY.name;
+
+  if (!item.category_id || !item.category_name) {
+    item.category_id = DEFAULT_CATEGORY.id;
+    item.category_name = DEFAULT_CATEGORY.name;
+  }
+
+  handleCategories(data, categoryId, categoryName);
+  addWarehouseStock(data[categoryId], item.warehouses);
+  data[categoryId].items.push(buildCategoryItem(item));
 };
 
 export const itemsByCategoryAndWarehouse = (
