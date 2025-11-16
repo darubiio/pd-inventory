@@ -3,6 +3,13 @@
 import { getCache, setCache } from "./cache";
 import { FetchOptions } from "./types/clientTypes";
 
+class AuthenticationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AuthenticationError";
+  }
+}
+
 export async function apiFetch<FinalResponse, ApiResponse = unknown>(
   path: string,
   options: FetchOptions<FinalResponse, ApiResponse> = {}
@@ -38,6 +45,11 @@ export async function apiFetch<FinalResponse, ApiResponse = unknown>(
     ...rest,
   });
 
+  if (response.status === 401) {
+    console.error("❌ Unauthorized: Token is invalid or expired");
+    throw new AuthenticationError("Invalid or expired authentication token");
+  }
+
   if (response.status !== 200) {
     throw new Error(`${response.status}`);
   }
@@ -52,3 +64,5 @@ export async function apiFetch<FinalResponse, ApiResponse = unknown>(
 
   return transformedData as FinalResponse;
 }
+
+export { AuthenticationError };

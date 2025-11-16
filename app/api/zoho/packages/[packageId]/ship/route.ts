@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiFetch } from "../../../../../../lib/api/client";
 import { getUserAuth } from "../../../../../../lib/api/clients/zoho/zohoAuth";
+import { PackageDetail } from "../../../../../../types/zoho";
 
 const { ZOHO_ORG_ID } = process.env;
 
@@ -33,8 +34,8 @@ export async function POST(
 
     const packageUrl = `${ZOHO_INVENTORY_URL}/packages/${packageId}?organization_id=${ZOHO_ORG_ID}`;
     const packageResponse = await apiFetch<
-      any,
-      { code: number; message: string; package: any }
+      PackageDetail,
+      { code: number; message: string; package: PackageDetail }
     >(packageUrl, {
       method: "GET",
       auth: await getUserAuth(),
@@ -75,7 +76,7 @@ export async function POST(
       notes: "Scanned and packed via inventory system",
     };
 
-    const shipmentResponse = await apiFetch<any, ShipmentOrderResponse>(
+    const shipmentResponse = await apiFetch<ShipmentOrderResponse>(
       createShipmentUrl,
       {
         method: "POST",

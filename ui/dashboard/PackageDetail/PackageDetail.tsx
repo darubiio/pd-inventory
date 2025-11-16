@@ -435,7 +435,7 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
           )}
         >
           <div className="flex flex-col md:flex-row gap-2 md:justify-between">
-            {data && (
+            <OnlyIf condition={!!data}>
               <Button
                 onClick={() => dispatch(toggleScanMode())}
                 variant={state.scanMode ? "error" : "primary"}
@@ -444,24 +444,24 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
               >
                 {state.scanMode ? "Stop Scanning" : "Scan Items"}
               </Button>
-            )}
+            </OnlyIf>
             <div className="flex flex-col md:flex-row gap-2">
-              {state.scanMode && scanProgress.isComplete && (
+              <OnlyIf condition={state.scanMode && scanProgress.isComplete}>
                 <Button
                   onClick={onCompleteItemsScan}
-                  disabled={state.isUpdatingStatus}
+                  disabled={true} // state.isUpdatingStatus
                   variant="success"
                   loading={state.isUpdatingStatus}
                   className="flex-1 md:flex-initial"
                   icon={
-                    !state.isUpdatingStatus && (
+                    <OnlyIf condition={!state.isUpdatingStatus}>
                       <CheckCircleIcon className="h-5 w-5" />
-                    )
+                    </OnlyIf>
                   }
                 >
                   {state.isUpdatingStatus ? "Updating..." : "Mark as Shipped"}
                 </Button>
-              )}
+              </OnlyIf>
             </div>
           </div>
         </div>

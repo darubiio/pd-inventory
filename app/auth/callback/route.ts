@@ -31,11 +31,13 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(new URL(returnTo, request.url));
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     response.cookies.set("zoho-session-id", sessionId, {
-      httpOnly: false,
-      secure: false,
+      httpOnly: true,
+      secure: isProduction,
       sameSite: "lax",
-      maxAge: 24 * 60 * 60, // 24 hours
+      maxAge: 24 * 60 * 60,
       path: "/",
     });
 
