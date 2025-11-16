@@ -5,6 +5,11 @@ import {
   UserSession,
 } from "../../types/zoho";
 import { getCache, setCache, deleteCache } from "../api/cache";
+import {
+  refreshTokenIfNeeded,
+  getTokenExpiryInfo,
+  clearRefreshState,
+} from "./tokenRefreshManager";
 
 const ZOHO_CLIENT_ID = process.env.ZOHO_CLIENT_ID!;
 const ZOHO_CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET!;
@@ -143,11 +148,15 @@ export class ZohoAuthClient {
     const user = await this.getCurrentUser(tokens.access_token);
     console.log("✅ User info received:", user.name);
 
+    const now = Date.now();
     const session: UserSession = {
       user,
       access_token: tokens.access_token,
-      expires_at: Date.now() + tokens.expires_in * 1000,
+      expires_at: now + tokens.expires_in * 1000,
       refresh_token: tokens.refresh_token,
+      refreshed_at: now,
+      refresh_count: 0,
+      last_activity: now,
     };
 
     console.log("📦 Storing session in Redis...");
@@ -187,44 +196,35 @@ export class ZohoAuthClient {
         session.user.name
       );
 
-      // Check if token is expired
-      if (Date.now() >= session.expires_at) {
-        console.log("⏰ Token expired, attempting refresh...");
-        if (session.refresh_token) {
-          try {
-            // Try to refresh the token
-            const newTokens = await this.refreshToken(session.refresh_token);
-            console.log("✅ Token refreshed successfully");
+      const expiryInfo = await getTokenExpiryInfo(session);
 
-            // Update session in Redis with new tokens
-            const updatedSession: UserSession = {
-              user: session.user,
-              access_token: newTokens.access_token,
-              expires_at: Date.now() + newTokens.expires_in * 1000,
-              refresh_token: session.refresh_token,
-            };
+      if (expiryInfo.isExpired) {
+        console.log("⏰ Token expired, session invalid");
+        await this.deleteSessionById(sessionId);
+        return null;
+      }
 
-            await setCache(
-              `zoho_session:${sessionId}`,
-              updatedSession,
-              SESSION_TTL
-            );
-            console.log("📦 Session updated in Redis with new tokens");
-
-            return updatedSession;
-          } catch (error) {
-            console.error("❌ Failed to refresh token:", error);
-            await this.deleteSessionById(sessionId);
-            return null;
-          }
-        } else {
-          console.log("❌ No refresh token available");
+      if (expiryInfo.needsRefresh && session.refresh_token) {
+        console.log(
+          "🔄 Token needs refresh (expires in",
+          expiryInfo.expiresInSeconds,
+          "seconds)"
+        );
+        try {
+          const updatedSession = await refreshTokenIfNeeded(sessionId, session);
+          return updatedSession;
+        } catch (error) {
+          console.error("❌ Failed to refresh token:", error);
           await this.deleteSessionById(sessionId);
           return null;
         }
       }
 
-      console.log("✅ Valid session found");
+      console.log(
+        "✅ Valid session found, expires in",
+        expiryInfo.expiresInSeconds,
+        "seconds"
+      );
       return session;
     } catch (error) {
       console.error("💥 Error getting session:", error);
@@ -237,6 +237,7 @@ export class ZohoAuthClient {
       console.log("🗑️ Deleting session from Redis...");
       const sessionKey = `zoho_session:${sessionId}`;
       await deleteCache(sessionKey);
+      await clearRefreshState(sessionId);
       console.log("✅ Session deleted successfully");
     } catch (error) {
       console.error("❌ Error deleting session:", error);

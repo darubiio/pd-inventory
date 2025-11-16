@@ -68,10 +68,10 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  console.log("✅ Session found for user:", session.user.name);
+  console.log("✅ Valid session for user:", session.user.name);
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-session-id", sessionId); // Add session ID for getUserAuth
+  requestHeaders.set("x-session-id", sessionId);
   requestHeaders.set("x-user-id", session.user.user_id);
   requestHeaders.set("x-user-email", session.user.email_ids[0]?.email || "");
   requestHeaders.set("x-user-name", session.user.name);

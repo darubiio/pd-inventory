@@ -36,6 +36,9 @@ export interface UserSession {
   access_token: string;
   expires_at: number;
   refresh_token?: string;
+  refreshed_at?: number;
+  refresh_count?: number;
+  last_activity?: number;
 }
 
 export interface Location {
@@ -352,6 +355,7 @@ export interface PackageDetail {
   total_quantity: string;
   line_items: PackageLineItem[];
   shipment_order?: {
+    shipment_id?: string;
     carrier?: string;
     tracking_number?: string;
     shipping_date?: string;

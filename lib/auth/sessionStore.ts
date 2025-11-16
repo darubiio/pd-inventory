@@ -10,15 +10,15 @@ import {
 } from "../api/cache";
 
 const SESSION_PREFIX = "zoho_session:";
-const SESSION_TTL = 24 * 60 * 60; // 24 hours in seconds
+const SESSION_TTL = 24 * 60 * 60;
 
-export function generateSessionId(): string {
+async function generateSessionId(): Promise<string> {
   return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 }
 
 export async function storeSession(session: UserSession): Promise<string> {
   try {
-    const sessionId = generateSessionId();
+    const sessionId = await generateSessionId();
     const key = `${SESSION_PREFIX}${sessionId}`;
     await setCache(key, session, SESSION_TTL);
     console.log("💾 Session stored in Redis:", {
