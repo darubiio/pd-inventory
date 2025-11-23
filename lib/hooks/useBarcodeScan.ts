@@ -1,83 +1,126 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 interface UseBarcodeScanOptions {
   enabled: boolean;
   onScan: (barcode: string) => void;
   scanTimeout?: number;
   minBarcodeLength?: number;
+  maxTimeBetweenChars?: number;
 }
 
 export const useBarcodeScan = ({
   enabled,
   onScan,
-  scanTimeout = 100,
+  scanTimeout = 150,
   minBarcodeLength = 3,
+  maxTimeBetweenChars = 50,
 }: UseBarcodeScanOptions) => {
-  const [buffer, setBuffer] = useState("");
+  const bufferRef = useRef<string>("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastKeypressRef = useRef<number>(0);
+  const isScanningSuspectedRef = useRef<boolean>(false);
 
-  const processBuffer = useCallback(
-    (currentBuffer: string) => {
-      const trimmed = currentBuffer.trim();
-      if (trimmed.length >= minBarcodeLength) {
-        onScan(trimmed);
-      }
-      setBuffer("");
-    },
-    [onScan, minBarcodeLength]
-  );
+  const resetBuffer = useCallback(() => {
+    bufferRef.current = "";
+    isScanningSuspectedRef.current = false;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  const processBuffer = useCallback(() => {
+    const trimmed = bufferRef.current.trim();
+    if (trimmed.length >= minBarcodeLength) {
+      onScan(trimmed);
+    }
+    resetBuffer();
+  }, [onScan, minBarcodeLength, resetBuffer]);
 
   useEffect(() => {
     if (!enabled) {
-      setBuffer("");
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      resetBuffer();
       return;
     }
 
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (!enabled) return;
 
+      const target = event.target as HTMLElement;
+      const isInputField =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
       const now = Date.now();
-      const timeSinceLastKeypress = now - lastKeypressRef.current;
+      const timeSinceLastKey = now - lastKeypressRef.current;
       lastKeypressRef.current = now;
 
-      if (timeSinceLastKeypress > 200) {
-        setBuffer("");
+      if (timeSinceLastKey > 200) {
+        resetBuffer();
       }
 
-      if (event.key === "Enter") {
-        event.preventDefault();
-        processBuffer(buffer);
+      if (
+        timeSinceLastKey < maxTimeBetweenChars &&
+        bufferRef.current.length > 0
+      ) {
+        isScanningSuspectedRef.current = true;
+      }
+
+      const isTerminalKey = event.key === "Enter" || event.key === "Tab";
+
+      if (isTerminalKey) {
+        if (bufferRef.current.length >= minBarcodeLength) {
+          if (!isInputField || isScanningSuspectedRef.current) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          processBuffer();
+        }
         return;
       }
 
-      if (event.key.length === 1) {
-        event.preventDefault();
-        const newBuffer = buffer + event.key;
-        setBuffer(newBuffer);
+      const isPrintableChar =
+        event.key.length === 1 &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey;
+
+      if (isPrintableChar) {
+        if (isScanningSuspectedRef.current && !isInputField) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        bufferRef.current += event.key;
 
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
 
         timeoutRef.current = setTimeout(() => {
-          processBuffer(newBuffer);
+          processBuffer();
         }, scanTimeout);
       }
     };
 
-    window.addEventListener("keypress", handleKeyPress);
+    window.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
-      window.removeEventListener("keypress", handleKeyPress);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      window.removeEventListener("keydown", handleKeyDown, true);
+      resetBuffer();
     };
-  }, [enabled, buffer, processBuffer, scanTimeout]);
+  }, [
+    enabled,
+    processBuffer,
+    scanTimeout,
+    minBarcodeLength,
+    maxTimeBetweenChars,
+    resetBuffer,
+  ]);
 
-  return { buffer };
+  return {
+    currentBuffer: bufferRef.current,
+    isScanning: isScanningSuspectedRef.current,
+  };
 };
