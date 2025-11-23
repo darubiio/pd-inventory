@@ -331,6 +331,7 @@ export const getAllPackages = async (
     buildPath,
     cacheKeyBase,
     auth: await getUserAuth(),
+    ttl: 0,
     extractPage: (response) => ({
       data: response.packages || [],
       has_more: response.page_context?.has_more_page ?? false,
