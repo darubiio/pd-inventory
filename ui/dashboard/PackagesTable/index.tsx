@@ -8,6 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import DateRangeInput from "../../components/DateRangeInput";
 import TableLoading from "../../loading/tableLoading";
 import { PackageListingLoading } from "../../../app/dashboard/warehouse/[id]/loading";
@@ -43,6 +44,7 @@ export function PackagesTable({
   loading = false,
   error,
   onRetry,
+  onRefresh,
 }: {
   data: PackageRow[];
   onDateChange?: (start: string, end: string) => void;
@@ -51,6 +53,7 @@ export function PackagesTable({
   loading?: boolean;
   error?: string | null;
   onRetry?: () => void;
+  onRefresh?: () => void;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -183,8 +186,8 @@ export function PackagesTable({
   return (
     <div className="card bg-base-100 shadow-xl pt-3 h-screen md:h-[calc(100vh-6.9rem)]">
       <div className="px-1 md:px-3 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="join w-full md:w-1/2">
-          <label className="input w-full rounded-sm">
+        <div className="flex gap-2 w-full md:w-1/2">
+          <label className="input flex-1 rounded-sm">
             <svg
               className="h-[1em] opacity-50"
               xmlns="http://www.w3.org/2000/svg"
@@ -208,8 +211,32 @@ export function PackagesTable({
               aria-label="Search packages"
             />
           </label>
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={loading}
+              className="btn btn-ghost btn-sm btn-square md:hidden"
+              aria-label="Refresh packages"
+            >
+              <ArrowPathIcon
+                className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
+              />
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center md:gap-2 md:justify-end">
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={loading}
+              className="btn btn-ghost btn-sm hidden md:inline-flex"
+              aria-label="Refresh packages"
+            >
+              <ArrowPathIcon
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+            </button>
+          )}
           <DateRangeInput
             defaultStart={defaultDateStart}
             defaultEnd={defaultDateEnd}

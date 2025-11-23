@@ -333,6 +333,10 @@ export interface PackageLineItem {
   name: string;
   description: string;
   sku: string;
+  upc?: string;
+  ean?: string;
+  isbn?: string;
+  part_number?: string;
   quantity: number;
   unit: string;
   is_invoiced: boolean;

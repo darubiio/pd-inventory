@@ -26,11 +26,6 @@ export function useAbortableRequest<TArgs extends readonly unknown[], TReturn>(
     async (...args: TArgs) => {
       const requestKey = JSON.stringify(args);
 
-      if (lastRequestRef.current === requestKey) {
-        return;
-      }
-      lastRequestRef.current = requestKey;
-
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -43,26 +38,18 @@ export function useAbortableRequest<TArgs extends readonly unknown[], TReturn>(
         setError(null);
         const result = await asyncFunction(...args, currentController.signal);
 
-        if (
-          !currentController.signal.aborted &&
-          lastRequestRef.current === requestKey
-        ) {
+        if (!currentController.signal.aborted) {
           setData(result);
+          lastRequestRef.current = requestKey;
         }
       } catch (err) {
-        if (
-          !currentController.signal.aborted &&
-          lastRequestRef.current === requestKey
-        ) {
+        if (!currentController.signal.aborted) {
           const error = err instanceof Error ? err : new Error(String(err));
           setError(error);
           setData(null);
         }
       } finally {
-        if (
-          !currentController.signal.aborted &&
-          lastRequestRef.current === requestKey
-        ) {
+        if (!currentController.signal.aborted) {
           setIsLoading(false);
         }
       }

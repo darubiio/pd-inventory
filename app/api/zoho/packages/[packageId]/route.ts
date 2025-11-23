@@ -72,6 +72,10 @@ interface PackageLineItem {
   name: string;
   description: string;
   sku: string;
+  upc?: string;
+  ean?: string;
+  isbn?: string;
+  part_number?: string;
   quantity: number;
   unit: string;
   is_invoiced: boolean;
@@ -90,6 +94,18 @@ interface CustomField {
   data_type: string;
 }
 
+interface ItemResponse {
+  code: number;
+  message: string;
+  item: {
+    item_id: string;
+    upc?: string;
+    ean?: string;
+    isbn?: string;
+    part_number?: string;
+  };
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ packageId: string }> }
@@ -106,11 +122,46 @@ export async function GET(
 
     const url = `${ZOHO_INVENTORY_URL}/packages/${packageId}?organization_id=${ZOHO_ORG_ID}`;
 
-    const data = await apiFetch<PackageDetail, PackageDetailResponse>(url, {
-      method: "GET",
-      auth: await getUserAuth(),
-      transform: (response) => response.package,
-    });
+    const packageData = await apiFetch<PackageDetail, PackageDetailResponse>(
+      url,
+      {
+        method: "GET",
+        auth: await getUserAuth(),
+        transform: (response) => response.package,
+      }
+    );
+
+    const enrichedLineItems = await Promise.all(
+      packageData.line_items.map(async (lineItem) => {
+        try {
+          const itemUrl = `${ZOHO_INVENTORY_URL}/items/${lineItem.item_id}?organization_id=${ZOHO_ORG_ID}`;
+          const itemData = await apiFetch<ItemResponse["item"], ItemResponse>(
+            itemUrl,
+            {
+              method: "GET",
+              auth: await getUserAuth(),
+              transform: (response) => response.item,
+            }
+          );
+
+          return {
+            ...lineItem,
+            upc: itemData.upc,
+            ean: itemData.ean,
+            isbn: itemData.isbn,
+            part_number: itemData.part_number,
+          };
+        } catch (error) {
+          console.warn(`Failed to enrich item ${lineItem.item_id}:`, error);
+          return lineItem;
+        }
+      })
+    );
+
+    const data = {
+      ...packageData,
+      line_items: enrichedLineItems,
+    };
 
     return NextResponse.json({ data });
   } catch (error) {

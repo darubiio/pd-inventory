@@ -12,14 +12,9 @@ import {
   setScanError,
   startUpdate,
   toggleScanMode,
-  updateError,
-  updateSuccess,
 } from "./state/scannerActions";
 import { initialState, scannerReducer } from "./state/scannerReducer";
-import {
-  PackageDetail as PackageDetailTypes,
-  PackageLineItem,
-} from "../../../types";
+import { PackageDetail as PackageDetailTypes } from "../../../types";
 import {
   fetcher,
   findItemByCode,
@@ -34,9 +29,11 @@ import {
   XCircleIcon,
   QrCodeIcon,
   ExclamationTriangleIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { OnlyIf } from "../../components/layout/OnlyIf/OnlyIf";
 import { ScanBadges } from "./components/ScanBadges";
+import { PackageDetailLoadingContent } from "./components/PackageDetailLoading";
 
 interface PackageDetailProps {
   packageId: string;
@@ -46,7 +43,7 @@ interface PackageDetailProps {
 export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
   const [state, dispatch] = useReducer(scannerReducer, initialState);
 
-  const { data, error, isLoading } = useSWR<PackageDetailTypes>(
+  const { data, error, isLoading, mutate } = useSWR<PackageDetailTypes>(
     packageId ? `/api/zoho/packages/${packageId}` : null,
     fetcher
   );
@@ -153,8 +150,8 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
     dispatch(toggleScanMode());
 
     if (newScanMode) {
-      toast("Scanner activated\nMake sure you have a scanner available", {
-        icon: <ExclamationTriangleIcon width={30} />,
+      toast("Scanner activated", {
+        icon: <QrCodeIcon width={30} />,
         duration: 4000,
         position: "top-center",
         style: {
@@ -165,6 +162,21 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
       });
     }
   }, [state.scanMode]);
+
+  const handleRefresh = useCallback(async () => {
+    try {
+      await mutate();
+      toast.success("Package data refreshed", {
+        duration: 2000,
+        position: "top-center",
+      });
+    } catch (error) {
+      toast.error("Failed to refresh package data", {
+        duration: 3000,
+        position: "top-center",
+      });
+    }
+  }, [mutate]);
 
   return (
     <>
@@ -206,6 +218,18 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
                 <ScanBadges scanProgress={scanProgress} />
               </OnlyIf>
               <Button
+                onClick={handleRefresh}
+                size="sm"
+                variant="ghost"
+                circle
+                aria-label="Refresh"
+                disabled={isLoading}
+              >
+                <ArrowPathIcon
+                  className={clsx("h-4 w-4", isLoading && "animate-spin")}
+                />
+              </Button>
+              <Button
                 onClick={onClose}
                 size="sm"
                 variant="ghost"
@@ -219,12 +243,10 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
 
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <OnlyIf condition={isLoading}>
-              <div className="flex justify-center py-8">
-                <span className="loading loading-spinner loading-lg"></span>
-              </div>
+              <PackageDetailLoadingContent />
             </OnlyIf>
 
-            <OnlyIf condition={!!error}>
+            <OnlyIf condition={!isLoading && !!error}>
               <div className="alert alert-error">
                 <XCircleIcon className="h-6 w-6" />
                 <span>{error?.message}</span>
@@ -492,35 +514,33 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
               state.scanMode ? "border-info" : "border-base-300"
             )}
           >
-            <div className="flex flex-col md:flex-row gap-2 md:justify-between">
+            <div className="flex gap-2">
               <OnlyIf condition={!!data}>
                 <Button
                   onClick={handleToggleScanMode}
                   variant={state.scanMode ? "error" : "primary"}
-                  className="md:w-auto"
+                  className="flex-1"
                   icon={<QrCodeIcon className="h-4 w-4" />}
                 >
                   {state.scanMode ? "Stop Scanning" : "Scan Items"}
                 </Button>
               </OnlyIf>
-              <div className="flex flex-col md:flex-row gap-2">
-                <OnlyIf condition={state.scanMode && scanProgress.isComplete}>
-                  <Button
-                    onClick={onCompleteItemsScan}
-                    disabled={true} // state.isUpdatingStatus
-                    variant="success"
-                    loading={state.isUpdatingStatus}
-                    className="flex-1 md:flex-initial"
-                    icon={
-                      <OnlyIf condition={!state.isUpdatingStatus}>
-                        <CheckCircleIcon className="h-5 w-5" />
-                      </OnlyIf>
-                    }
-                  >
-                    {state.isUpdatingStatus ? "Updating..." : "Mark as Shipped"}
-                  </Button>
-                </OnlyIf>
-              </div>
+              <OnlyIf condition={state.scanMode && scanProgress.isComplete}>
+                <Button
+                  onClick={onCompleteItemsScan}
+                  disabled={true}
+                  variant="success"
+                  loading={state.isUpdatingStatus}
+                  className="flex-1"
+                  icon={
+                    <OnlyIf condition={!state.isUpdatingStatus}>
+                      <CheckCircleIcon className="h-5 w-5" />
+                    </OnlyIf>
+                  }
+                >
+                  {state.isUpdatingStatus ? "Updating..." : "Mark as Shipped"}
+                </Button>
+              </OnlyIf>
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ interface PaginatedApiOptions<T, U>
   buildPath: (page: number) => string;
   cacheKeyBase: string;
   cacheTTL?: number;
+  ttl?: number;
 }
 
 export async function apiFetchAllPaginated<T, U>({
@@ -22,14 +23,19 @@ export async function apiFetchAllPaginated<T, U>({
   buildPath,
   cacheKeyBase,
   cacheTTL = 600,
+  ttl,
   auth,
   headers,
   body,
   method = "GET",
   ...rest
 }: PaginatedApiOptions<T, U>): Promise<T[]> {
-  const cachedData = await getAllCacheChunks<T>(cacheKeyBase);
-  if (cachedData.length) return cachedData;
+  const shouldCache = ttl !== 0;
+
+  if (shouldCache) {
+    const cachedData = await getAllCacheChunks<T>(cacheKeyBase);
+    if (cachedData.length) return cachedData;
+  }
 
   let allData: T[] = [];
   let hasMore = true;
@@ -53,12 +59,14 @@ export async function apiFetchAllPaginated<T, U>({
       page++;
     }
 
-    await setCacheChunks<T>(
-      cacheKeyBase,
-      allData,
-      THREE_HOURS_IN_SECONDS,
-      cacheTTL
-    );
+    if (shouldCache) {
+      await setCacheChunks<T>(
+        cacheKeyBase,
+        allData,
+        THREE_HOURS_IN_SECONDS,
+        cacheTTL
+      );
+    }
 
     return allData;
   } catch (error) {

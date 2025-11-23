@@ -94,6 +94,10 @@ export default function ClientPackagesTable({
     execute(currentDateStart, currentDateEnd);
   }, [execute, currentDateStart, currentDateEnd]);
 
+  const handleRefresh = useCallback(() => {
+    execute(currentDateStart, currentDateEnd);
+  }, [execute, currentDateStart, currentDateEnd]);
+
   return (
     <PackagesTable
       data={rows as any}
@@ -103,6 +107,7 @@ export default function ClientPackagesTable({
       loading={isLoading}
       error={error}
       onRetry={handleRetry}
+      onRefresh={handleRefresh}
     />
   );
 }
