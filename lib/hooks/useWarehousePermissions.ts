@@ -23,11 +23,11 @@ export function useWarehousePermissions() {
   const { hasLocationAccess, userLocations, allowedLocationIds } =
     useLocations();
 
-  const filterAllowedWarehouses = <T extends { warehouse_id: string }>(
+  const filterAllowedWarehouses = <T extends { location_id: string }>(
     warehouses: T[]
   ): T[] => {
     return warehouses.filter((warehouse) =>
-      hasLocationAccess(warehouse.warehouse_id)
+      hasLocationAccess(warehouse.location_id)
     );
   };
 

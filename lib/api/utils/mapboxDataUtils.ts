@@ -1,24 +1,24 @@
 import {
+  Location,
   MapBoxLocationResponse,
-  Warehouse,
   WarehouseAndPosition,
 } from "../../../types";
 
 const { MAPBOX_ACCESS_TOKEN } = process.env;
 
-export const buildAddress = (warehouse: Warehouse) => {
+export const buildAddress = (location: Location) => {
   const fullAddress = [
-    warehouse.address,
-    warehouse.city,
-    warehouse.state,
-    warehouse.country,
+    location.address.street_address1,
+    location.address.city,
+    location.address.state,
+    location.address.country,
   ];
   return fullAddress.filter(Boolean).join(", ");
 };
 
 export const transformLocations = (
   data: MapBoxLocationResponse,
-  warehouse: Warehouse
+  location: Location
 ): WarehouseAndPosition => {
   if (data.features && data.features.length > 0) {
     const [lon, lat] = data.features[0].center;
@@ -28,13 +28,13 @@ export const transformLocations = (
     return {
       mapUrl,
       coordinates: [lon, lat] as [number, number],
-      ...warehouse,
+      ...location,
     };
   } else {
     return {
       coordinates: [0, 0] as [number, number],
       mapUrl: "/map.png",
-      ...warehouse,
+      ...location,
     };
   }
 };

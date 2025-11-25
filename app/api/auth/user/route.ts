@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { zohoAuth } from "../../../../lib/auth/zohoAuth";
-import { getWarehousesByOrganization } from "../../../../lib/api/clients/zoho/zohoData";
 
 const getUserData = async (sessionId: string) => {
   const session = await zohoAuth.getSessionById(sessionId);
-  const warehouses = await getWarehousesByOrganization(session?.access_token);
-
-  const userBranches = warehouses.map((warehouse) => ({
-    is_default: false,
-    is_primary_branch: false,
-    is_primary_location: false,
-    branch_id: warehouse.warehouse_id,
-    location_id: warehouse.warehouse_id,
-    branch_name: warehouse.warehouse_name,
-    location_name: warehouse.warehouse_name,
-  }));
 
   return {
     ...session?.user,
-    branches: userBranches,
     is_admin: session?.user?.user_role === "admin",
-    locations: userBranches,
   };
 };
 

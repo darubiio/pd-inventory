@@ -7,15 +7,8 @@ import {
   WarehouseCategory,
 } from "../../../types";
 
-const withLocationId = (location: Location) =>
-  location.warehouses.map((w) => ({ ...w, location_id: location.location_id }));
-
-const filterActives = <T extends { status: string }>(items: T[]) => {
-  return items.filter((item) => item.status === "active");
-};
-
 export const getWarehousesByLocations = (locations: Location[]) => {
-  return filterActives(locations.flatMap(withLocationId));
+  return locations.filter((loc) => loc.type === "line_item_only");
 };
 
 export const getCategories = (items: Item[]) => {
@@ -67,20 +60,22 @@ const normalizeWarehouseName = (name?: string): string | undefined =>
 
 const addCategoryWarehouseStock = (
   category: CategoryItem,
-  warehouseName: string,
+  locationName: string,
   stock: number
 ) => {
-  category[warehouseName] = Number(category[warehouseName] ?? 0) + stock;
+  category[locationName] = Number(category[locationName] ?? 0) + stock;
 };
 
-const buildCategoryItem = (item: ItemDetails): CategoryItem => {
-  const { item_id, name, warehouses } = item;
+const buildCategoryItem = (
+  item: ItemDetails,
+  locations: Location[]
+): CategoryItem => {
+  const { item_id, name } = item;
   const itemStock: CategoryItem = { id: item_id, name, items: [] };
-  warehouses.forEach((warehouse) => {
-    const warehouseName = normalizeWarehouseName(warehouse.warehouse_name);
-    if (warehouseName) {
-      itemStock[warehouseName] = Number(warehouse.warehouse_stock_on_hand);
-    }
+  locations.forEach((location) => {
+    const stock = Number(location.location_stock_on_hand);
+    const locationName = normalizeWarehouseName(location.location_name);
+    if (locationName) itemStock[locationName] = stock;
   });
   return itemStock;
 };
@@ -102,23 +97,30 @@ const handleCategories = (
 
 const addWarehouseStock = (
   category: CategoryItem,
-  warehouses: ItemDetails["warehouses"]
+  locations: ItemDetails["locations"]
 ) => {
-  warehouses.forEach((warehouse) => {
-    const warehouseName = normalizeWarehouseName(warehouse.warehouse_name);
-    if (warehouseName) {
+  locations.forEach((location) => {
+    const locationName = normalizeWarehouseName(location.location_name);
+    if (locationName) {
       addCategoryWarehouseStock(
         category,
-        warehouseName,
-        Number(warehouse.warehouse_stock_on_hand)
+        locationName,
+        Number(location.location_stock_on_hand)
       );
     }
   });
 };
 
-export const processItem = (item: ItemDetails, data: ItemCategories) => {
+export const processItem = (
+  item: ItemDetails,
+  data: ItemCategories,
+  locationIds: string[]
+) => {
   const categoryId = item.category_id || DEFAULT_CATEGORY.id;
   const categoryName = item.category_name || DEFAULT_CATEGORY.name;
+  const locations = item.locations.filter((loc) =>
+    locationIds.includes(loc.location_id)
+  );
 
   if (!item.category_id || !item.category_name) {
     item.category_id = DEFAULT_CATEGORY.id;
@@ -126,8 +128,8 @@ export const processItem = (item: ItemDetails, data: ItemCategories) => {
   }
 
   handleCategories(data, categoryId, categoryName);
-  addWarehouseStock(data[categoryId], item.warehouses);
-  data[categoryId].items.push(buildCategoryItem(item));
+  addWarehouseStock(data[categoryId], locations);
+  data[categoryId].items.push(buildCategoryItem(item, locations));
 };
 
 export const itemsByCategoryAndWarehouse = (
@@ -135,19 +137,19 @@ export const itemsByCategoryAndWarehouse = (
   warehouseId: string,
   categoryId: string
 ) =>
-  item.warehouses.some(
-    (warehouse) =>
-      warehouse.warehouse_id === warehouseId && item.category_id === categoryId
+  item.locations.some(
+    (location) =>
+      location.location_id === warehouseId && item.category_id === categoryId
   ) && item.category_id === categoryId;
 
 const ensureWarehouseBucket = (
   acc: WarehouseCategory,
-  warehouseName: string
+  locationName: string
 ) => {
-  if (!acc[warehouseName]) {
-    acc[warehouseName] = { name: warehouseName };
+  if (!acc[locationName]) {
+    acc[locationName] = { name: locationName };
   }
-  return acc[warehouseName];
+  return acc[locationName];
 };
 
 const addCategoryStock = (
@@ -164,14 +166,14 @@ export const buildWarehouseCategoryMap = (
 ): WarehouseCategory => {
   const acc: WarehouseCategory = {};
   for (const item of items) {
-    const { category_id, warehouses } = item;
-    for (const wh of warehouses) {
-      const { warehouse_name, warehouse_stock_on_hand } = wh;
-      const bucket = ensureWarehouseBucket(acc, warehouse_name);
+    const { category_id, locations } = item;
+    for (const wh of locations) {
+      const { location_name, location_stock_on_hand } = wh;
+      const bucket = ensureWarehouseBucket(acc, location_name);
       addCategoryStock(
         bucket as Record<string, unknown>,
         category_id,
-        warehouse_stock_on_hand
+        location_stock_on_hand
       );
     }
   }

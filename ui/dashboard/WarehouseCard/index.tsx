@@ -8,13 +8,13 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const WarehouseCard: FC<WarehouseAndPosition> = ({
-  warehouse_name,
-  warehouse_id,
+  location_name,
   location_id,
-  attention,
-  address,
+  // attention,
+  // address,
   email,
   phone,
+  parent_location_id,
   mapUrl,
 }) => {
   const [focused, setFocused] = useState(false);
@@ -22,7 +22,7 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
   return (
     <Link
       className="card card-side border border-gray-300 dark:border-gray-700 bg-base-100 shadow-sm hover:shadow-lg duration-500 ease-in-out cursor-pointer transition-transform hover:scale-101"
-      href={`/dashboard/warehouse/${warehouse_id}?location_id=${location_id}`}
+      href={`/dashboard/warehouse/${location_id}?location_id=${parent_location_id}`}
       onMouseEnter={toggleFocus}
       onMouseLeave={toggleFocus}
     >
@@ -32,24 +32,24 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
           <div className="flex justify-start gap-1 flex-wrap">
             <div className="badge badge-ghost">
               <h2 className="font-bold opacity-90 uppercase">
-                {warehouse_name}
+                {location_name}
               </h2>
             </div>
-            {attention && (
+            {/* {attention && (
               <div className="badge badge-ghost mb-2">
                 <p className="text-xs uppercase font-semibold opacity-60">
                   {attention}
                 </p>
               </div>
-            )}
+            )} */}
           </div>
         </div>
         <ul className="list gap-2">
-          {address && (
+          {/* {address && (
             <li className="font-semibold opacity-70 flex gap-x-2">
               <MapPinIcon height={18} /> {address}
             </li>
-          )}
+          )} */}
           <ContactLinks email={email} phone={phone} />
         </ul>
       </div>

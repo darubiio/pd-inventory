@@ -46,8 +46,8 @@ export const FilteredWarehouseGrid = ({
     );
   }
 
-  const allowedWarehouses = warehouses.filter((warehouse) =>
-    hasLocationAccess(warehouse.warehouse_id)
+  const allowedWarehouses = warehouses.filter((location) =>
+    hasLocationAccess(location.location_id)
   );
 
   if (allowedWarehouses.length === 0) {
@@ -72,7 +72,7 @@ export const FilteredWarehouseGrid = ({
     <div className="m-2">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-4">
         {allowedWarehouses.map((warehouse) => (
-          <WarehouseCard key={warehouse.warehouse_id} {...warehouse} />
+          <WarehouseCard key={warehouse.location_id} {...warehouse} />
         ))}
       </div>
     </div>

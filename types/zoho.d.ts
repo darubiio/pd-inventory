@@ -65,6 +65,8 @@ export interface Location {
   autonumbergenerationgroup_name: string;
   is_storage_location_enabled: boolean;
   total_zones: string;
+  location_stock_on_hand: number;
+  parent_location_id: string;
   warehouses: Warehouse[];
   shippingzones: unknown[];
   is_fba_location: boolean;
@@ -72,9 +74,8 @@ export interface Location {
 }
 
 export interface Warehouse {
-  warehouse_id: string;
-  warehouse_name: string;
   location_id: string;
+  location_name: string;
   attention: string;
   address: string;
   address1: string;
@@ -233,20 +234,7 @@ export interface ItemDetails {
     dimension_unit: string;
   };
   custom_fields: unknown[];
-  warehouses: {
-    warehouse_id: string;
-    warehouse_name: string;
-    is_primary: boolean;
-    is_item_mapped: boolean;
-    warehouse_stock_on_hand: number;
-    warehouse_available_stock: number;
-    warehouse_actual_available_stock: number;
-    warehouse_committed_stock: number;
-    warehouse_actual_committed_stock: number;
-    warehouse_available_for_sale_stock: number;
-    warehouse_actual_available_for_sale_stock: number;
-    is_storage_location_enabled: boolean;
-  }[];
+  locations: Location[];
 }
 
 export interface CategoryItem {
@@ -272,7 +260,7 @@ interface Categories {
   category_name: string;
 }
 
-export interface WarehouseAndPosition extends Warehouse {
+export interface WarehouseAndPosition extends Location {
   coordinates: [number, number];
   mapUrl: string;
 }

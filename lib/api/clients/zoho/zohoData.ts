@@ -2,26 +2,22 @@
 
 import {
   Item,
-  ItemCategories,
   ItemDetails,
   ItemDetailsResponse,
   ItemsResponse,
+  Location,
   LocationsResponse,
-  Warehouse,
 } from "../../../../types";
-import { getAllCacheChunks, setCacheChunks } from "../../cache";
 import { apiFetch } from "../../client";
 import { apiFetchAllPaginated } from "../../paginationClient";
 import {
   buildWarehouseCategoryMap,
   chunkArray,
   extractUniqueCategories,
-  getCategories,
-  getItemsDetailCategories,
   getWarehousesByLocations,
   itemsByCategoryAndWarehouse,
-  processItem,
 } from "../../utils/zohoDataUtils";
+import { getItemsDetail } from "./items";
 import { getAuthByToken, getUserAuth } from "./zohoAuth";
 
 const { ZOHO_ORG_ID } = process.env;
@@ -39,7 +35,7 @@ export const getOrganizations = async () => {
 export const getWarehousesByOrganization = async (accessToken?: string) => {
   const url = `${ZOHO_INVENTORY_URL}/locations?organization_id=${ZOHO_ORG_ID}`;
   const key = `Zoho-warehouses`;
-  const data = await apiFetch<Warehouse[], LocationsResponse>(url, {
+  const data = await apiFetch<Location[], LocationsResponse>(url, {
     method: "GET",
     cacheCfg: { key, ttl: ONE_DAY_IN_SECONDS },
     auth: await getAuthByToken(accessToken),
@@ -51,7 +47,7 @@ export const getWarehousesByOrganization = async (accessToken?: string) => {
 export const getItems = async () => {
   const cacheKeyBase = `Zoho-items`;
   const buildPath = (page: number) => {
-    return `${ZOHO_INVENTORY_URL}/items?organization_id=${ZOHO_ORG_ID}&page=${page}&per_page=800`;
+    return `${ZOHO_INVENTORY_URL}/items?organization_id=${ZOHO_ORG_ID}&page=${page}&per_page=700`;
   };
   return apiFetchAllPaginated<Item, ItemsResponse>({
     buildPath,
@@ -93,37 +89,13 @@ export const getItemCategories = async () => {
   return extractUniqueCategories(items);
 };
 
-export const getItemsDetail = async () => {
-  const cacheKeyBase = `Zoho-itemsDetail`;
-  const itemDetailsCache = await getAllCacheChunks<ItemDetails>(cacheKeyBase);
-  if (itemDetailsCache?.length) return itemDetailsCache;
-
-  const itemList = await getItems();
-  const itemCategories = getCategories(itemList);
-  const itemDetails = await getItemsDetailById(Object.keys(itemCategories));
-  const details = getItemsDetailCategories(itemDetails, itemCategories);
-
-  setCacheChunks(cacheKeyBase, details);
-
-  return details;
-};
-
-export const getItemsCategoriesStock = async () => {
-  const itemDetails = await getItemsDetail();
-  const data: ItemCategories = {};
-
-  itemDetails.forEach((item) => processItem(item, data));
-
-  return Object.values(data);
-};
-
 export const getItemsByWarehouseAndCategory = async (
-  warehouseId: string,
+  locationId: string,
   categoryId: string
 ): Promise<ItemDetails[]> => {
   const itemDetails = await getItemsDetail();
   return itemDetails.filter((item) =>
-    itemsByCategoryAndWarehouse(item, warehouseId, categoryId)
+    itemsByCategoryAndWarehouse(item, locationId, categoryId)
   );
 };
 
@@ -133,13 +105,13 @@ export const getWarehouseCategoryStock = async () => {
   return Object.values(map);
 };
 
-export const getWarehouseDetailCategories = async (warehouseId: string) => {
-  return Promise.all([getItemCategories(), getWarehouseById(warehouseId)]);
+export const getWarehouseDetailCategories = async (locationId: string) => {
+  return Promise.all([getItemCategories(), getWarehouseById(locationId)]);
 };
 
-export const getWarehouseById = async (warehouseId: string) => {
-  const warehouses = await getWarehousesByOrganization();
-  return warehouses.find((warehouse) => warehouse.warehouse_id === warehouseId);
+export const getWarehouseById = async (locationId: string) => {
+  const locations = await getWarehousesByOrganization();
+  return locations.find((location) => location.location_id === locationId);
 };
 
 interface SalesOrdersResponse {
@@ -356,6 +328,7 @@ export const getPackagesByLocationIdRange = async (
   const locationSalesOrders = salesOrders.filter(
     (so) => so.location_id === locationId
   );
+  if (locationSalesOrders.length === 0) return [];
   const salesOrderIds = new Set(
     locationSalesOrders.map((so) => so.salesorder_id)
   );

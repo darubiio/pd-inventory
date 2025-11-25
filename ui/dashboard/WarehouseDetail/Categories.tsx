@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CategoriesMenu } from "../CategoriesMenu/CategoriesMenu";
 import { ItemsTable } from "../ItemsTable/ItemsTable";
+import { Location } from "../../../types";
 
 interface Category {
   category_id: string;
@@ -11,7 +12,7 @@ interface Category {
 
 interface CategoriesProps {
   categories: Category[];
-  warehouse?: { warehouse_id: string; warehouse_name: string };
+  warehouse?: Location;
 }
 
 export const Categories = ({ categories, warehouse }: CategoriesProps) => {
@@ -56,7 +57,7 @@ export const Categories = ({ categories, warehouse }: CategoriesProps) => {
       <div className="pt-2 md:p-3 md:pl-0 overflow-hidden">
         <div className="menu card w-full border-t-1 border-b-1 md:border-1 rounded-none md:rounded-sm border-gray-300 dark:border-gray-700 p-0 bg-base-100 shadow-sm overflow-y-auto h-[calc(100vh-8.4rem)]">
           <ItemsTable
-            warehouseId={warehouse.warehouse_id}
+            warehouseId={warehouse.location_id}
             categoryId={selectedCategory}
           />
         </div>
@@ -71,7 +72,7 @@ const DrawerMenu = ({
   selectedCategory,
   setSelectedCategory,
 }: {
-  warehouse: { warehouse_id: string; warehouse_name: string };
+  warehouse: { location_id: string; location_name: string };
   categories: Category[];
   selectedCategory: string;
   setSelectedCategory: (id: string) => void;
@@ -81,7 +82,7 @@ const DrawerMenu = ({
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="flex justify-between items-center w-full pt-1 px-1 h-10">
         <div className="badge badge-lg font-extrabold">
-          {warehouse.warehouse_name}
+          {warehouse.location_name}
         </div>
         <label
           htmlFor="my-drawer-2"

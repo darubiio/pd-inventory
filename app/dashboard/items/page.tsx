@@ -1,4 +1,4 @@
-import { getItemsCategoriesStock } from "../../../lib/api/clients/zoho/zohoData";
+import { getItemsCategoriesStock } from "../../../lib/api/clients/zoho/items";
 import { CategoriesTable } from "../../../ui/items/CategoryItemsTable";
 
 const ItemsPage = async () => {

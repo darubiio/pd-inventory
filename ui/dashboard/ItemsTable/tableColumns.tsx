@@ -13,7 +13,9 @@ export const getColumns = (warehouseId: string) => {
       }: {
         table: Table<CategoryItem>;
         column: Column<CategoryItem, string>;
-      }) => <CategoryNameHeader table={table} column={column} dropIcon={false} />,
+      }) => (
+        <CategoryNameHeader table={table} column={column} dropIcon={false} />
+      ),
       cell: (info: CellContext<CategoryItem, string>) => (
         <div
           style={{ paddingLeft: `${info.row.depth * 1.5}rem` }}
@@ -26,10 +28,10 @@ export const getColumns = (warehouseId: string) => {
     },
     {
       accessorFn: (item: ItemDetails) => {
-        const warehouse = item.warehouses?.find(({ warehouse_id }) => {
-          return warehouse_id === warehouseId;
+        const warehouse = item.locations?.find(({ location_id }) => {
+          return location_id === warehouseId;
         });
-        return warehouse?.warehouse_stock_on_hand ?? 0;
+        return warehouse?.location_stock_on_hand ?? 0;
       },
       header: "Stock",
       cell: (info: CellContext<ItemDetails, string>) => (
