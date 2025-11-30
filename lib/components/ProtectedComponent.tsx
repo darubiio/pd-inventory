@@ -4,6 +4,7 @@ import React from "react";
 import { usePermission } from "../hooks/usePermissions";
 import { usePermissions, useLocations } from "../auth/PermissionsProvider";
 import { Action, Subject } from "../../types/permissions";
+import { cleanWarehouseName } from "../api/utils/zohoDataUtils";
 
 interface BaseProtectedProps {
   children: React.ReactNode;
@@ -156,7 +157,7 @@ export function AllowedLocationsSelector({
 
         return (
           <option key={id} value={id}>
-            {name}
+            {cleanWarehouseName(name)}
           </option>
         );
       })}

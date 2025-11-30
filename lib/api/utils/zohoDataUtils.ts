@@ -56,7 +56,10 @@ export const getItemsDetailCategories = (
 };
 
 const normalizeWarehouseName = (name?: string): string | undefined =>
-  name?.replace(/ /g, "_");
+  name?.replace(/ \(Warehouse\)/g, "").replace(/ /g, "_");
+
+export const cleanWarehouseName = (name?: string): string | undefined =>
+  name?.replace(/ \(Warehouse\)/g, "");
 
 const addCategoryWarehouseStock = (
   category: CategoryItem,

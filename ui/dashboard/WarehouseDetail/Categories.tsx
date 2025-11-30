@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CategoriesMenu } from "../CategoriesMenu/CategoriesMenu";
 import { ItemsTable } from "../ItemsTable/ItemsTable";
 import { Location } from "../../../types";
+import { cleanWarehouseName } from "../../../lib/api/utils/zohoDataUtils";
 
 interface Category {
   category_id: string;
@@ -82,7 +83,7 @@ const DrawerMenu = ({
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="flex justify-between items-center w-full pt-1 px-1 h-10">
         <div className="badge badge-lg font-extrabold">
-          {warehouse.location_name}
+          {cleanWarehouseName(warehouse.location_name)}
         </div>
         <label
           htmlFor="my-drawer-2"

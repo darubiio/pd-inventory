@@ -1,6 +1,7 @@
 import { Packages } from "../../../../ui/dashboard/Packages/Packages";
 import { WarehouseDetail } from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
 import { getWarehouseById } from "../../../../lib/api/clients/zoho/zohoData";
+import { cleanWarehouseName } from "../../../../lib/api/utils/zohoDataUtils";
 
 export default async function WarehouseItems({
   params,
@@ -16,7 +17,7 @@ export default async function WarehouseItems({
   return (
     <div className="flex-1 overflow-auto tabs tabs-lift pt-1 relative">
       <div className="badge hidden md:inline-flex md:absolute font-bold right-13 top-2">
-        {warehouse?.location_name}
+        {cleanWarehouseName(warehouse?.location_name)}
       </div>
       <label className="tab [--tab-border-color:#d1d5db] dark:[--tab-border-color:#374151]">
         <input type="radio" name="my_tabs_4" defaultChecked />

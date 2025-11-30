@@ -3,6 +3,7 @@ import { CellContext, Column, Table } from "@tanstack/react-table";
 import CategoryNameHeader from "./CategoryNameHeader";
 import { filterBySubitemName } from "./TableFilter";
 import { ReactNode } from "react";
+import { cleanWarehouseName } from "../../lib/api/utils/zohoDataUtils";
 
 type CategoriesTableProps = {
   data: CategoryItem[];
@@ -45,7 +46,9 @@ export const getColumns = ({ data }: CategoriesTableProps) => {
     },
     ...locationKeys.map((location) => ({
       accessorKey: location,
-      header: location.replace(/_/g, " "),
+      header:
+        cleanWarehouseName(location.replace(/_/g, " ")) ||
+        location.replace(/_/g, " "),
       cell: (info: CellContext<CategoryItem, ReactNode>) => (
         <div
           className={`flex justify-center align-middle font-semibold ${

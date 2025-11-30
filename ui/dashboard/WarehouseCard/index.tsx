@@ -3,6 +3,7 @@ import { WarehouseAndPosition } from "../../../types";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import { BuildingStorefrontIcon } from "@heroicons/react/16/solid";
 import { ContactLinks } from "./ContactLinks";
+import { cleanWarehouseName } from "../../../lib/api/utils/zohoDataUtils";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -32,7 +33,7 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
           <div className="flex justify-start gap-1 flex-wrap">
             <div className="badge badge-ghost">
               <h2 className="font-bold opacity-90 uppercase">
-                {location_name}
+                {cleanWarehouseName(location_name)}
               </h2>
             </div>
             {/* {attention && (
