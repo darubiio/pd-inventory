@@ -6,38 +6,36 @@ export function PackageDetailLoadingContent() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
           <div key={i}>
-            <div className="skeleton h-4 w-24 mb-2"></div>
+            <div className="skeleton h-3 w-24 mb-2"></div>
             <div className="skeleton h-5 w-32"></div>
           </div>
         ))}
       </div>
 
-      <div className="divider">
-        <div className="skeleton h-4 w-32"></div>
-      </div>
+      <div className="divider">Line Items</div>
 
       {/* Mobile: cards skeleton */}
       <div className="md:hidden space-y-3">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="card bg-base-200 border-2">
+          <div key={i} className="card bg-base-200">
             <div className="card-body p-4">
               <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-2">
-                  <div className="skeleton h-5 w-40"></div>
-                  <div className="skeleton h-3 w-24"></div>
-                  <div className="skeleton h-3 w-24"></div>
+                <div className="flex-1">
+                  <div className="skeleton h-5 w-40 mb-2"></div>
+                  <div className="skeleton h-3 w-24 mb-1"></div>
+                  <div className="skeleton h-3 w-28"></div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <div className="skeleton h-5 w-16"></div>
+                  <div className="skeleton h-5 w-16 rounded-full"></div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+              <div className="grid grid-cols-2 gap-2 text-sm mt-3">
                 <div>
-                  <div className="skeleton h-3 w-16 mb-1"></div>
+                  <p className="opacity-70 text-sm mb-1">Quantity</p>
                   <div className="skeleton h-4 w-8"></div>
                 </div>
                 <div>
-                  <div className="skeleton h-3 w-12 mb-1"></div>
+                  <p className="opacity-70 text-sm mb-1">Unit</p>
                   <div className="skeleton h-4 w-12"></div>
                 </div>
               </div>
@@ -51,24 +49,12 @@ export function PackageDetailLoadingContent() {
         <table className="table table-sm">
           <thead>
             <tr>
-              <th>
-                <div className="skeleton h-4 w-16"></div>
-              </th>
-              <th>
-                <div className="skeleton h-4 w-12"></div>
-              </th>
-              <th>
-                <div className="skeleton h-4 w-20"></div>
-              </th>
-              <th>
-                <div className="skeleton h-4 w-16"></div>
-              </th>
-              <th>
-                <div className="skeleton h-4 w-12"></div>
-              </th>
-              <th>
-                <div className="skeleton h-4 w-16"></div>
-              </th>
+              <th>Item</th>
+              <th>SKU</th>
+              <th>Part Number</th>
+              <th className="text-right">Quantity</th>
+              <th>Unit</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -83,14 +69,14 @@ export function PackageDetailLoadingContent() {
                 <td>
                   <div className="skeleton h-3 w-20"></div>
                 </td>
-                <td>
-                  <div className="skeleton h-4 w-12"></div>
+                <td className="text-right">
+                  <div className="skeleton h-4 w-12 ml-auto"></div>
                 </td>
                 <td>
                   <div className="skeleton h-3 w-12"></div>
                 </td>
                 <td>
-                  <div className="skeleton h-5 w-16"></div>
+                  <div className="skeleton h-5 w-16 rounded-full"></div>
                 </td>
               </tr>
             ))}

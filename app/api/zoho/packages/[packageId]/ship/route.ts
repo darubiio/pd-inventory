@@ -46,34 +46,35 @@ export async function POST(
       return NextResponse.json({ error: "Package not found" }, { status: 404 });
     }
 
-    const salesorderId = packageResponse.salesorder_id;
+    if (!packageResponse.salesorder_id) {
+      return NextResponse.json(
+        { error: "Package has no associated sales order" },
+        { status: 400 }
+      );
+    }
+
+    const salesOrderId = packageResponse.salesorder_id;
 
     if (packageResponse.shipment_order?.shipment_id) {
-      const shipmentId = packageResponse.shipment_order.shipment_id;
-      const deliveredUrl = `${ZOHO_INVENTORY_URL}/shipmentorders/${shipmentId}/status/delivered?organization_id=${ZOHO_ORG_ID}`;
-
-      await apiFetch(deliveredUrl, {
-        method: "POST",
-        auth: await getUserAuth(),
-      });
-
       return NextResponse.json({
         success: true,
-        message: "Package marked as delivered",
+        message: `This package already contains shipping order ${packageResponse.shipment_order.shipment_id}`,
+        shipmentId: packageResponse.shipment_order.shipment_id,
       });
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const shipmentNumber = `SH-${Date.now()}`;
+    const timestamp = Date.now().toString().slice(-5);
+    const shipmentNumber = `SN-${timestamp}`;
 
-    const createShipmentUrl = `${ZOHO_INVENTORY_URL}/shipmentorders?package_ids=${packageId}&salesorder_id=${salesorderId}&organization_id=${ZOHO_ORG_ID}`;
+    const createShipmentUrl = `${ZOHO_INVENTORY_URL}/shipmentorders?package_ids=${packageId}&salesorder_id=${salesOrderId}&organization_id=${ZOHO_ORG_ID}`;
 
     const shipmentData = {
       shipment_number: shipmentNumber,
       date: today,
-      delivery_method: "Manual Shipment",
-      tracking_number: `PKG-${packageId}`,
-      notes: "Scanned and packed via inventory system",
+      delivery_method: "Pick up",
+      tracking_number: packageId,
+      notes: `Shipment created automatically on ${today} via PD Inventory System`,
     };
 
     const shipmentResponse = await apiFetch<ShipmentOrderResponse>(
@@ -85,20 +86,17 @@ export async function POST(
       }
     );
 
-    if (shipmentResponse?.shipment_order?.shipment_id) {
-      const shipmentId = shipmentResponse.shipment_order.shipment_id;
-      const deliveredUrl = `${ZOHO_INVENTORY_URL}/shipmentorders/${shipmentId}/status/delivered?organization_id=${ZOHO_ORG_ID}`;
-
-      await apiFetch(deliveredUrl, {
-        method: "POST",
-        auth: await getUserAuth(),
-      });
+    if (!shipmentResponse?.shipment_order?.shipment_id) {
+      return NextResponse.json(
+        { error: "Failed to create shipment order" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Package shipped successfully",
-      data: shipmentResponse,
+      message: "Shipment order created successfully",
+      shipmentId: shipmentResponse.shipment_order.shipment_id,
     });
   } catch (error) {
     console.error("Error shipping package:", error);

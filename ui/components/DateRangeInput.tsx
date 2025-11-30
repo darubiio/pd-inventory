@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { DayPicker, DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
+import "./dateRangeInput.css";
 
 function toISO(date?: Date) {
   return date ? date.toISOString().split("T")[0] : "";
