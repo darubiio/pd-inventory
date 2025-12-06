@@ -64,13 +64,10 @@ export async function POST(
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const timestamp = Date.now().toString().slice(-5);
-    const shipmentNumber = `SN-${timestamp}`;
 
     const createShipmentUrl = `${ZOHO_INVENTORY_URL}/shipmentorders?package_ids=${packageId}&salesorder_id=${salesOrderId}&organization_id=${ZOHO_ORG_ID}`;
 
     const shipmentData = {
-      shipment_number: shipmentNumber,
       date: today,
       delivery_method: "Pick up",
       tracking_number: packageId,

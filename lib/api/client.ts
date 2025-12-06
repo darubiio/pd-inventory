@@ -50,8 +50,16 @@ export async function apiFetch<FinalResponse, ApiResponse = unknown>(
     throw new AuthenticationError("Invalid or expired authentication token");
   }
 
-  if (response.status !== 200) {
-    throw new Error(`${response.status}`);
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error(`❌ API Error ${response.status}:`, errorBody);
+    try {
+      const errorJson = JSON.parse(errorBody);
+      const errorMessage = errorJson.message || errorJson.error || errorBody;
+      throw new Error(`${response.status}: ${errorMessage}`);
+    } catch {
+      throw new Error(`${response.status}: ${errorBody}`);
+    }
   }
 
   const data: ApiResponse = await response.json();
