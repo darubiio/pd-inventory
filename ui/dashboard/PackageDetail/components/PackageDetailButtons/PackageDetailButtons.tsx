@@ -31,19 +31,21 @@ interface PackageDetailButtonsProps {
     completed: number;
     total: number;
     isComplete: boolean;
+    allItemsScanned: boolean;
   };
   mutate: () => Promise<any>;
   onUpdate?: (updatedPackage: any) => void;
 }
 
 export const PackageDetailButtons = ({
-  state,
   data,
-  packageId,
   dispatch,
-  scanProgress,
   mutate,
+  onClose,
   onUpdate,
+  packageId,
+  scanProgress,
+  state,
 }: PackageDetailButtonsProps) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -97,6 +99,8 @@ export const PackageDetailButtons = ({
         duration: 5000,
         position: "top-center",
       });
+
+      onClose();
     } catch (error) {
       toast.error("Error updating package", {
         duration: 5000,
@@ -140,7 +144,7 @@ export const PackageDetailButtons = ({
               {state.scanMode ? "Stop Scanning" : "Scan Items"}
             </Button>
           </OnlyIf>
-          <OnlyIf condition={state.scanMode && scanProgress?.isComplete}>
+          <OnlyIf condition={state.scanMode && scanProgress?.allItemsScanned}>
             <Button
               onClick={handleConfirmShipment}
               variant="success"

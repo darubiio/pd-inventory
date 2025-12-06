@@ -104,7 +104,13 @@ export function PackageDetail({
   }, [state.scanResult]);
 
   const scanProgress = useMemo(() => {
-    if (!data?.line_items) return { completed: 0, total: 0, isComplete: false };
+    if (!data?.line_items)
+      return {
+        completed: 0,
+        total: 0,
+        isComplete: false,
+        allItemsScanned: false,
+      };
 
     const total: number = data.line_items.reduce(
       (sum: number, item: { quantity: number }) => sum + item.quantity,
@@ -115,10 +121,18 @@ export function PackageDetail({
       0
     );
 
+    const allItemsScanned = data.line_items.every(
+      (item: { line_item_id: string; quantity: number }) => {
+        const scanned = state.scannedItems.get(item.line_item_id) || 0;
+        return scanned >= item.quantity;
+      }
+    );
+
     return {
       completed,
       total,
       isComplete: completed >= total && total > 0,
+      allItemsScanned,
     };
   }, [data?.line_items, state.scannedItems]);
 
