@@ -1,9 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    domains: ["api.mapbox.com", "contacts.zoho.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.mapbox.com",
+      },
+      {
+        protocol: "https",
+        hostname: "contacts.zoho.com",
+      },
+    ],
   },
 };
 

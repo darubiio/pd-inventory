@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { zohoAuth } from "./lib/auth/zohoAuth";
 import { isAuth, isPublic } from "./lib/api/utils/pathUtils";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const {
     url,
     nextUrl: { pathname, search },
