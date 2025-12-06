@@ -35,7 +35,7 @@ export class ZohoAuthClient {
     }
   }
 
-  getAuthorizationUrl(state?: string) {
+  getAuthorizationUrl(state?: string, forceConsent = false) {
     const params = new URLSearchParams({
       scope: "ZohoInventory.FullAccess.all,ZohoInventory.settings.READ",
       client_id: ZOHO_CLIENT_ID,
@@ -43,6 +43,7 @@ export class ZohoAuthClient {
       redirect_uri: ZOHO_REDIRECT_URI,
       access_type: "offline",
       ...(state && { state }),
+      ...(forceConsent && { prompt: "consent" }),
     });
 
     return `${ZOHO_ACCOUNTS_BASE}/oauth/v2/auth?${params.toString()}`;
@@ -109,6 +110,33 @@ export class ZohoAuthClient {
     console.log("🔄 Token refreshed successfully updated");
 
     return response.json();
+  }
+
+  async revokeToken(token: string): Promise<void> {
+    try {
+      const params = new URLSearchParams({
+        token,
+      });
+
+      const response = await fetch(
+        `${ZOHO_ACCOUNTS_BASE}/oauth/v2/token/revoke?${params.toString()}`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("⚠️ Token revocation failed:", {
+          status: response.status,
+          error: errorText,
+        });
+      } else {
+        console.log("🔒 Token revoked successfully");
+      }
+    } catch (error) {
+      console.error("❌ Error revoking token:", error);
+    }
   }
 
   async getCurrentUser(accessToken: string): Promise<ZohoUser> {
@@ -236,6 +264,13 @@ export class ZohoAuthClient {
     try {
       console.log("🗑️ Deleting session from Redis...");
       const sessionKey = `zoho_session:${sessionId}`;
+
+      const session = await getCache<UserSession>(sessionKey);
+      if (session?.refresh_token) {
+        console.log("🔒 Revoking refresh token");
+        await this.revokeToken(session.refresh_token);
+      }
+
       await deleteCache(sessionKey);
       await clearRefreshState(sessionId);
       console.log("✅ Session deleted successfully");
@@ -244,11 +279,11 @@ export class ZohoAuthClient {
     }
   }
 
-  getLoginUrl(returnTo?: string): string {
+  getLoginUrl(returnTo?: string, forceConsent = false): string {
     const state = returnTo
       ? Buffer.from(returnTo).toString("base64")
       : undefined;
-    return this.getAuthorizationUrl(state);
+    return this.getAuthorizationUrl(state, forceConsent);
   }
 
   async processCallback(

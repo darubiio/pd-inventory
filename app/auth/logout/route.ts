@@ -7,17 +7,21 @@ export async function GET(request: NextRequest) {
 
     if (sessionId) {
       await zohoAuth.deleteSessionById(sessionId);
-      console.log("🗑️ Session deleted from Redis");
+      console.log("🗑️ Session deleted from Redis and token revoked");
     }
 
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(
+      new URL("/auth/login?force_consent=true", request.url)
+    );
     response.cookies.delete("zoho-session-id");
-    console.log("🍪 Session cookie cleared");
+    console.log("🍪 Session cookie cleared, redirecting to force consent");
 
     return response;
   } catch (error) {
     console.error("Logout error:", error);
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(
+      new URL("/auth/login?force_consent=true", request.url)
+    );
     response.cookies.delete("zoho-session-id");
     return response;
   }
