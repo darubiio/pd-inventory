@@ -100,7 +100,9 @@ export const PackageDetailButtons = ({
         position: "top-center",
       });
 
-      onClose();
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (error) {
       toast.error("Error updating package", {
         duration: 5000,
