@@ -24,9 +24,14 @@ import { LineItems } from "./components/LineItems/LineItems";
 interface PackageDetailProps {
   packageId: string;
   onClose: () => void;
+  onUpdate?: (updatedPackage: any) => void;
 }
 
-export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
+export function PackageDetail({
+  packageId,
+  onClose,
+  onUpdate,
+}: PackageDetailProps) {
   const [state, dispatch] = useReducer(scannerReducer, initialState);
 
   const { data, error, isLoading, mutate } = useSWR<PackageDetailTypes>(
@@ -101,7 +106,10 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
   const scanProgress = useMemo(() => {
     if (!data?.line_items) return { completed: 0, total: 0, isComplete: false };
 
-    const total = data.line_items.reduce((sum, item) => sum + item.quantity, 0);
+    const total: number = data.line_items.reduce(
+      (sum: number, item: { quantity: number }) => sum + item.quantity,
+      0
+    );
     const completed = Array.from(state.scannedItems.values()).reduce(
       (sum, qty) => sum + qty,
       0
@@ -207,6 +215,7 @@ export function PackageDetail({ packageId, onClose }: PackageDetailProps) {
             scanProgress={scanProgress}
             state={state}
             mutate={mutate}
+            onUpdate={onUpdate}
           />
         </div>
       </div>

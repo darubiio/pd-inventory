@@ -5,7 +5,7 @@ export const Packages = async ({ locationId }: { locationId: string }) => {
   const end = new Date();
   const start = new Date();
 
-  start.setDate(start.getDate() - 5);
+  start.setDate(start.getDate() - 30);
   const defaultStart = start.toISOString().split("T")[0];
   const defaultEnd = end.toISOString().split("T")[0];
 

@@ -1,11 +1,7 @@
 import React, { Fragment, useState } from "react";
 import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
 import { Button } from "../../../../components/inputs/Button";
-import {
-  CheckCircleIcon,
-  PaperAirplaneIcon,
-  QrCodeIcon,
-} from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon, QrCodeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import {
   finishUpdate,
@@ -37,6 +33,7 @@ interface PackageDetailButtonsProps {
     isComplete: boolean;
   };
   mutate: () => Promise<any>;
+  onUpdate?: (updatedPackage: any) => void;
 }
 
 export const PackageDetailButtons = ({
@@ -44,9 +41,9 @@ export const PackageDetailButtons = ({
   data,
   packageId,
   dispatch,
-  onClose,
   scanProgress,
   mutate,
+  onUpdate,
 }: PackageDetailButtonsProps) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -88,11 +85,15 @@ export const PackageDetailButtons = ({
         throw new Error("Failed to update package status");
       }
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       await mutate();
 
-      toast.success(data.message, {
+      if (responseData.package) {
+        onUpdate?.(responseData.package);
+      }
+
+      toast.success(responseData.message, {
         duration: 5000,
         position: "top-center",
       });
@@ -139,7 +140,7 @@ export const PackageDetailButtons = ({
               {state.scanMode ? "Stop Scanning" : "Scan Items"}
             </Button>
           </OnlyIf>
-          <OnlyIf condition={state.scanMode && scanProgress.isComplete}>
+          <OnlyIf condition={state.scanMode && scanProgress?.isComplete}>
             <Button
               onClick={handleConfirmShipment}
               variant="success"

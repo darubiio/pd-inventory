@@ -98,6 +98,20 @@ export default function ClientPackagesTable({
     execute(currentDateStart, currentDateEnd);
   }, [execute, currentDateStart, currentDateEnd]);
 
+  const handlePackageUpdate = useCallback((updatedPackage: any) => {
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.package_id === updatedPackage.package_id
+          ? {
+              ...row,
+              status: updatedPackage.status,
+              shipment_order: updatedPackage.shipment_order,
+            }
+          : row
+      )
+    );
+  }, []);
+
   return (
     <PackagesTable
       data={rows as any}
@@ -108,6 +122,7 @@ export default function ClientPackagesTable({
       error={error}
       onRetry={handleRetry}
       onRefresh={handleRefresh}
+      onPackageUpdate={handlePackageUpdate}
     />
   );
 }

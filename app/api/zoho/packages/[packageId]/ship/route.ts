@@ -11,10 +11,18 @@ const ZOHO_INVENTORY_URL = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1`;
 interface ShipmentOrderResponse {
   code: number;
   message: string;
-  shipment_order: {
+  shipmentorder: {
     shipment_id: string;
     shipment_number: string;
     status: string;
+    packages: Array<{
+      package_id: string;
+      package_number: string;
+      package_quantity: number;
+      package_date: string;
+      notes: string;
+      terms: string;
+    }>;
   };
 }
 
@@ -83,17 +91,29 @@ export async function POST(
       }
     );
 
-    if (!shipmentResponse?.shipment_order?.shipment_id) {
+    if (!shipmentResponse?.shipmentorder?.shipment_id) {
       return NextResponse.json(
         { error: "Failed to create shipment order" },
         { status: 500 }
       );
     }
 
+    const updatedPackageData = {
+      ...packageResponse,
+      status: "shipped",
+      shipment_order: {
+        shipment_id: shipmentResponse.shipmentorder.shipment_id,
+        shipment_number: shipmentResponse.shipmentorder.shipment_number,
+        tracking_number: packageId,
+        carrier: "Pick up",
+      },
+    };
+
     return NextResponse.json({
       success: true,
       message: "Shipment order created successfully",
-      shipmentId: shipmentResponse.shipment_order.shipment_id,
+      shipmentId: shipmentResponse.shipmentorder.shipment_id,
+      package: updatedPackageData,
     });
   } catch (error) {
     console.error("Error shipping package:", error);

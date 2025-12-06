@@ -45,6 +45,7 @@ export function PackagesTable({
   error,
   onRetry,
   onRefresh,
+  onPackageUpdate,
 }: {
   data: PackageRow[];
   onDateChange?: (start: string, end: string) => void;
@@ -54,6 +55,7 @@ export function PackagesTable({
   error?: string | null;
   onRetry?: () => void;
   onRefresh?: () => void;
+  onPackageUpdate?: (updatedPackage: any) => void;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -369,6 +371,7 @@ export function PackagesTable({
         <PackageDetail
           packageId={selectedPackageId}
           onClose={() => setSelectedPackageId(null)}
+          onUpdate={onPackageUpdate}
         />
       )}
     </div>
