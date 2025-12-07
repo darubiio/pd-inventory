@@ -37,6 +37,15 @@ export async function apiFetchAllPaginated<T, U>({
     if (cachedData.length) return cachedData;
   }
 
+  let resolvedAuth = auth;
+  if (auth && auth.getToken) {
+    const token = await auth.getToken();
+    resolvedAuth = {
+      header: auth.header,
+      accessToken: token || "",
+    };
+  }
+
   let allData: T[] = [];
   let hasMore = true;
   let page = 1;
@@ -48,7 +57,7 @@ export async function apiFetchAllPaginated<T, U>({
         method,
         headers,
         body,
-        auth,
+        auth: resolvedAuth,
         ...rest,
       });
 
