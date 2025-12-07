@@ -18,6 +18,7 @@ interface PackageDetailButtonsProps {
     scannedItems: Map<string, number>;
   };
   data?: {
+    status?: string;
     line_items: Array<{
       line_item_id: string;
       quantity: number;
@@ -136,7 +137,9 @@ export const PackageDetailButtons = ({
         )}
       >
         <div className="flex gap-2">
-          <OnlyIf condition={!!data}>
+          <OnlyIf
+            condition={!!data && data.status?.toLowerCase() === "not_shipped"}
+          >
             <Button
               onClick={handleToggleScanMode}
               variant={state.scanMode ? "error" : "primary"}
