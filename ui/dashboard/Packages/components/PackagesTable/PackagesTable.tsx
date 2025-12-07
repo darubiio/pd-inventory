@@ -10,7 +10,7 @@ import {
 import { useMemo, useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import DateRangeInput from "../../../../components/DateRangeInput";
-import { PackageListingLoading } from "../../../../../app/dashboard/warehouse/[id]/loading";
+import { PackageListingLoading } from "../../../../../ui/loading/packagesLoading";
 import TableLoading from "../../../../loading/tableLoading";
 import { PackageDetail } from "../PackageDetail/PackageDetail";
 import { Location } from "../../../../../types";

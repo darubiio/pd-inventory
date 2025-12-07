@@ -1,4 +1,4 @@
-import { PackageLoading } from "../loading";
+import { PackageLoading } from "../../../../../ui/loading/packagesLoading";
 
 const Loading = () => <PackageLoading />;
 
