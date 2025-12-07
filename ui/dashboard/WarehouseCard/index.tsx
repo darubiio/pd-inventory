@@ -27,19 +27,15 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
     >
       <div className="w-full p-3 flex flex-col justify-between gap-2">
         <div className="flex gap-2 justify-start items-center">
-          <BuildingStorefrontIcon width={20} />
-          <div className="flex justify-start gap-1 flex-wrap">
-            <div className="badge badge-ghost">
-              <Link
-                href={`/dashboard/warehouse/${location_id}/details?location_id=${parent_location_id}`}
-                className="cursor-pointer"
-              >
-                <h2 className="font-bold opacity-90 uppercase">
-                  {cleanWarehouseName(location_name)}
-                </h2>
-              </Link>
-            </div>
-          </div>
+          <BuildingStorefrontIcon width={20} className="flex-shrink-0" />
+          <Link
+            href={`/dashboard/warehouse/${location_id}/details?location_id=${parent_location_id}`}
+            className="cursor-pointer"
+          >
+            <h2 className="font-bold opacity-90 uppercase bg-base-200 hover:bg-base-300 px-3 py-1.5 rounded-lg transition-colors inline-block">
+              {cleanWarehouseName(location_name)}
+            </h2>
+          </Link>
         </div>
         <ul className="list gap-2 mt-2">
           <ContactLinks email={email} phone={phone} />

@@ -7,8 +7,15 @@ import {
   WarehouseCategory,
 } from "../../../types";
 
+const hiddenNames = ["GARANTIAS - WARRANTY (Warehouse)"];
+
 export const getWarehousesByLocations = (locations: Location[]) => {
-  return locations.filter((loc) => loc.type === "line_item_only");
+  return locations.filter(
+    (loc) =>
+      loc.type === "line_item_only" &&
+      loc.is_location_active &&
+      !hiddenNames.includes(loc.location_name)
+  );
 };
 
 export const getCategories = (items: Item[]) => {
