@@ -1,9 +1,5 @@
-import React from "react";
 import TableLoading from "../../../../../ui/loading/tableLoading";
-import {
-  PackageLoading,
-  PackageListingLoading,
-} from "../../../../../ui/loading/packagesLoading";
+import { PackageLoading } from "../../../../../ui/loading/packagesLoading";
 
 function Loading() {
   return (
@@ -35,7 +31,7 @@ export const WarehouseDetailLoading = () => (
     <MenuLoading />
     <div className="pt-2 md:p-3 md:pl-0 overflow-hidden">
       <div className="menu card w-full border-t-1 border-b-1 md:border-1 rounded-none md:rounded-sm border-gray-300 dark:border-gray-700 p-0 bg-base-100 shadow-sm overflow-y-auto h-[calc(100vh-8.4rem)]">
-        <TableLoading cols={6} />
+        <TableLoading cols={6} rows={14} />
       </div>
     </div>
   </div>

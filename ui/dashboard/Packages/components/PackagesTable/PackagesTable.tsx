@@ -194,7 +194,7 @@ export function PackagesTable({
   });
 
   return (
-    <div className="card bg-base-100 shadow-xl pt-3 h-screen md:h-[calc(100vh-6.9rem)]">
+    <div className="card bg-base-100 shadow-xl pt-2 h-screen md:h-[calc(100vh-6.9rem)]">
       <div className="px-1 md:px-3 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2 w-full md:w-1/2">
           <div className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md px-3 py-2 font-extrabold h-10 flex items-center">

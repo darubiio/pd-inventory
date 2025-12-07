@@ -23,7 +23,7 @@ export default async function WarehouseItems({
         <input type="radio" name="my_tabs_4" defaultChecked />
         <span className="font-semibold">📋 Inventory</span>
       </label>
-      <div className="tab-content bg-base-100 [border-color:#d1d5db] dark:[border-color:#374151] rounded-none">
+      <div className="tab-content bg-base-100 [border-color:#d1d5db] dark:[border-color:#374151] pt-2 rounded-none">
         <div className="grid md:grid-cols-[250px_1fr] h-[calc(100vh-6.9rem)]">
           <WarehouseDetail warehouseId={id} warehouse={warehouse} />
         </div>

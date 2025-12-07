@@ -2,7 +2,7 @@ import TableLoading from "./tableLoading";
 
 export const PackageListingLoading = () => (
   <div className="md:hidden px-1 pb-1 flex flex-col gap-3">
-    {Array.from({ length: 5 }).map((_, idx) => (
+    {Array.from({ length: 4 }).map((_, idx) => (
       <div
         key={idx}
         className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3 flex gap-1"
@@ -30,7 +30,7 @@ export const PackageLoading = () => (
         <div className="skeleton h-10 w-10 md:hidden" />
       </div>
       <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center md:gap-2 md:justify-end">
-        <div className="skeleton h-10 w-full md:w-auto hidden md:block md:w-10"></div>
+        <div className="skeleton h-10 w-full hidden md:block md:w-10"></div>
         <div className="skeleton h-10 w-full md:w-42"></div>
         <div className="skeleton h-10 w-full md:w-42"></div>
       </div>

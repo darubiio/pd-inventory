@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { useUser } from "../../../lib/hooks/useUser";
+import { Bars4Icon } from "@heroicons/react/16/solid";
 
 const navItems = [
   {
@@ -42,36 +43,27 @@ const TopBar: FC = () => {
         </a>
         <div className="dropdown md:hidden">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h7"
-              />
-            </svg>
+            <Bars4Icon width={20} />
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-5 w-62 p-2 shadow font-semibold"
+            className="menu menu-lg dropdown-content bg-base-100 border border-gray-300 dark:border-gray-600 rounded-box z-1 mt-5 w-64 p-3 shadow-lg font-semibold"
           >
             {navItems.map(({ name, href, Icon }) => (
               <li key={name}>
                 <Link
                   href={href}
-                  className={pathname === href ? "menu-active" : ""}
+                  className={
+                    pathname === href
+                      ? "bg-base-200 border-2 border-gray-500 text-base"
+                      : "text-base"
+                  }
                   onClick={() => {
                     const dropdown = document.activeElement as HTMLElement;
                     if (dropdown && dropdown.blur) dropdown.blur();
                   }}
                 >
-                  <Icon width={18} />
+                  <Icon width={20} />
                   {name}
                 </Link>
               </li>
@@ -88,15 +80,19 @@ const TopBar: FC = () => {
             </span>
           </span>
         </a>
-        <ul className="menu hidden md:flex menu-horizontal font-semibold gap-2 bg-base-200 rounded-box">
+        <ul className="menu hidden md:flex menu-horizontal font-semibold gap-2 bg-base-200 rounded-box p-2">
           {navItems.map(({ name, href, Icon }) => (
             <li key={name}>
               <Link
                 href={href}
-                className={pathname === href ? "shadow bg-base-100" : ""}
+                className={
+                  pathname === href
+                    ? "bg-base-100 border-2 border-gray-500 shadow-md"
+                    : ""
+                }
               >
-                <Icon width={18} />
-                {name}
+                <Icon width={20} />
+                <span className="text-base">{name}</span>
               </Link>
             </li>
           ))}
