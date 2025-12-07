@@ -4,7 +4,7 @@ import { useLocations } from "../../lib/auth/PermissionsProvider";
 import { usePermissions } from "../../lib/auth/PermissionsProvider";
 import { WarehouseCard } from "./WarehouseCard";
 import { WarehouseAndPosition } from "../../types/zoho";
-import Loading from "../../app/dashboard/loading";
+import Loading from "../../app/dashboard/(warehouses)/loading";
 
 interface FilteredWarehouseGridProps {
   warehouses: WarehouseAndPosition[] | null;
@@ -55,13 +55,13 @@ export const FilteredWarehouseGrid = ({
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Sin Acceso a Ubicaciones
+            No Location Access
           </h2>
           <p className="text-gray-600 mb-4">
-            No tienes acceso a ninguna ubicación de almacén.
+            You don't have access to any warehouse locations.
           </p>
           <p className="text-sm text-gray-500">
-            Contacta al administrador para obtener acceso.
+            Contact your administrator to request access.
           </p>
         </div>
       </div>
