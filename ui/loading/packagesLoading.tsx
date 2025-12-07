@@ -22,7 +22,7 @@ export const PackageListingLoading = () => (
 );
 
 export const PackageLoading = () => (
-  <div className="card bg-base-100 shadow-xl pt-3 h-screen md:h-[calc(100vh-6.9rem)]">
+  <div className="card bg-base-100 shadow-xl pt-3 h-full md:h-[calc(100vh-6.9rem)]">
     <div className="px-1 md:px-3 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-2 w-full md:w-1/2">
         <div className="skeleton h-10 w-32" />

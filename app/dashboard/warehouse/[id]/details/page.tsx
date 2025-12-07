@@ -24,7 +24,7 @@ export default async function WarehouseItems({
         <span className="font-semibold">📋 Inventory</span>
       </label>
       <div className="tab-content bg-base-100 [border-color:#d1d5db] dark:[border-color:#374151] pt-2 rounded-none">
-        <div className="grid md:grid-cols-[250px_1fr] h-[calc(100vh-6.9rem)]">
+        <div className="grid md:grid-cols-[250px_1fr] h-full">
           <WarehouseDetail warehouseId={id} warehouse={warehouse} />
         </div>
       </div>

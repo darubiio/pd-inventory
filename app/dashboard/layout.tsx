@@ -7,9 +7,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useTokenRefresh();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <TopBar />
-      {children}
+      <div className="flex-1 overflow-auto">{children}</div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ const WarehouseInventory = async ({ params }: WarehouseInventoryProps) => {
   const { id } = await params;
   const warehouse = await getWarehouseById(id);
   return (
-    <div className="grid md:grid-cols-[250px_1fr] h-[calc(100vh-6.9rem)]">
+    <div className="grid md:grid-cols-[250px_1fr] h-full">
       <WarehouseDetail warehouseId={id} warehouse={warehouse} />
     </div>
   );
