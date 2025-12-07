@@ -1,7 +1,7 @@
-import { WarehouseDetail } from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
-import { getWarehouseById } from "../../../../lib/api/clients/zoho/zohoData";
-import { cleanWarehouseName } from "../../../../lib/api/utils/zohoDataUtils";
-import { ClientPackagesTable } from "../../../../ui/dashboard/Packages/components/PackagesTable/ClientPackagesTable";
+import { WarehouseDetail } from "../../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
+import { getWarehouseById } from "../../../../../lib/api/clients/zoho/zohoData";
+import { cleanWarehouseName } from "../../../../../lib/api/utils/zohoDataUtils";
+import { ClientPackagesTable } from "../../../../../ui/dashboard/Packages/components/PackagesTable/ClientPackagesTable";
 
 export default async function WarehouseItems({
   params,

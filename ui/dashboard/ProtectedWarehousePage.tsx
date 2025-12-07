@@ -1,7 +1,7 @@
 "use client";
 
 import { useWarehouseAccess } from "../../lib/hooks/useWarehousePermissions";
-import { WarehouseDetailLoading } from "../../app/dashboard/warehouse/[id]/loading";
+import { WarehouseDetailLoading } from "../../app/dashboard/warehouse/[id]/details/loading";
 
 interface ProtectedWarehousePageProps {
   warehouseId: string;

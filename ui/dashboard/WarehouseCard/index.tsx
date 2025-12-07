@@ -31,7 +31,7 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
           <div className="flex justify-start gap-1 flex-wrap">
             <div className="badge badge-ghost">
               <Link
-                href={`/dashboard/warehouse/${location_id}?location_id=${parent_location_id}`}
+                href={`/dashboard/warehouse/${location_id}/details?location_id=${parent_location_id}`}
                 className="cursor-pointer"
               >
                 <h2 className="font-bold opacity-90 uppercase">

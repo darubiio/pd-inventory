@@ -1,9 +1,9 @@
 import React from "react";
-import TableLoading from "../../../../ui/loading/tableLoading";
+import TableLoading from "../../../../../ui/loading/tableLoading";
 import {
   PackageLoading,
   PackageListingLoading,
-} from "../../../../ui/loading/packagesLoading";
+} from "../../../../../ui/loading/packagesLoading";
 
 function Loading() {
   return (

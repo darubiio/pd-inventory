@@ -1,4 +1,4 @@
-import { WarehouseDetailLoading } from "../loading";
+import { WarehouseDetailLoading } from "../details/loading";
 
 const Loading = () => <WarehouseDetailLoading />;
 
