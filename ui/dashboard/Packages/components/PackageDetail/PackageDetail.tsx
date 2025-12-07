@@ -3,12 +3,10 @@
 import { clsx } from "clsx";
 import { fetcher, findItemByCode, getStatusBadgeClass } from "./utils/utils";
 import { initialState, scannerReducer } from "./state/scannerReducer";
-import { OnlyIf } from "../../components/layout/OnlyIf/OnlyIf";
-import { PackageDetail as PackageDetailTypes } from "../../../types";
+import { PackageDetail as PackageDetailTypes } from "../../../../../types";
 import { PackageDetailButtons } from "./components/PackageDetailButtons/PackageDetailButtons";
 import { PackageDetailHeader } from "./components/PackageDetailHeader/PackageDetailHeader";
 import { PackageDetailLoadingContent } from "./components/Loading/PackageDetailLoading";
-import { useBarcodeScan } from "../../../lib/hooks/useBarcodeScan";
 import { useMemo, useCallback, useReducer, useEffect, Fragment } from "react";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import {
@@ -20,6 +18,8 @@ import toast, { Toaster } from "react-hot-toast";
 import useSWR from "swr";
 import { ShipmentInfo } from "./components/ShipmentInfo/ShipmentInfo";
 import { LineItems } from "./components/LineItems/LineItems";
+import { useBarcodeScan } from "../../../../../lib/hooks/useBarcodeScan";
+import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
 
 interface PackageDetailProps {
   packageId: string;

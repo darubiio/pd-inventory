@@ -1,5 +1,6 @@
 "use server";
 
+import { get } from "http";
 import {
   Item,
   ItemDetails,
@@ -19,6 +20,7 @@ import {
 } from "../../utils/zohoDataUtils";
 import { getItemsDetail } from "./items";
 import { getAuthByToken, getUserAuth } from "./zohoAuth";
+import { getDefaultDates } from "../../../../ui/dashboard/Packages/utils/utils";
 
 const { ZOHO_ORG_ID } = process.env;
 const ZOHO_DOMAIN = process.env.ZOHO_DOMAIN || "com";
@@ -321,8 +323,7 @@ export const getPackagesByLocationId = async (locationId: string) => {
 
 export const getPackagesByLocationIdRange = async (
   locationId: string,
-  dateStart?: string,
-  dateEnd?: string
+  { dateStart, dateEnd }: { dateStart?: string; dateEnd?: string }
 ) => {
   const salesOrders = await getAllSalesOrders({ dateStart, dateEnd });
   const locationSalesOrders = salesOrders.filter(

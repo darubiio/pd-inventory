@@ -1,10 +1,4 @@
-import { PackageDetail, PackageLineItem } from "../../../../types";
-import {
-  clearResult,
-  scanItem,
-  setLastScannedCode,
-  setScanError,
-} from "../state/scannerActions";
+import { PackageDetail, PackageLineItem } from "../../../../../../types";
 
 export const getPartNumber = (item: PackageLineItem): string | null => {
   const partNumberField = item.item_custom_fields?.find(

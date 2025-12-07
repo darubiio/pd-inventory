@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     const data =
       dateStart || dateEnd
-        ? await getPackagesByLocationIdRange(locationId, dateStart, dateEnd)
+        ? await getPackagesByLocationIdRange(locationId, { dateStart, dateEnd })
         : await getPackagesByLocationId(locationId);
 
     return NextResponse.json({

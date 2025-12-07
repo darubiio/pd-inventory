@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { LineItemsCards } from "./LineItemsCards/LineItemsCards";
 import { LineItemsTable } from "./LineItemsTable/LineItemsTable";
-import { PackageDetail } from "../../../../../types";
+import { PackageDetail } from "../../../../../../../types";
 
 interface LineItemsProps {
   data?: PackageDetail;

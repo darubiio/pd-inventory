@@ -1,7 +1,7 @@
-import { Packages } from "../../../../ui/dashboard/Packages/Packages";
 import { WarehouseDetail } from "../../../../ui/dashboard/WarehouseDetail/WarehouseDetail";
 import { getWarehouseById } from "../../../../lib/api/clients/zoho/zohoData";
 import { cleanWarehouseName } from "../../../../lib/api/utils/zohoDataUtils";
+import { ClientPackagesTable } from "../../../../ui/dashboard/Packages/components/PackagesTable/ClientPackagesTable";
 
 export default async function WarehouseItems({
   params,
@@ -33,7 +33,7 @@ export default async function WarehouseItems({
         <span className="font-semibold ">📦 Packages</span>
       </label>
       <div className="tab-content bg-base-100 [border-color:#d1d5db] dark:[border-color:#374151] rounded-none shadow-2xl h-full md:h-[calc(100vh-6.9rem)]">
-        <Packages locationId={location_id} />
+        <ClientPackagesTable locationId={location_id} warehouse={warehouse} />
       </div>
     </div>
   );

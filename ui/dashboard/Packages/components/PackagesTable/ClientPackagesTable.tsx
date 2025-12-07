@@ -2,8 +2,15 @@
 
 import React, { useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PackagesTable } from "../PackagesTable";
-import { useAbortableRequest } from "../../../lib/hooks/useAbortableRequest";
+import { useAbortableRequest } from "../../../../../lib/hooks/useAbortableRequest";
+import { PackagesTable } from "./PackagesTable";
+import { Location } from "../../../../../types";
+import { getDefaultDates } from "../../utils/utils";
+
+type ClientPackagesTableProps = {
+  warehouse?: Location;
+  locationId: string;
+};
 
 async function fetchPackages(
   locationId: string,
@@ -27,27 +34,22 @@ async function fetchPackages(
   return json.data || [];
 }
 
-export default function ClientPackagesTable({
+export const ClientPackagesTable = ({
+  warehouse,
   locationId,
-  initialData,
-  defaultStart,
-  defaultEnd,
-}: {
-  locationId: string;
-  initialData: any[];
-  defaultStart: string;
-  defaultEnd: string;
-}) {
+}: ClientPackagesTableProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [rows, setRows] = React.useState<any[]>(initialData);
+  const [rows, setRows] = React.useState<any[]>([]);
   const [error, setError] = React.useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = React.useState(true);
 
   const urlDateStart = searchParams.get("date_start");
   const urlDateEnd = searchParams.get("date_end");
 
-  const currentDateStart = urlDateStart || defaultStart;
-  const currentDateEnd = urlDateEnd || defaultEnd;
+  const { dateStart, dateEnd } = getDefaultDates();
+  const currentDateStart = urlDateStart || dateStart;
+  const currentDateEnd = urlDateEnd || dateEnd;
 
   const fetchPackagesCallback = useCallback(
     async (start: string, end: string, signal?: AbortSignal) => {
@@ -65,15 +67,21 @@ export default function ClientPackagesTable({
   } = useAbortableRequest(fetchPackagesCallback, { debounceMs: 0 });
 
   useEffect(() => {
+    execute(currentDateStart, currentDateEnd);
+  }, []);
+
+  useEffect(() => {
     if (data) {
       setRows(data);
       setError(null);
+      setInitialLoading(false);
     }
   }, [data]);
 
   useEffect(() => {
     if (requestError) {
       setError("Failed to load packages. Please try again.");
+      setInitialLoading(false);
     }
   }, [requestError]);
 
@@ -115,6 +123,7 @@ export default function ClientPackagesTable({
   return (
     <PackagesTable
       data={rows as any}
+      warehouse={warehouse}
       defaultDateStart={currentDateStart}
       defaultDateEnd={currentDateEnd}
       onDateChange={handleDateChange}
@@ -123,6 +132,7 @@ export default function ClientPackagesTable({
       onRetry={handleRetry}
       onRefresh={handleRefresh}
       onPackageUpdate={handlePackageUpdate}
+      initialLoading={initialLoading}
     />
   );
-}
+};

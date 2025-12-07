@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import React from "react";
-import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
-import { ScanBadges } from "./ScanBadges";
-import { Button } from "../../../../components/inputs/Button";
+import { ScanBadges } from "../PackageDetailHeader/ScanBadges";
 import { ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { OnlyIf } from "../../../../../../components/layout/OnlyIf/OnlyIf";
+import { Button } from "../../../../../../components/inputs/Button";
 
 interface PackageDetailHeaderProps {
   state: {

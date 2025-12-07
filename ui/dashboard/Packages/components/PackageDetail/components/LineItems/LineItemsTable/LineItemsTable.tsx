@@ -1,11 +1,11 @@
 import React from "react";
-import { PackageDetail } from "../../../../../../types";
 import {
   getItemStatus,
   getPartNumber,
   getStatusColor,
 } from "../../../utils/utils";
 import clsx from "clsx";
+import { PackageDetail } from "../../../../../../../../types";
 
 interface PackageDetailTableProps {
   state: {

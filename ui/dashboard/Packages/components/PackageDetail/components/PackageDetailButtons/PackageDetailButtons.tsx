@@ -1,6 +1,4 @@
 import React, { Fragment, useState } from "react";
-import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
-import { Button } from "../../../../components/inputs/Button";
 import { PaperAirplaneIcon, QrCodeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import {
@@ -10,6 +8,8 @@ import {
 } from "../../state/scannerActions";
 import clsx from "clsx";
 import { ConfirmShipmentModal } from "../ConfirmShipmentModal/ConfirmShipmentModal";
+import { OnlyIf } from "../../../../../../components/layout/OnlyIf/OnlyIf";
+import { Button } from "../../../../../../components/inputs/Button";
 
 interface PackageDetailButtonsProps {
   state: {

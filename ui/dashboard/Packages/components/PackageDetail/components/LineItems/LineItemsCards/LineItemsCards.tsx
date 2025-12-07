@@ -5,7 +5,7 @@ import {
   getStatusColor,
 } from "../../../utils/utils";
 import clsx from "clsx";
-import { PackageDetail } from "../../../../../../types";
+import { PackageDetail } from "../../../../../../../../types";
 
 interface PackageDetailCardsProps {
   data?: PackageDetail;

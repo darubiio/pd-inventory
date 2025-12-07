@@ -9,10 +9,12 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import DateRangeInput from "../../components/DateRangeInput";
-import TableLoading from "../../loading/tableLoading";
-import { PackageListingLoading } from "../../../app/dashboard/warehouse/[id]/loading";
+import DateRangeInput from "../../../../components/DateRangeInput";
+import { PackageListingLoading } from "../../../../../app/dashboard/warehouse/[id]/loading";
+import TableLoading from "../../../../loading/tableLoading";
 import { PackageDetail } from "../PackageDetail/PackageDetail";
+import { Location } from "../../../../../types";
+import { cleanWarehouseName } from "../../../../../lib/api/utils/zohoDataUtils";
 
 type PackageRow = {
   package_id: string;
@@ -27,6 +29,20 @@ type PackageRow = {
   shipment_order?: { tracking_number?: string; carrier?: string };
 };
 
+type PackagesTableProps = {
+  data: PackageRow[];
+  onDateChange?: (start: string, end: string) => void;
+  defaultDateStart?: string;
+  defaultDateEnd?: string;
+  loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
+  onRefresh?: () => void;
+  onPackageUpdate?: (updatedPackage: any) => void;
+  warehouse?: Location;
+  initialLoading?: boolean;
+};
+
 const statusOptions = {
   all: { label: "All", value: "all" },
   not_shipped: { label: "NotShipped", value: "not_shipped" },
@@ -38,25 +54,17 @@ const normalizeStatus = (s?: string) => (s || "").trim();
 
 export function PackagesTable({
   data,
-  onDateChange,
-  defaultDateStart,
   defaultDateEnd,
-  loading = false,
+  defaultDateStart,
   error,
-  onRetry,
-  onRefresh,
+  loading = false,
+  onDateChange,
   onPackageUpdate,
-}: {
-  data: PackageRow[];
-  onDateChange?: (start: string, end: string) => void;
-  defaultDateStart?: string;
-  defaultDateEnd?: string;
-  loading?: boolean;
-  error?: string | null;
-  onRetry?: () => void;
-  onRefresh?: () => void;
-  onPackageUpdate?: (updatedPackage: any) => void;
-}) {
+  onRefresh,
+  onRetry,
+  warehouse,
+  initialLoading = false,
+}: PackagesTableProps) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
@@ -188,8 +196,11 @@ export function PackagesTable({
   return (
     <div className="card bg-base-100 shadow-xl pt-3 h-screen md:h-[calc(100vh-6.9rem)]">
       <div className="px-1 md:px-3 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex gap-2 w-full md:w-1/2">
-          <label className="input flex-1 rounded-sm">
+        <div className="flex items-center gap-2 w-full md:w-1/2">
+          <div className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md px-3 py-2 font-extrabold h-10 flex items-center">
+            {cleanWarehouseName(warehouse?.location_name)}
+          </div>
+          <label className="input input-bordered flex-1 rounded-sm h-10 flex items-center">
             <svg
               className="h-[1em] opacity-50"
               xmlns="http://www.w3.org/2000/svg"
@@ -211,13 +222,14 @@ export function PackagesTable({
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Search by package number or ID"
               aria-label="Search packages"
+              className="grow"
             />
           </label>
           {onRefresh && (
             <button
               onClick={onRefresh}
               disabled={loading}
-              className="btn btn-ghost btn-sm btn-square md:hidden"
+              className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md hover:shadow-md transition-shadow md:hidden h-10 w-10 flex items-center justify-center"
               aria-label="Refresh packages"
             >
               <ArrowPathIcon
@@ -294,7 +306,7 @@ export function PackagesTable({
             </button>
           )}
         </div>
-      ) : loading ? (
+      ) : initialLoading || loading ? (
         <>
           <PackageListingLoading />
           <div className="overflow-x-auto md:mx-3 hidden md:block">

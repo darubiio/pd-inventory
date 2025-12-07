@@ -5,6 +5,7 @@ import { CategoriesMenu } from "../CategoriesMenu/CategoriesMenu";
 import { ItemsTable } from "../ItemsTable/ItemsTable";
 import { Location } from "../../../types";
 import { cleanWarehouseName } from "../../../lib/api/utils/zohoDataUtils";
+import { TagIcon } from "@heroicons/react/24/outline";
 
 interface Category {
   category_id: string;
@@ -82,33 +83,15 @@ const DrawerMenu = ({
     <div className="drawer flex md:hidden">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="flex justify-between items-center w-full pt-1 px-1 h-10">
-        <div className="badge badge-lg font-extrabold">
-          {cleanWarehouseName(warehouse.location_name)}
+        <div className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md px-3 py-2 font-extrabold h-10 flex items-center">
+          {cleanWarehouseName(warehouse?.location_name)}
         </div>
         <label
           htmlFor="my-drawer-2"
-          className="btn btn-sm mt-2 btn-primary btn-outline drawer-button lg:hidden mb-2"
+          className="btn h-10 btn-sm mt-2 btn-primary btn-outline drawer-button lg:hidden mb-2"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 6h.008v.008H6V6Z"
-            />
-          </svg>
-          Categories
+          <span className="mr-2 text-sm font-semibold">Categories</span>
+          <TagIcon width={25} height={25} />
         </label>
       </div>
       <div className="drawer-side z-100 md:z-0 border-l-0">

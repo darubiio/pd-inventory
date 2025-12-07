@@ -1,4 +1,4 @@
-import { PackageLineItem } from "../../../../types";
+import { PackageLineItem } from "../../../../../../types";
 
 export const setLastScannedCode = (barCode: string) => ({
   type: "SET_LAST_CODE" as const,
