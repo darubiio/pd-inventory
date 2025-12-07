@@ -46,26 +46,69 @@ export async function apiFetchAllPaginated<T, U>({
     };
   }
 
-  let allData: T[] = [];
+  const allData: T[] = [];
   let hasMore = true;
-  let page = 1;
+  let currentPage = 1;
+  const BATCH_SIZE = 20;
 
   try {
     while (hasMore) {
-      const path = buildPath(page);
-      const response = await apiFetch<U>(path, {
-        method,
-        headers,
-        body,
-        auth: resolvedAuth,
-        ...rest,
-      });
+      const batchPromises: Promise<{
+        data: T[];
+        has_more: boolean;
+        page: number;
+        error?: Error;
+      }>[] = [];
 
-      const { data, has_more } = extractPage(response);
+      for (let i = 0; i < BATCH_SIZE; i++) {
+        const page = currentPage + i;
+        const path = buildPath(page);
 
-      allData = allData.concat(data);
-      hasMore = has_more;
-      page++;
+        batchPromises.push(
+          apiFetch<U>(path, {
+            method,
+            headers,
+            body,
+            auth: resolvedAuth,
+            ...rest,
+          })
+            .then((response) => {
+              const { data, has_more } = extractPage(response);
+              return { data, has_more, page };
+            })
+            .catch((error) => {
+              return {
+                data: [],
+                has_more: false,
+                page,
+                error: error as Error,
+              };
+            })
+        );
+      }
+
+      const results = await Promise.all(batchPromises);
+
+      for (const result of results) {
+        if (result.error) {
+          if (result.page === currentPage) {
+            throw result.error;
+          }
+          hasMore = false;
+          break;
+        }
+
+        if (result.data.length > 0) {
+          allData.push(...result.data);
+        }
+
+        if (!result.has_more) {
+          hasMore = false;
+          break;
+        }
+      }
+
+      currentPage += BATCH_SIZE;
     }
 
     if (shouldCache) {
