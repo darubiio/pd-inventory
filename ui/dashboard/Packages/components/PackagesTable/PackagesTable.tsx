@@ -1,33 +1,20 @@
 "use client";
 
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import DateRangeInput from "../../../../components/DateRangeInput";
-import { PackageListingLoading } from "../../../../../ui/loading/packagesLoading";
-import TableLoading from "../../../../loading/tableLoading";
-import { PackageDetail } from "../PackageDetail/PackageDetail";
-import { Location } from "../../../../../types";
 import { cleanWarehouseName } from "../../../../../lib/api/utils/zohoDataUtils";
-
-type PackageRow = {
-  package_id: string;
-  package_number: string;
-  salesorder_id: string;
-  salesorder_number: string;
-  date: string;
-  customer_name: string;
-  status: string;
-  total_quantity?: string | number;
-  created_time?: string;
-  shipment_order?: { tracking_number?: string; carrier?: string };
-};
+import { getColumns, normalizeStatus, statusOptions } from "./utils/columns";
+import { Location, PackageRow } from "../../../../../types";
+import { PackageDetail } from "../PackageDetail/PackageDetail";
+import { PackageListingLoading } from "../../../../../ui/loading/packagesLoading";
+import { useMemo, useState } from "react";
+import DateRangeInput from "../../../../components/DateRangeInput";
+import TableLoading from "../../../../loading/tableLoading";
 
 type PackagesTableProps = {
   data: PackageRow[];
@@ -42,15 +29,6 @@ type PackagesTableProps = {
   warehouse?: Location;
   initialLoading?: boolean;
 };
-
-const statusOptions = {
-  all: { label: "All", value: "all" },
-  not_shipped: { label: "NotShipped", value: "not_shipped" },
-  shipped: { label: "Shipped", value: "shipped" },
-  delivered: { label: "Delivered", value: "delivered" },
-};
-
-const normalizeStatus = (s?: string) => (s || "").trim();
 
 export function PackagesTable({
   data,
@@ -82,91 +60,6 @@ export function PackagesTable({
       : "";
   };
 
-  const columns = useMemo<ColumnDef<PackageRow>[]>(
-    () => [
-      {
-        accessorKey: "package_number",
-        header: "Package",
-        cell: (ctx) => (
-          <div className="font-semibold">{ctx.getValue() as string}</div>
-        ),
-      },
-      {
-        accessorKey: "package_id",
-        header: "ID",
-        cell: (ctx) => (
-          <span className="opacity-70">{ctx.getValue() as string}</span>
-        ),
-      },
-      {
-        accessorKey: "customer_name",
-        header: "Customer",
-      },
-      {
-        accessorKey: "salesorder_number",
-        header: "Sales Order",
-      },
-      {
-        accessorKey: "date",
-        header: "Date",
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-        cell: (ctx) => {
-          const v = String(ctx.getValue() ?? "") as keyof typeof statusOptions;
-          return (
-            <span className={`badge ${getStatusBadgeClass(v)}`}>
-              {statusOptions[v].label}
-            </span>
-          );
-        },
-      },
-      {
-        accessorKey: "shipment_order.tracking_number",
-        header: "Tracking",
-        cell: ({ row }) => (
-          <span className="text-xs">
-            {row.original.shipment_order?.tracking_number || "-"}
-          </span>
-        ),
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => (
-          <button
-            onClick={() => setSelectedPackageId(row.original.package_id)}
-            className="btn btn-sm btn-ghost"
-            aria-label="View details"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-              />
-            </svg>
-          </button>
-        ),
-      },
-    ],
-    []
-  );
-
   const filtered = useMemo(() => {
     const text = globalFilter.trim().toLowerCase();
     return (data || [])
@@ -188,7 +81,7 @@ export function PackagesTable({
 
   const table = useReactTable<PackageRow>({
     data: filtered,
-    columns,
+    columns: getColumns({ actions: { setSelectedPackageId } }),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });

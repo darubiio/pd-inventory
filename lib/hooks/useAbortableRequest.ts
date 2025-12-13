@@ -14,7 +14,7 @@ export function useAbortableRequest<TArgs extends readonly unknown[], TReturn>(
 ) {
   const { debounceMs = 300 } = options;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<TReturn | null>(null);
   const [error, setError] = useState<Error | null>(null);
 

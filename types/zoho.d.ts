@@ -328,11 +328,10 @@ export interface PackageLineItem {
   quantity: number;
   unit: string;
   is_invoiced: boolean;
-  item_custom_fields?: Array<{
-    customfield_id: string;
-    label: string;
-    value: string;
-  }>;
+  cf_box_barcode?: string;
+  cf_box_qty?: string;
+  cf_package_qty?: string;
+  item_custom_fields: CustomField[];
 }
 
 export interface PackageDetail {
@@ -362,3 +361,16 @@ export interface PackageDetail {
   };
   notes?: string;
 }
+
+export type PackageRow = {
+  package_id: string;
+  package_number: string;
+  salesorder_id: string;
+  salesorder_number: string;
+  date: string;
+  customer_name: string;
+  status: string;
+  total_quantity?: string | number;
+  created_time?: string;
+  shipment_order?: { tracking_number?: string; carrier?: string };
+};

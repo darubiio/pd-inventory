@@ -1,21 +1,20 @@
-import React from "react";
+import clsx from "clsx";
+import { PackageLineItem } from "../../../../../../../../types";
 import {
   getItemStatus,
   getPartNumber,
   getStatusColor,
 } from "../../../utils/utils";
-import clsx from "clsx";
-import { PackageDetail } from "../../../../../../../../types";
 
 interface PackageDetailTableProps {
   state: {
     scanMode: boolean;
     scannedItems: Map<string, number>;
   };
-  data?: PackageDetail;
+  items?: PackageLineItem[];
 }
 
-export const LineItemsTable = ({ state, data }: PackageDetailTableProps) => {
+export const LineItemsTable = ({ state, items }: PackageDetailTableProps) => {
   return (
     <div className="overflow-x-auto hidden md:block">
       <table className="table table-sm">
@@ -32,7 +31,7 @@ export const LineItemsTable = ({ state, data }: PackageDetailTableProps) => {
           </tr>
         </thead>
         <tbody>
-          {data?.line_items.map((item) => {
+          {items?.map((item) => {
             const status = getItemStatus(item, state.scannedItems);
             const scanned = state.scannedItems.get(item.line_item_id) || 0;
             const partNumber = getPartNumber(item);

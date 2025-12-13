@@ -43,7 +43,7 @@ export function PackageDetail({
     (barcode: string) => {
       dispatch(setLastScannedCode(barcode));
 
-      const item = findItemByCode(barcode, data);
+      const { item, isBoxBarcode } = findItemByCode(barcode, data);
 
       if (!item) {
         dispatch(setScanError(barcode));
@@ -51,7 +51,12 @@ export function PackageDetail({
       }
 
       const currentScanned = state.scannedItems.get(item.line_item_id) || 0;
-      const newScanned = currentScanned + 1;
+
+      const boxQuantity = isBoxBarcode
+        ? Number(item.cf_box_qty || item.cf_package_qty || 1)
+        : 1;
+
+      const newScanned = currentScanned + boxQuantity;
 
       dispatch(scanItem({ ...item, newScanned }));
     },

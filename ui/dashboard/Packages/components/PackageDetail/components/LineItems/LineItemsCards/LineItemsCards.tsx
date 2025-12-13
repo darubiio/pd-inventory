@@ -5,20 +5,20 @@ import {
   getStatusColor,
 } from "../../../utils/utils";
 import clsx from "clsx";
-import { PackageDetail } from "../../../../../../../../types";
+import { PackageDetail, PackageLineItem } from "../../../../../../../../types";
 
 interface PackageDetailCardsProps {
-  data?: PackageDetail;
+  items?: PackageLineItem[];
   state: {
     scanMode: boolean;
     scannedItems: Map<string, number>;
   };
 }
 
-export const LineItemsCards = ({ data, state }: PackageDetailCardsProps) => {
+export const LineItemsCards = ({ items, state }: PackageDetailCardsProps) => {
   return (
     <div className="md:hidden space-y-3">
-      {data?.line_items.map((item) => {
+      {items?.map((item) => {
         const status = getItemStatus(item, state.scannedItems);
         const scanned = state.scannedItems.get(item.line_item_id) || 0;
         const partNumber = getPartNumber(item);

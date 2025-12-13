@@ -5,6 +5,7 @@ import { getUserAuth } from "../../../../../lib/api/clients/zoho/zohoAuth";
 const { ZOHO_ORG_ID } = process.env;
 const ZOHO_DOMAIN = process.env.ZOHO_DOMAIN || "com";
 const ZOHO_INVENTORY_URL = `https://www.zohoapis.${ZOHO_DOMAIN}/inventory/v1`;
+const CUSTOM_FIELDS_IDS = ["cf_box_barcode", "cf_box_qty", "cf_package_qty"];
 
 interface PackageDetailResponse {
   code: number;
@@ -98,6 +99,10 @@ interface ItemResponse {
   code: number;
   message: string;
   item: {
+    custom_fields: Array<{
+      api_name: string;
+      value: string;
+    }>;
     item_id: string;
     upc?: string;
     ean?: string;
@@ -144,8 +149,16 @@ export async function GET(
             }
           );
 
+          const customFields = itemData.custom_fields.reduce((acc, field) => {
+            if (CUSTOM_FIELDS_IDS.includes(field.api_name)) {
+              acc[field.api_name] = field.value;
+            }
+            return acc;
+          }, {} as Record<string, any>);
+
           return {
             ...lineItem,
+            ...customFields,
             upc: itemData.upc,
             ean: itemData.ean,
             isbn: itemData.isbn,

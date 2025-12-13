@@ -15,8 +15,8 @@ export const LineItems = ({ data, state }: LineItemsProps) => {
   return (
     <Fragment>
       <div className="divider">Line Items</div>
-      <LineItemsCards data={data} state={state} />
-      <LineItemsTable data={data} state={state} />
+      <LineItemsCards items={data?.line_items} state={state} />
+      <LineItemsTable items={data?.line_items} state={state} />
     </Fragment>
   );
 };
