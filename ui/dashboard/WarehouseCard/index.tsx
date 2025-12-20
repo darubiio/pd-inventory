@@ -1,21 +1,24 @@
 import { FC, useState } from "react";
 import { WarehouseAndPosition } from "../../../types";
-import { CubeIcon, ArchiveBoxIcon } from "@heroicons/react/24/outline";
+import {
+  ArchiveBoxIcon,
+  ArrowUpTrayIcon,
+  ArrowDownTrayIcon,
+} from "@heroicons/react/24/outline";
 import { BuildingStorefrontIcon } from "@heroicons/react/16/solid";
 import { ContactLinks } from "./ContactLinks";
 import { cleanWarehouseName } from "../../../lib/api/utils/zohoDataUtils";
-
 import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 
 export const WarehouseCard: FC<WarehouseAndPosition> = ({
-  location_name,
-  location_id,
   email,
-  phone,
-  parent_location_id,
+  location_id,
+  location_name,
   mapUrl,
+  parent_location_id,
+  phone,
 }) => {
   const [focused, setFocused] = useState(false);
   const toggleFocus = () => setFocused(!focused);
@@ -40,23 +43,33 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
         <ul className="list gap-2 mt-2">
           <ContactLinks email={email} phone={phone} />
         </ul>
-        <div className="join join-horizontal w-full">
+        <div className="flex flex-col gap-2 w-full">
           <Link
             href={`/dashboard/warehouse/${location_id}/inventory?location_id=${parent_location_id}`}
-            className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <CubeIcon className="h-4 w-4" />
-            Inventory
-          </Link>
-          <Link
-            href={`/dashboard/warehouse/${location_id}/packages?location_id=${parent_location_id}`}
-            className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+            className="btn btn-sm w-full border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
             onClick={(e) => e.stopPropagation()}
           >
             <ArchiveBoxIcon className="h-4 w-4" />
-            Packages
+            Inventory
           </Link>
+          <div className="join join-horizontal w-full">
+            <Link
+              href={`/dashboard/warehouse/${location_id}/receiving?location_id=${parent_location_id}`}
+              className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              Receiving
+            </Link>
+            <Link
+              href={`/dashboard/warehouse/${location_id}/packages?location_id=${parent_location_id}`}
+              className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ArrowUpTrayIcon className="h-4 w-4" />
+              Dispatching
+            </Link>
+          </div>
         </div>
       </div>
       <figure className="relative">

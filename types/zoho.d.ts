@@ -374,3 +374,157 @@ export type PackageRow = {
   created_time?: string;
   shipment_order?: { tracking_number?: string; carrier?: string };
 };
+
+export interface PurchaseOrdersResponse {
+  purchaseorders: PurchaseOrder[];
+  page_context: {
+    page: number;
+    per_page: number;
+    has_more_page: boolean;
+    report_name: string;
+    applied_filter: string;
+    sort_column: string;
+    sort_order: string;
+  };
+}
+
+export interface PurchaseOrder {
+  purchaseorder_id: string;
+  purchaseorder_number: string;
+  date: string;
+  expected_delivery_date: string;
+  reference_number: string;
+  status: string;
+  vendor_id: string;
+  vendor_name: string;
+  currency_id: string;
+  currency_code: string;
+  currency_symbol: string;
+  exchange_rate: number;
+  location_id?: string;
+  location_name?: string;
+  line_items: PurchaseOrderLineItem[];
+  sub_total: number;
+  tax_total: number;
+  total: number;
+  created_time: string;
+  last_modified_time: string;
+}
+
+export interface PurchaseOrderLineItem {
+  line_item_id: string;
+  item_id: string;
+  name: string;
+  description: string;
+  item_order: number;
+  bcy_rate: number;
+  purchase_rate: number;
+  quantity: number;
+  quantity_received: number;
+  unit: string;
+  item_total: number;
+  tax_id: string;
+  tax_name: string;
+  tax_type: string;
+  tax_percentage: number;
+  location_id?: string;
+  location_name?: string;
+  sku?: string;
+}
+
+export interface PurchaseOrderSearchParams {
+  locationId?: string;
+  dateStart?: string;
+  dateEnd?: string;
+  status?: string;
+}
+
+export interface PurchaseOrder {
+  purchaseorder_id: string;
+  purchaseorder_number: string;
+  date: string;
+  expected_delivery_date: string;
+  reference_number: string;
+  status: string;
+  vendor_id: string;
+  vendor_name: string;
+  currency_id: string;
+  currency_code: string;
+  currency_symbol: string;
+  exchange_rate: number;
+  location_id?: string;
+  location_name?: string;
+  line_items: PurchaseOrderLineItem[];
+  sub_total: number;
+  tax_total: number;
+  total: number;
+  created_time: string;
+  last_modified_time: string;
+  purchasereceives?: Array<{
+    receive_id: string;
+    receive_number: string;
+    date: string;
+    notes?: string;
+    received_status?: string;
+  }>;
+}
+
+export type PurchaseOrderRow = {
+  purchaseorder_id: string;
+  purchaseorder_number: string;
+  date: string;
+  expected_delivery_date: string;
+  vendor_name: string;
+  status: string;
+  total: number;
+  currency_code?: string;
+  currency_symbol?: string;
+  created_time?: string;
+  reference_number?: string;
+};
+
+export interface PurchaseReceive {
+  purchaseorder_id: string;
+  purchaseorder_number: string;
+  received_status?: string;
+  receive_id: string;
+  receive_number: string;
+  date: string;
+  vendor_id: string;
+  vendor_name: string;
+  location_id?: string;
+  location_name?: string;
+  line_items: PurchaseReceiveLineItem[];
+  notes?: string;
+  created_time: string;
+  last_modified_time: string;
+}
+
+export interface PurchaseReceiveLineItem {
+  line_item_id: string;
+  item_id: string;
+  name: string;
+  description?: string;
+  item_order: number;
+  quantity: number;
+  unit: string;
+  sku?: string;
+}
+
+export interface PurchaseReceivesResponse {
+  code: number;
+  message: string;
+  purchasereceive: PurchaseReceive;
+}
+
+export type PurchaseReceiveRow = {
+  receive_id: string;
+  receive_number: string;
+  purchaseorder_number: string;
+  received_status?: string;
+  date: string;
+  vendor_name: string;
+  created_time?: string;
+  location_id?: string;
+  location_name?: string;
+};
