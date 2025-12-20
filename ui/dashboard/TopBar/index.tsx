@@ -33,14 +33,17 @@ const TopBar: FC = () => {
   return (
     <div className="navbar sticky top-0 z-100 bg-base-100">
       <div className="navbar-start">
-        <a className="btn btn-ghost text-xl hidden md:flex p-0 pl-2 min-h-0 h-auto">
-          <span className="flex flex-col items-end leading-tight font-bold">
+        <Link
+          href="/dashboard"
+          className="btn btn-ghost text-xl hidden md:flex px-3 py-2 min-h-0 h-auto hover:bg-transparent"
+        >
+          <span className="flex flex-col items-end leading-tight font-bold transition-opacity hover:opacity-80">
             Perdomo Distribuitor
             <span className="font-bold text-[10px] text-right text-base-content/60">
               inventory
             </span>
           </span>
-        </a>
+        </Link>
         <div className="dropdown md:hidden">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
             <Bars4Icon width={20} />
@@ -72,14 +75,17 @@ const TopBar: FC = () => {
         </div>
       </div>
       <div className="navbar-center">
-        <a className="btn btn-ghost text-xl flex md:hidden p-0 min-h-0 h-auto">
-          <span className="flex flex-col items-end leading-tight font-bold">
+        <Link
+          href="/dashboard"
+          className="btn btn-ghost text-xl flex md:hidden px-3 py-2 min-h-0 h-auto hover:bg-transparent"
+        >
+          <span className="flex flex-col items-end leading-tight font-bold transition-opacity hover:opacity-80">
             Perdomo Distribuitor
             <span className="text-[10px] text-right text-base-content/60 mt-1 font-bold">
               inventory
             </span>
           </span>
-        </a>
+        </Link>
         <ul className="menu hidden md:flex menu-horizontal font-semibold gap-2 bg-base-200 rounded-box p-2">
           {navItems.map(({ name, href, Icon }) => (
             <li key={name}>

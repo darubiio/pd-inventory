@@ -5,7 +5,7 @@ import { CategoriesMenu } from "../CategoriesMenu/CategoriesMenu";
 import { ItemsTable } from "../ItemsTable/ItemsTable";
 import { Location } from "../../../types";
 import { cleanWarehouseName } from "../../../lib/api/utils/zohoDataUtils";
-import { TagIcon } from "@heroicons/react/24/outline";
+import { TagIcon, ArchiveBoxIcon } from "@heroicons/react/24/outline";
 
 interface Category {
   category_id: string;
@@ -83,7 +83,8 @@ const DrawerMenu = ({
     <div className="drawer flex md:hidden">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="flex justify-between items-center w-full pt-1 px-1 h-10">
-        <div className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md px-3 py-2 font-extrabold h-10 flex items-center">
+        <div className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md px-3 py-2 font-extrabold h-10 flex items-center gap-2">
+          <ArchiveBoxIcon className="h-5 w-5" />
           {cleanWarehouseName(warehouse?.location_name)}
         </div>
         <label

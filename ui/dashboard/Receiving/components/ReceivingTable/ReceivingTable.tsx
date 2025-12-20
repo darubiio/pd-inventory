@@ -6,82 +6,85 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowPathIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { cleanWarehouseName } from "../../../../../lib/api/utils/zohoDataUtils";
-import { getColumns, normalizeStatus, statusOptions } from "./utils/columns";
-import { Location, PackageRow } from "../../../../../types";
-import { PackageDetail } from "../PackageDetail/PackageDetail";
-import { PackageListingLoading } from "../../../../../ui/loading/packagesLoading";
+import { getColumns } from "./columns";
+import { Location, PurchaseReceiveRow } from "../../../../../types";
+import TableLoading from "../../../../loading/tableLoading";
+import { ReceivingListingLoading } from "../../../../loading/receivingLoading";
 import { useMemo, useState } from "react";
 import DateRangeInput from "../../../../components/DateRangeInput";
-import TableLoading from "../../../../loading/tableLoading";
+import { ReceivingDetail } from "../ReceivingDetail/ReceivingDetail";
 
-type PackagesTableProps = {
-  data: PackageRow[];
+const statusOptions = {
+  all: { label: "All", value: "all" },
+  issued: { label: "In Transit", value: "in_transit" },
+  received: { label: "Received", value: "received" },
+};
+
+export const getStatusBadge = (status?: string) => {
+  switch (status?.toLowerCase()) {
+    case "in_transit":
+      return { label: "In Transit", class: "badge-info" };
+    case "received":
+      return { label: "Received", class: "badge-success" };
+    case "cancelled":
+      return { label: "Cancelled", class: "badge-error" };
+    default:
+      return { label: "Other", class: "badge-warning" };
+  }
+};
+
+type ReceivingTableProps = {
+  data: PurchaseReceiveRow[];
   onDateChange?: (start: string, end: string) => void;
+  onStatusChange?: (status: string) => void;
   defaultDateStart?: string;
   defaultDateEnd?: string;
+  defaultStatus?: string;
   loading?: boolean;
   error?: string | null;
   onRetry?: () => void;
   onRefresh?: () => void;
-  onPackageUpdate?: (updatedPackage: any) => void;
   warehouse?: Location;
   initialLoading?: boolean;
 };
 
-export function PackagesTable({
+export function ReceivingTable({
   data,
   defaultDateEnd,
   defaultDateStart,
+  defaultStatus = "in_transit",
   error,
   loading = false,
   onDateChange,
-  onPackageUpdate,
+  onStatusChange,
   onRefresh,
   onRetry,
   warehouse,
   initialLoading = false,
-}: PackagesTableProps) {
+}: ReceivingTableProps) {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("not_shipped");
-  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
-    null
-  );
-
-  const getStatusBadgeClass = (status: string) => {
-    const isPending = normalizeStatus(status).toLowerCase() === "not_shipped";
-    return isPending
-      ? "badge-warning"
-      : status === "shipped"
-      ? "badge-primary"
-      : status === "delivered"
-      ? "badge-success"
-      : "";
-  };
+  const [statusFilter, setStatusFilter] = useState<string>(defaultStatus);
+  const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<
+    string | null
+  >(null);
 
   const filtered = useMemo(() => {
     const text = globalFilter.trim().toLowerCase();
-    return (data || [])
-      .filter((p) => {
-        if (!statusFilter || statusFilter === "all") return true;
-        const s = normalizeStatus(p.status);
-        if (statusFilter === "not_shipped")
-          return s.toLowerCase() === "not_shipped";
-        return s === statusFilter;
-      })
-      .filter((p) => {
-        if (!text) return true;
-        return (
-          p.package_number?.toLowerCase().includes(text) ||
-          p.package_id?.toLowerCase().includes(text)
-        );
-      });
-  }, [data, globalFilter, statusFilter]);
+    return (data || []).filter((receive) => {
+      if (!text) return true;
+      return (
+        receive.receive_number?.toLowerCase().includes(text) ||
+        receive.purchaseorder_number?.toLowerCase().includes(text) ||
+        receive.vendor_name?.toLowerCase().includes(text)
+      );
+    });
+  }, [data, globalFilter]);
 
-  const table = useReactTable<PackageRow>({
+  const table = useReactTable<PurchaseReceiveRow>({
     data: filtered,
-    columns: getColumns({ actions: { setSelectedPackageId } }),
+    columns: getColumns({ actions: { setSelectedPurchaseOrderId } }),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
@@ -91,7 +94,7 @@ export function PackagesTable({
       <div className="px-1 md:px-3 pb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2 w-full md:w-1/2">
           <div className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md px-3 py-2 font-extrabold h-10 flex items-center gap-2">
-            <ArrowUpTrayIcon className="h-5 w-5" />
+            <ArrowDownTrayIcon className="h-5 w-5" />
             {cleanWarehouseName(warehouse?.location_name)}
           </div>
           <label className="input input-bordered flex-1 rounded-sm h-10 flex items-center">
@@ -114,8 +117,8 @@ export function PackagesTable({
             <input
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder="Search by package number or ID"
-              aria-label="Search packages"
+              placeholder="Search by PR number"
+              aria-label="Search receiving orders"
               className="grow"
             />
           </label>
@@ -124,7 +127,7 @@ export function PackagesTable({
               onClick={onRefresh}
               disabled={loading}
               className="bg-base-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded-md hover:shadow-md transition-shadow md:hidden h-10 w-10 flex items-center justify-center"
-              aria-label="Refresh packages"
+              aria-label="Refresh receiving orders"
             >
               <ArrowPathIcon
                 className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
@@ -137,11 +140,11 @@ export function PackagesTable({
             <button
               onClick={onRefresh}
               disabled={loading}
-              className="btn btn-ghost btn-sm hidden md:inline-flex"
-              aria-label="Refresh packages"
+              className="btn border border-gray-300 dark:border-gray-600 btn-sm hidden shadow-sm rounded-md hover:shadow-md transition-shadow md:inline-flex h-10 w-10"
+              aria-label="Refresh purchase orders"
             >
               <ArrowPathIcon
-                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
               />
             </button>
           )}
@@ -160,7 +163,10 @@ export function PackagesTable({
             <span className="label">Status</span>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                onStatusChange?.(e.target.value);
+              }}
               aria-label="Filter status"
             >
               {Object.values(statusOptions).map((o) => (
@@ -194,7 +200,7 @@ export function PackagesTable({
             <button
               onClick={onRetry}
               className="btn btn-primary mt-4"
-              aria-label="Retry loading packages"
+              aria-label="Retry loading receiving orders"
             >
               Try again
             </button>
@@ -202,43 +208,50 @@ export function PackagesTable({
         </div>
       ) : initialLoading || loading ? (
         <>
-          <PackageListingLoading />
+          <ReceivingListingLoading />
           <div className="overflow-x-auto md:mx-3 hidden md:block">
             <TableLoading cols={8} rows={14} />
           </div>
         </>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-4">
-          <ArrowUpTrayIcon className="h-24 w-24 opacity-20 mb-4" />
-          <p className="text-sm opacity-50">No packages found</p>
+          <ArrowDownTrayIcon className="h-24 w-24 opacity-20 mb-4" />
+          <p className="text-sm opacity-50">No receiving orders found</p>
         </div>
       ) : (
         <>
           <div className="md:hidden px-1 pb-1 flex flex-col gap-3">
-            {filtered.map((p) => (
-              <div
-                key={p.package_id}
-                onClick={() => setSelectedPackageId(p.package_id)}
-                className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3 cursor-pointer hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">{p.package_number}</div>
-                  <span className={`badge ${getStatusBadgeClass(p.status)}`}>
-                    {statusOptions[p.status as keyof typeof statusOptions]
-                      ?.label || p.status}
-                  </span>
+            {filtered.map((receive) => {
+              const statusBadge = getStatusBadge(receive.received_status);
+              return (
+                <div
+                  key={receive.receive_id}
+                  onClick={() => setSelectedPurchaseOrderId(receive.receive_id)}
+                  className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3 cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold">
+                      {receive.receive_number}
+                    </div>
+                    <span className={`badge ${statusBadge.class}`}>
+                      {statusBadge.label}
+                    </span>
+                  </div>
+                  <div className="text-sm opacity-80">
+                    {receive.vendor_name}
+                  </div>
+                  <div className="text-xs opacity-70">
+                    PO: {receive.purchaseorder_number}
+                  </div>
+                  <div className="text-xs opacity-70">Date: {receive.date}</div>
+                  {receive.location_name && (
+                    <div className="text-xs opacity-70">
+                      Location: {receive.location_name}
+                    </div>
+                  )}
                 </div>
-                <div className="text-sm opacity-80">{p.customer_name}</div>
-                <div className="text-xs opacity-70">
-                  SO: {p.salesorder_number}
-                </div>
-                <div className="text-xs opacity-70">ID: {p.package_id}</div>
-                <div className="text-xs opacity-70">Date: {p.date}</div>
-                <div className="text-xs opacity-70">
-                  Tracking: {p.shipment_order?.tracking_number || "-"}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="overflow-x-auto md:mx-3 hidden md:block">
@@ -273,11 +286,10 @@ export function PackagesTable({
           </div>
         </>
       )}
-      {selectedPackageId && (
-        <PackageDetail
-          packageId={selectedPackageId}
-          onClose={() => setSelectedPackageId(null)}
-          onUpdate={onPackageUpdate}
+      {selectedPurchaseOrderId && (
+        <ReceivingDetail
+          purchaseorderId={selectedPurchaseOrderId}
+          onClose={() => setSelectedPurchaseOrderId(null)}
         />
       )}
     </div>
