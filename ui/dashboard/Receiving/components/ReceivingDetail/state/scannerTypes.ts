@@ -7,6 +7,12 @@ export interface ScannerState {
     message: string;
   } | null;
   isUpdating: boolean;
+  maxQuantityModal: {
+    isOpen: boolean;
+    itemName: string;
+    maxQuantity: number;
+    scannedQuantity: number;
+  } | null;
 }
 
 export type ScannerAction =
@@ -24,4 +30,13 @@ export type ScannerAction =
   | { type: "SET_LAST_CODE"; payload: string }
   | { type: "CLEAR_RESULT" }
   | { type: "START_UPDATE" }
-  | { type: "FINISH_UPDATE" };
+  | { type: "FINISH_UPDATE" }
+  | {
+      type: "SHOW_MAX_QUANTITY_MODAL";
+      payload: {
+        itemName: string;
+        maxQuantity: number;
+        scannedQuantity: number;
+      };
+    }
+  | { type: "CLOSE_MAX_QUANTITY_MODAL" };

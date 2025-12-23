@@ -27,6 +27,7 @@ import { useBarcodeScan } from "../../../../../lib/hooks/useBarcodeScan";
 import { ReceivingDetailHeader } from "./components/ReceivingDetailHeader";
 import { ReceivingDetailButtons } from "./components/ReceivingDetailButtons";
 import { LineItems } from "./components/ReceivingLineItems";
+import { MaxQuantityModal } from "../../../shared/components/MaxQuantityModal";
 
 interface ReceivingDetailProps {
   updatePurchaseReceives?: () => void;
@@ -54,6 +55,8 @@ export function ReceivingDetail({
 
   const onItemScan = useCallback(
     (barcode: string) => {
+      if (state.maxQuantityModal?.isOpen) return;
+
       dispatch(setLastScannedCode(barcode));
 
       const { item } = findItemByCode(
@@ -66,17 +69,22 @@ export function ReceivingDetail({
       const currentScanned = state.scannedItems.get(item.line_item_id) || 0;
 
       if (currentScanned >= item.quantity) {
-        return dispatch({
-          type: "SCAN_ERROR",
-          payload: `${item.name}: Maximum quantity reached (${item.quantity})`,
+        dispatch({
+          type: "SHOW_MAX_QUANTITY_MODAL",
+          payload: {
+            itemName: item.name,
+            maxQuantity: item.quantity,
+            scannedQuantity: currentScanned + 1,
+          },
         });
+        return;
       }
 
       const newScanned = currentScanned + 1;
 
       dispatch(scanItem({ ...item, newScanned }));
     },
-    [state.scannedItems, purchaseReceiveDetail]
+    [state.scannedItems, state.maxQuantityModal?.isOpen, purchaseReceiveDetail]
   );
 
   useBarcodeScan({ enabled: state.scanMode, onScan: onItemScan });
@@ -334,6 +342,13 @@ export function ReceivingDetail({
           />
         </div>
       </div>
+      <MaxQuantityModal
+        isOpen={state.maxQuantityModal?.isOpen || false}
+        itemName={state.maxQuantityModal?.itemName || ""}
+        maxQuantity={state.maxQuantityModal?.maxQuantity || 0}
+        scannedQuantity={state.maxQuantityModal?.scannedQuantity || 0}
+        onConfirm={() => dispatch({ type: "CLOSE_MAX_QUANTITY_MODAL" })}
+      />
     </Fragment>
   );
 }

@@ -4,6 +4,7 @@ export const initialState: ScannerState = {
   lastScannedCode: "",
   scanResult: null,
   isUpdatingStatus: false,
+  maxQuantityModal: null,
 };
 
 export const scannerReducer = (
@@ -88,6 +89,23 @@ export const scannerReducer = (
       return {
         ...state,
         isUpdatingStatus: false,
+      };
+
+    case "SHOW_MAX_QUANTITY_MODAL":
+      return {
+        ...state,
+        maxQuantityModal: {
+          isOpen: true,
+          itemName: action.payload.itemName,
+          maxQuantity: action.payload.maxQuantity,
+          scannedQuantity: action.payload.scannedQuantity,
+        },
+      };
+
+    case "CLOSE_MAX_QUANTITY_MODAL":
+      return {
+        ...state,
+        maxQuantityModal: null,
       };
 
     default:

@@ -7,6 +7,12 @@ interface ScannerState {
     message: string;
   } | null;
   isUpdatingStatus: boolean;
+  maxQuantityModal: {
+    isOpen: boolean;
+    itemName: string;
+    maxQuantity: number;
+    scannedQuantity: number;
+  } | null;
 }
 
 type ScannerAction =
@@ -26,4 +32,13 @@ type ScannerAction =
   | { type: "START_UPDATE" }
   | { type: "UPDATE_SUCCESS"; payload: string }
   | { type: "UPDATE_ERROR"; payload: string }
-  | { type: "FINISH_UPDATE" };
+  | { type: "FINISH_UPDATE" }
+  | {
+      type: "SHOW_MAX_QUANTITY_MODAL";
+      payload: {
+        itemName: string;
+        maxQuantity: number;
+        scannedQuantity: number;
+      };
+    }
+  | { type: "CLOSE_MAX_QUANTITY_MODAL" };

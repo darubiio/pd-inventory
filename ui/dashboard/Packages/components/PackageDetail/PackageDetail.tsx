@@ -21,6 +21,7 @@ import { ShipmentInfo } from "./components/ShipmentInfo/ShipmentInfo";
 import { LineItems } from "./components/LineItems/LineItems";
 import { useBarcodeScan } from "../../../../../lib/hooks/useBarcodeScan";
 import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
+import { MaxQuantityModal } from "../../../shared/components/MaxQuantityModal";
 
 interface PackageDetailProps {
   packageId: string;
@@ -42,6 +43,8 @@ export function PackageDetail({
 
   const onItemScan = useCallback(
     (barcode: string) => {
+      if (state.maxQuantityModal?.isOpen) return;
+
       dispatch(setLastScannedCode(barcode));
 
       const { item, isBoxBarcode } = findItemByCode(barcode, data?.line_items);
@@ -59,9 +62,20 @@ export function PackageDetail({
 
       const newScanned = currentScanned + boxQuantity;
 
+      if (newScanned > item.quantity) {
+        return dispatch({
+          type: "SHOW_MAX_QUANTITY_MODAL",
+          payload: {
+            itemName: item.name,
+            maxQuantity: item.quantity,
+            scannedQuantity: newScanned,
+          },
+        });
+      }
+
       dispatch(scanItem({ ...item, newScanned }));
     },
-    [findItemByCode, state.scannedItems, data]
+    [findItemByCode, state.scannedItems, state.maxQuantityModal?.isOpen, data]
   );
 
   useBarcodeScan({ enabled: state.scanMode, onScan: onItemScan });
@@ -239,6 +253,13 @@ export function PackageDetail({
           />
         </div>
       </div>
+      <MaxQuantityModal
+        isOpen={state.maxQuantityModal?.isOpen || false}
+        itemName={state.maxQuantityModal?.itemName || ""}
+        maxQuantity={state.maxQuantityModal?.maxQuantity || 0}
+        scannedQuantity={state.maxQuantityModal?.scannedQuantity || 0}
+        onConfirm={() => dispatch({ type: "CLOSE_MAX_QUANTITY_MODAL" })}
+      />
     </Fragment>
   );
 }
