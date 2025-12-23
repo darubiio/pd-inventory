@@ -1,7 +1,8 @@
 "use client";
 
 import { clsx } from "clsx";
-import { fetcher, findItemByCode, getStatusBadgeClass } from "./utils/utils";
+import { fetcher, getStatusBadgeClass } from "./utils/utils";
+import { findItemByCode } from "../../../shared/utils/scannerUtils";
 import { initialState, scannerReducer } from "./state/scannerReducer";
 import { PackageDetail as PackageDetailTypes } from "../../../../../types";
 import { PackageDetailButtons } from "./components/PackageDetailButtons/PackageDetailButtons";
@@ -43,7 +44,7 @@ export function PackageDetail({
     (barcode: string) => {
       dispatch(setLastScannedCode(barcode));
 
-      const { item, isBoxBarcode } = findItemByCode(barcode, data);
+      const { item, isBoxBarcode } = findItemByCode(barcode, data?.line_items);
 
       if (!item) {
         dispatch(setScanError(barcode));

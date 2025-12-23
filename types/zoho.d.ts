@@ -297,6 +297,10 @@ export type ItemDetailsResponse = {
   items: ItemDetails;
 };
 
+export type ItemDetailResponse = {
+  item: ItemDetails;
+};
+
 export type OrganizationsResponse = {
   organizations: ZohoOrganization[];
 };

@@ -2,16 +2,18 @@
 
 import { clsx } from "clsx";
 import { QrCodeIcon } from "@heroicons/react/24/outline";
-import { Fragment, useCallback, useReducer, useEffect, useMemo } from "react";
+import {
+  Fragment,
+  useCallback,
+  useReducer,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { PurchaseReceive } from "../../../../../types";
-import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
-import {
-  findItemByCode,
-  getStatusBadgeClass,
-  getItemStatus,
-  getStatusColor,
-} from "./utils/utils";
+import { findItemByCode } from "../../../shared/utils/scannerUtils";
+import { getStatusBadgeClass } from "./utils/utils";
 import { initialState, scannerReducer } from "./state/scannerReducer";
 import {
   scanItem,
@@ -24,6 +26,7 @@ import {
 import { useBarcodeScan } from "../../../../../lib/hooks/useBarcodeScan";
 import { ReceivingDetailHeader } from "./components/ReceivingDetailHeader";
 import { ReceivingDetailButtons } from "./components/ReceivingDetailButtons";
+import { LineItems } from "./components/ReceivingLineItems";
 
 interface ReceivingDetailProps {
   updatePurchaseReceives?: () => void;
@@ -37,21 +40,43 @@ export function ReceivingDetail({
   onClose,
 }: ReceivingDetailProps) {
   const [state, dispatch] = useReducer(scannerReducer, initialState);
+  const [detailedLineItems, setDetailedLineItems] = useState(
+    purchaseReceive.line_items
+  );
+
+  const purchaseReceiveDetail = useMemo(
+    () => ({
+      ...purchaseReceive,
+      line_items: detailedLineItems,
+    }),
+    [purchaseReceive, detailedLineItems]
+  );
 
   const onItemScan = useCallback(
     (barcode: string) => {
       dispatch(setLastScannedCode(barcode));
 
-      const { item } = findItemByCode(barcode, purchaseReceive);
+      const { item } = findItemByCode(
+        barcode,
+        purchaseReceiveDetail.line_items
+      );
 
       if (!item) return dispatch(setScanError(barcode));
 
       const currentScanned = state.scannedItems.get(item.line_item_id) || 0;
+
+      if (currentScanned >= item.quantity) {
+        return dispatch({
+          type: "SCAN_ERROR",
+          payload: `${item.name}: Maximum quantity reached (${item.quantity})`,
+        });
+      }
+
       const newScanned = currentScanned + 1;
 
       dispatch(scanItem({ ...item, newScanned }));
     },
-    [state.scannedItems, purchaseReceive]
+    [state.scannedItems, purchaseReceiveDetail]
   );
 
   useBarcodeScan({ enabled: state.scanMode, onScan: onItemScan });
@@ -164,7 +189,7 @@ export function ReceivingDetail({
     } finally {
       dispatch(finishUpdate());
     }
-  }, [purchaseReceive, purchaseReceive, state.scannedItems, onClose]);
+  }, [purchaseReceive, state.scannedItems, onClose]);
 
   useEffect(() => {
     if (!state.scanResult) return;
@@ -292,152 +317,18 @@ export function ReceivingDetail({
                 </div>
               )}
               <div className="divider">Items Received</div>
-              <div className="md:hidden space-y-3">
-                {purchaseReceive?.line_items?.map((item) => {
-                  const scanned =
-                    state.scannedItems.get(item.line_item_id) || 0;
-                  const status = getItemStatus(item, state.scannedItems);
-                  const isComplete = scanned >= item.quantity;
-                  const isExcess = scanned > item.quantity;
-                  const isInTransit =
-                    purchaseReceive?.received_status === "in_transit";
-                  const quantityLabel = isInTransit
-                    ? "Expected Quantity"
-                    : "Received";
-
-                  return (
-                    <div
-                      key={item.line_item_id}
-                      className={clsx(
-                        "card",
-                        state.scanMode ? getStatusColor(status) : "bg-base-200"
-                      )}
-                    >
-                      <div className="card-body p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="card-title text-base">
-                              {item.name}
-                            </h4>
-                            {item.sku && (
-                              <p className="text-xs opacity-70">
-                                SKU: {item.sku}
-                              </p>
-                            )}
-                            {item.description && (
-                              <p className="text-xs opacity-70 mt-1">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-                          <div>
-                            <p className="opacity-70">{quantityLabel}</p>
-                            <p className="font-semibold">
-                              {purchaseReceive?.received_status === "in_transit"
-                                ? item.quantity
-                                : item.quantity_received}{" "}
-                              {item.unit}
-                            </p>
-                          </div>
-                          <OnlyIf condition={state.scanMode}>
-                            <div>
-                              <p className="opacity-70">Scanned</p>
-                              <p
-                                className={clsx(
-                                  "font-semibold",
-                                  scanned > 0 && "font-bold",
-                                  isComplete && !isExcess && "text-success",
-                                  isExcess && "text-warning"
-                                )}
-                              >
-                                {scanned}
-                              </p>
-                            </div>
-                          </OnlyIf>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="hidden md:block overflow-x-auto">
-                <table className="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>SKU</th>
-                      <th className="text-right">
-                        {purchaseReceive?.received_status === "in_transit"
-                          ? "Expected"
-                          : "Received"}
-                      </th>
-                      <OnlyIf condition={state.scanMode}>
-                        <th className="text-right">Scanned</th>
-                      </OnlyIf>
-                      <th>Unit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {purchaseReceive?.line_items?.map((item) => {
-                      const scanned =
-                        state.scannedItems.get(item.line_item_id) || 0;
-                      const status = getItemStatus(item, state.scannedItems);
-                      const isComplete = scanned >= item.quantity;
-                      const isExcess = scanned > item.quantity;
-
-                      return (
-                        <tr
-                          key={item.line_item_id}
-                          className={clsx(
-                            state.scanMode && getStatusColor(status)
-                          )}
-                        >
-                          <td>
-                            <div>
-                              <div className="font-semibold">{item.name}</div>
-                              {item.description && (
-                                <div className="text-xs opacity-70">
-                                  {item.description}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="text-xs opacity-70">
-                            {item.sku || "-"}
-                          </td>
-                          <td className="text-right font-semibold">
-                            {purchaseReceive?.received_status === "in_transit"
-                              ? item.quantity
-                              : item.quantity_received}
-                          </td>
-                          <OnlyIf condition={state.scanMode}>
-                            <td className="text-right">
-                              <span
-                                className={clsx(
-                                  scanned > 0 && "font-bold",
-                                  isComplete && !isExcess && "text-success",
-                                  isExcess && "text-warning"
-                                )}
-                              >
-                                {scanned}
-                              </span>
-                            </td>
-                          </OnlyIf>
-                          <td className="text-xs">{item.unit}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <LineItems
+                state={state}
+                purchaseReceive={purchaseReceive}
+                onEnrichedItemsReady={setDetailedLineItems}
+              />
             </div>
           </div>
           <ReceivingDetailButtons
             state={state}
             dispatch={dispatch}
             scanProgress={scanProgress}
+            purchaseReceive={purchaseReceive}
             onToggleScanMode={handleToggleScanMode}
             onMarkAsReceived={handleMarkAsReceived}
           />
