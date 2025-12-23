@@ -1,17 +1,19 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { PurchaseReceiveRow } from "../../../../../types";
+import { PurchaseReceive, PurchaseReceiveRow } from "../../../../../types";
 import { Dispatch, SetStateAction } from "react";
 import { getStatusBadge } from "./ReceivingTable";
 
 type GetColumnsParams = {
   actions: {
-    setSelectedPurchaseOrderId: Dispatch<SetStateAction<string | null>>;
+    setSelectedPurchaseReceives: Dispatch<
+      SetStateAction<PurchaseReceive | null>
+    >;
   };
 };
 
 export const getColumns = ({
   actions,
-}: GetColumnsParams): ColumnDef<PurchaseReceiveRow>[] => [
+}: GetColumnsParams): ColumnDef<PurchaseReceive>[] => [
   {
     accessorKey: "receive_number",
     header: "Receive #",
@@ -56,9 +58,7 @@ export const getColumns = ({
     cell: ({ row }) => (
       <button
         className="btn btn-ghost btn-sm"
-        onClick={() =>
-          actions.setSelectedPurchaseOrderId(row.original.receive_id)
-        }
+        onClick={() => actions.setSelectedPurchaseReceives(row.original)}
         aria-label="View details"
       >
         <svg

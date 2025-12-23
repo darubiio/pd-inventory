@@ -384,17 +384,49 @@ export const getPurchaseReceiveById = async (
   }
 };
 
+export const updatePurchaseReceive = async (
+  receiveId: string,
+  updateData: {
+    receive_number: string;
+    date: string;
+    line_items: Array<{
+      line_item_id: string;
+      quantity: number;
+    }>;
+  }
+): Promise<PurchaseReceive | null> => {
+  try {
+    const updateUrl = `${ZOHO_INVENTORY_URL}/purchasereceives/${receiveId}?organization_id=${ZOHO_ORG_ID}`;
+    await apiFetch<PurchaseReceivesResponse>(updateUrl, {
+      method: "PUT",
+      auth: await getUserAuth(),
+      body: JSON.stringify(updateData),
+    });
+
+    const statusUrl = `${ZOHO_INVENTORY_URL}/purchasereceives/${receiveId}/setstatusasreceived?organization_id=${ZOHO_ORG_ID}`;
+    const statusResponse = await apiFetch<PurchaseReceivesResponse>(statusUrl, {
+      method: "POST",
+      auth: await getUserAuth(),
+    });
+
+    return statusResponse.purchasereceive;
+  } catch (error) {
+    console.error(`Error updating purchase receive ${receiveId}:`, error);
+    throw error;
+  }
+};
+
 interface PurchaseOrderDetailResponse {
   code: number;
   message: string;
   purchaseorder: PurchaseOrder;
 }
 
-const getPurchaseOrderDetail = async (
-  purchaseorderId: string
-): Promise<PurchaseOrder | null> => {
+const getPurchaseOrderDetail = async ({
+  purchaseorder_id,
+}: PurchaseOrder): Promise<PurchaseOrder | null> => {
   try {
-    const url = `${ZOHO_INVENTORY_URL}/purchaseorders/${purchaseorderId}?organization_id=${ZOHO_ORG_ID}`;
+    const url = `${ZOHO_INVENTORY_URL}/purchaseorders/${purchaseorder_id}?organization_id=${ZOHO_ORG_ID}`;
     const data = await apiFetch<PurchaseOrderDetailResponse>(url, {
       method: "GET",
       auth: await getUserAuth(),
@@ -402,7 +434,7 @@ const getPurchaseOrderDetail = async (
     return data.purchaseorder;
   } catch (error) {
     console.error(
-      `Error fetching purchase order detail ${purchaseorderId}:`,
+      `Error fetching purchase order detail ${purchaseorder_id}:`,
       error
     );
     return null;
@@ -419,46 +451,27 @@ export const getPurchaseReceivesByLocationIdRange = async (
 ): Promise<PurchaseReceive[]> => {
   const purchaseOrders = await getAllPurchaseOrders({ dateStart, dateEnd });
 
-  const locationPurchaseOrders = purchaseOrders.filter(
-    (po) => po.location_id === locationId
-  );
+  const getByLocation = (po: PurchaseOrder) => po.location_id === locationId;
+  const locationPurchaseOrders = purchaseOrders.filter(getByLocation);
 
   if (locationPurchaseOrders.length === 0) return [];
 
-  const detailsPromises = locationPurchaseOrders.map((po) =>
-    getPurchaseOrderDetail(po.purchaseorder_id)
-  );
+  const detailsPromises = locationPurchaseOrders.map(getPurchaseOrderDetail);
   const detailedPurchaseOrders = await Promise.all(detailsPromises);
 
-  const allReceivesWithStatus = detailedPurchaseOrders
-    .filter((po): po is PurchaseOrder => po !== null)
-    .flatMap((po) => po.purchasereceives || []);
-
-  if (allReceivesWithStatus.length === 0) return [];
-
-  const batchSize = 10;
-  const purchaseReceives: (PurchaseReceive | null)[] = [];
-
-  for (let i = 0; i < allReceivesWithStatus.length; i += batchSize) {
-    const batch = allReceivesWithStatus.slice(i, i + batchSize);
-    const batchResults = await Promise.all(
-      batch.map((pr) => getPurchaseReceiveById(pr.receive_id))
-    );
-    purchaseReceives.push(...batchResults);
-  }
-
-  const receiveStatusMap = new Map(
-    allReceivesWithStatus.map((pr) => [pr.receive_id, pr.received_status])
+  const allReceives: PurchaseReceive[] = detailedPurchaseOrders.flatMap((po) =>
+    (po?.purchasereceives || []).map((purchaseReceivesDetail) => ({
+      ...purchaseReceivesDetail,
+      purchaseorder_id: po?.purchaseorder_id || "",
+      purchaseorder_number: po?.purchaseorder_number || "",
+      vendor_name: po?.vendor_name || "",
+      location_name: po?.location_name || "",
+      line_items: po?.line_items || [],
+      status: purchaseReceivesDetail.received_status || "pending",
+    }))
   );
 
-  const receivesWithStatusField = purchaseReceives
-    .filter((pr): pr is PurchaseReceive => pr !== null)
-    .map((pr) => ({
-      ...pr,
-      received_status: receiveStatusMap.get(pr.receive_id),
-    }));
+  if (!status || status === "all") return allReceives;
 
-  if (!status || status === "all") return receivesWithStatusField;
-
-  return receivesWithStatusField.filter((pr) => pr.received_status === status);
+  return allReceives.filter((pr) => pr.received_status === status);
 };

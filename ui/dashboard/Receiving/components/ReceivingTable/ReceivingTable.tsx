@@ -9,7 +9,7 @@ import {
 import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { cleanWarehouseName } from "../../../../../lib/api/utils/zohoDataUtils";
 import { getColumns } from "./columns";
-import { Location, PurchaseReceiveRow } from "../../../../../types";
+import { Location, PurchaseReceive } from "../../../../../types";
 import TableLoading from "../../../../loading/tableLoading";
 import { ReceivingListingLoading } from "../../../../loading/receivingLoading";
 import { useMemo, useState } from "react";
@@ -36,7 +36,7 @@ export const getStatusBadge = (status?: string) => {
 };
 
 type ReceivingTableProps = {
-  data: PurchaseReceiveRow[];
+  data: PurchaseReceive[];
   onDateChange?: (start: string, end: string) => void;
   onStatusChange?: (status: string) => void;
   defaultDateStart?: string;
@@ -66,9 +66,8 @@ export function ReceivingTable({
 }: ReceivingTableProps) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(defaultStatus);
-  const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<
-    string | null
-  >(null);
+  const [selectedPurchaseReceives, setSelectedPurchaseReceives] =
+    useState<PurchaseReceive | null>(null);
 
   const filtered = useMemo(() => {
     const text = globalFilter.trim().toLowerCase();
@@ -82,9 +81,9 @@ export function ReceivingTable({
     });
   }, [data, globalFilter]);
 
-  const table = useReactTable<PurchaseReceiveRow>({
+  const table = useReactTable<PurchaseReceive>({
     data: filtered,
-    columns: getColumns({ actions: { setSelectedPurchaseOrderId } }),
+    columns: getColumns({ actions: { setSelectedPurchaseReceives } }),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
@@ -226,7 +225,7 @@ export function ReceivingTable({
               return (
                 <div
                   key={receive.receive_id}
-                  onClick={() => setSelectedPurchaseOrderId(receive.receive_id)}
+                  onClick={() => setSelectedPurchaseReceives(receive)}
                   className="card bg-base-100 shadow-sm border border-gray-300 dark:border-gray-600 p-3 cursor-pointer hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center justify-between">
@@ -286,10 +285,11 @@ export function ReceivingTable({
           </div>
         </>
       )}
-      {selectedPurchaseOrderId && (
+      {selectedPurchaseReceives && (
         <ReceivingDetail
-          purchaseorderId={selectedPurchaseOrderId}
-          onClose={() => setSelectedPurchaseOrderId(null)}
+          updatePurchaseReceives={onRetry}
+          purchaseReceive={selectedPurchaseReceives}
+          onClose={() => setSelectedPurchaseReceives(null)}
         />
       )}
     </div>

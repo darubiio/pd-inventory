@@ -484,20 +484,26 @@ export type PurchaseOrderRow = {
 };
 
 export interface PurchaseReceive {
+  vendor_name: string;
+  status: string;
+  received_status?: string;
+  receive_number: string;
+  receive_id: string;
   purchaseorder_id: string;
   purchaseorder_number: string;
-  received_status?: string;
-  receive_id: string;
-  receive_number: string;
-  date: string;
-  vendor_id: string;
-  vendor_name: string;
-  location_id?: string;
+  notes?: string;
   location_name?: string;
   line_items: PurchaseReceiveLineItem[];
-  notes?: string;
-  created_time: string;
-  last_modified_time: string;
+  date?: string;
+  billed_status?: string;
+  bills?: Array<{
+    bill_id: string;
+    bill_number: string;
+    date?: string;
+    total: number;
+    currency_code: string;
+    currency_symbol: string;
+  }>;
 }
 
 export interface PurchaseReceiveLineItem {
@@ -507,6 +513,7 @@ export interface PurchaseReceiveLineItem {
   description?: string;
   item_order: number;
   quantity: number;
+  quantity_received: number;
   unit: string;
   sku?: string;
 }
