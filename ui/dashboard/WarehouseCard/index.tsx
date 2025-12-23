@@ -46,27 +46,27 @@ export const WarehouseCard: FC<WarehouseAndPosition> = ({
         <div className="flex flex-col gap-2 w-full">
           <Link
             href={`/dashboard/warehouse/${location_id}/inventory?location_id=${parent_location_id}`}
-            className="btn btn-sm w-full border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+            className="btn btn-sm md:btn-sm w-full border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all active:scale-95 h-12 md:h-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <ArchiveBoxIcon className="h-4 w-4" />
+            <ArchiveBoxIcon className="h-5 w-5 md:h-4 md:w-4" />
             Inventory
           </Link>
           <div className="join join-horizontal w-full">
             <Link
               href={`/dashboard/warehouse/${location_id}/receiving?location_id=${parent_location_id}`}
-              className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+              className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all active:scale-95 h-12 md:h-8"
               onClick={(e) => e.stopPropagation()}
             >
-              <ArrowDownTrayIcon className="h-4 w-4" />
+              <ArrowDownTrayIcon className="h-5 w-5 md:h-4 md:w-4" />
               Receiving
             </Link>
             <Link
               href={`/dashboard/warehouse/${location_id}/packages?location_id=${parent_location_id}`}
-              className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+              className="btn btn-sm join-item flex-1 border border-gray-300 dark:border-gray-700 bg-base-100 hover:border-2 hover:border-gray-400 dark:hover:border-gray-600 transition-all active:scale-95 h-12 md:h-8"
               onClick={(e) => e.stopPropagation()}
             >
-              <ArrowUpTrayIcon className="h-4 w-4" />
+              <ArrowUpTrayIcon className="h-5 w-5 md:h-4 md:w-4" />
               Dispatching
             </Link>
           </div>
