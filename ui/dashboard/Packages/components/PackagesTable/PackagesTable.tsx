@@ -13,8 +13,8 @@ import { Location, PackageRow } from "../../../../../types";
 import { PackageDetail } from "../PackageDetail/PackageDetail";
 import { PackageListingLoading } from "../../../../../ui/loading/packagesLoading";
 import { useMemo, useState } from "react";
-import DateRangeInput from "../../../../components/DateRangeInput";
 import TableLoading from "../../../../loading/tableLoading";
+import { DateRangeInput } from "@components/inputs";
 
 type PackagesTableProps = {
   data: PackageRow[];

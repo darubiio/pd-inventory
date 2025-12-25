@@ -1,8 +1,8 @@
 import React from "react";
 import { QrCodeIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { OnlyIf } from "../../../../../components/layout/OnlyIf/OnlyIf";
-import { Button } from "../../../../../components/inputs/Button/Button";
+import { OnlyIf } from "@components/layout";
+import { Button } from "@components/inputs";
 import { PurchaseReceive } from "../../../../../../types";
 
 interface ReceivingDetailButtonsProps {

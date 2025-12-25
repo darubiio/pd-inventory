@@ -1,7 +1,7 @@
 import React, { Fragment, useMemo, useEffect, useState } from "react";
 import { getItemStatus, getStatusColor } from "../utils/utils";
 import clsx from "clsx";
-import { OnlyIf } from "../../../../../components/layout/OnlyIf/OnlyIf";
+import { OnlyIf } from "@components/layout";
 import { PurchaseReceive, ItemDetails } from "../../../../../../types";
 import { ScannerState } from "../state/scannerTypes";
 

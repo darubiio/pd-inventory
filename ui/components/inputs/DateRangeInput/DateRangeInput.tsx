@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { DayPicker, DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
-import "./dateRangeInput.css";
+import "./DateRangeInput.css";
 
 function toISO(date?: Date) {
   return date ? date.toISOString().split("T")[0] : "";
@@ -15,7 +15,7 @@ function fromISO(s?: string) {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
-export default function DateRangeInput({
+export const DateRangeInput = ({
   defaultStart,
   defaultEnd,
   onChange,
@@ -29,7 +29,7 @@ export default function DateRangeInput({
   loading?: boolean;
   className?: string;
   buttonClassName?: string;
-}) {
+}) => {
   const initialRange: DateRange | undefined = useMemo(
     () => ({ from: fromISO(defaultStart), to: fromISO(defaultEnd) }),
     [defaultStart, defaultEnd]
@@ -89,4 +89,4 @@ export default function DateRangeInput({
       </div>
     </>
   );
-}
+};

@@ -13,8 +13,8 @@ import { Location, PurchaseReceive } from "../../../../../types";
 import TableLoading from "../../../../loading/tableLoading";
 import { ReceivingListingLoading } from "../../../../loading/receivingLoading";
 import { useMemo, useState } from "react";
-import DateRangeInput from "../../../../components/DateRangeInput";
 import { ReceivingDetail } from "../ReceivingDetail/ReceivingDetail";
+import { DateRangeInput } from "@components/inputs";
 
 const statusOptions = {
   all: { label: "All", value: "all" },

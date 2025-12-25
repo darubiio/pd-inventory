@@ -2,8 +2,8 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import { OnlyIf } from "../../../../../../components/layout/OnlyIf/OnlyIf";
-import { Button } from "../../../../../../components/inputs/Button";
+import { OnlyIf } from "@components/layout";
+import { Button } from "@components/inputs";
 
 interface ConfirmShipmentModalProps {
   isOpen: boolean;

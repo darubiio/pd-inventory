@@ -20,7 +20,7 @@ import useSWR from "swr";
 import { ShipmentInfo } from "./components/ShipmentInfo/ShipmentInfo";
 import { LineItems } from "./components/LineItems/LineItems";
 import { useBarcodeScan } from "../../../../../lib/hooks/useBarcodeScan";
-import { OnlyIf } from "../../../../components/layout/OnlyIf/OnlyIf";
+import { OnlyIf } from "@components/layout";
 import { MaxQuantityModal } from "../../../shared/components/MaxQuantityModal";
 
 interface PackageDetailProps {

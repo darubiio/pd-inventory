@@ -8,8 +8,8 @@ import {
 } from "../../state/scannerActions";
 import clsx from "clsx";
 import { ConfirmShipmentModal } from "../ConfirmShipmentModal/ConfirmShipmentModal";
-import { OnlyIf } from "../../../../../../components/layout/OnlyIf/OnlyIf";
-import { Button } from "../../../../../../components/inputs/Button";
+import { OnlyIf } from "@components/layout";
+import { Button } from "@components/inputs";
 
 interface PackageDetailButtonsProps {
   state: {
