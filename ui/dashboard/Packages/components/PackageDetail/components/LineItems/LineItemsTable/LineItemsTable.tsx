@@ -4,9 +4,11 @@ import {
   getItemStatus,
   getPartNumber,
   getStatusColor,
+  getMappedStatusColor,
   getMappedItemStatus,
   getParentStatus,
 } from "../../../utils/utils";
+import { computeParentScanned } from "../../../utils/utils";
 import { Fragment } from "react";
 
 interface PackageDetailTableProps {
@@ -39,26 +41,10 @@ export const LineItemsTable = ({ state, items }: PackageDetailTableProps) => {
             const hasMappedItems =
               item.mapped_items && item.mapped_items.length > 0;
 
-            let scanned = 0;
-            let expectedQuantity = item.quantity;
-
-            if (hasMappedItems) {
-              const completedMappedItems = item.mapped_items!.filter(
-                (mappedItem) => {
-                  const mappedScanned =
-                    state.scannedItems.get(mappedItem.line_item_id) || 0;
-                  const mappedExpected = mappedItem.quantity;
-                  return mappedScanned >= mappedExpected;
-                }
-              ).length;
-
-              const totalMappedItems = item.mapped_items!.length;
-              scanned = Math.floor(
-                (completedMappedItems / totalMappedItems) * item.quantity
-              );
-            } else {
-              scanned = state.scannedItems.get(item.line_item_id) || 0;
-            }
+            const { scanned, expectedQuantity } = computeParentScanned(
+              item,
+              state.scannedItems
+            );
 
             return (
               <Fragment key={item.line_item_id}>
@@ -129,7 +115,7 @@ export const LineItemsTable = ({ state, items }: PackageDetailTableProps) => {
                         key={mappedItem.line_item_id}
                         className={clsx(
                           "text-xs opacity-80",
-                          state.scanMode && getStatusColor(mappedStatus)
+                          state.scanMode && getMappedStatusColor(mappedStatus)
                         )}
                       >
                         {state.scanMode && (

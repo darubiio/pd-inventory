@@ -26,7 +26,20 @@ export const getStatusColor = (status: string) => {
     case "excess":
       return "bg-error/20 border-error";
     default:
-      return "bg-base-200";
+      return "bg-base-200 border-base-300";
+  }
+};
+
+export const getMappedStatusColor = (status: string) => {
+  switch (status) {
+    case "complete":
+      return "bg-success/10 border-success";
+    case "partial":
+      return "bg-warning/10 border-warning";
+    case "excess":
+      return "bg-error/10 border-error";
+    default:
+      return "bg-base-100 border-base-300";
   }
 };
 
@@ -89,4 +102,31 @@ export const fetcher = async (url: string) => {
   }
   const { data } = await response.json();
   return data as PackageDetail;
+};
+
+export const computeParentScanned = (
+  item: PackageLineItem,
+  scannedItems: Map<string, number> | undefined
+) => {
+  const expectedQuantity = item.quantity;
+
+  if (!item.mapped_items || item.mapped_items.length === 0) {
+    const scanned = scannedItems?.get(item.line_item_id) || 0;
+    return { scanned, expectedQuantity };
+  }
+
+  const packagesPerMapped = item.mapped_items.map((mi) => {
+    const mappedScanned = scannedItems?.get(mi.line_item_id) || 0;
+    const perPackageNeeded = expectedQuantity
+      ? mi.quantity / expectedQuantity
+      : 0;
+    if (!perPackageNeeded || perPackageNeeded <= 0) return 0;
+    return Math.floor(mappedScanned / perPackageNeeded);
+  });
+
+  const completedPackages = packagesPerMapped.length
+    ? Math.min(...packagesPerMapped)
+    : 0;
+  const scanned = Math.min(completedPackages, expectedQuantity);
+  return { scanned, expectedQuantity };
 };

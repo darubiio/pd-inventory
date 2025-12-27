@@ -1,13 +1,12 @@
-import React from "react";
 import {
-  getItemStatus,
-  getPartNumber,
   getStatusColor,
+  getMappedStatusColor,
   getMappedItemStatus,
   getParentStatus,
+  computeParentScanned,
 } from "../../../utils/utils";
 import clsx from "clsx";
-import { PackageDetail, PackageLineItem } from "../../../../../../../../types";
+import { PackageLineItem } from "../../../../../../../../types";
 import { Card } from "../../../../../../../components/layout/Card/Card";
 
 interface PackageDetailCardsProps {
@@ -23,30 +22,13 @@ export const LineItemsCards = ({ items, state }: PackageDetailCardsProps) => {
     <div className="md:hidden space-y-3">
       {items?.map((item) => {
         const status = getParentStatus(item, state.scannedItems);
-        const partNumber = getPartNumber(item);
         const hasMappedItems =
           item.mapped_items && item.mapped_items.length > 0;
 
-        let scanned = 0;
-        let expectedQuantity = item.quantity;
-
-        if (hasMappedItems) {
-          const completedMappedItems = item.mapped_items!.filter(
-            (mappedItem) => {
-              const mappedScanned =
-                state.scannedItems.get(mappedItem.line_item_id) || 0;
-              const mappedExpected = mappedItem.quantity;
-              return mappedScanned >= mappedExpected;
-            }
-          ).length;
-
-          const totalMappedItems = item.mapped_items!.length;
-          scanned = Math.floor(
-            (completedMappedItems / totalMappedItems) * item.quantity
-          );
-        } else {
-          scanned = state.scannedItems.get(item.line_item_id) || 0;
-        }
+        const { scanned, expectedQuantity } = computeParentScanned(
+          item,
+          state.scannedItems
+        );
 
         return (
           <div key={item.line_item_id} className="space-y-2">
@@ -54,7 +36,7 @@ export const LineItemsCards = ({ items, state }: PackageDetailCardsProps) => {
               className={clsx(
                 "card",
                 state.scanMode ? getStatusColor(status) : "bg-base-200",
-                state.scanMode && "border-2"
+                state.scanMode && "border-1"
               )}
             >
               <div className="card-body p-4">
@@ -115,9 +97,9 @@ export const LineItemsCards = ({ items, state }: PackageDetailCardsProps) => {
                     <div
                       key={mappedItem.line_item_id}
                       className={clsx(
-                        "card border-2",
+                        "card border-1",
                         state.scanMode
-                          ? getStatusColor(mappedStatus)
+                          ? getMappedStatusColor(mappedStatus)
                           : "bg-base-100 border-base-300"
                       )}
                     >

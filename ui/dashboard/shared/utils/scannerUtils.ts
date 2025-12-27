@@ -94,14 +94,11 @@ export const findItemByCode = <T extends ItemWithMappedItems>(
       for (const mappedItem of item.mapped_items) {
         const mappedMatch = checkItemMatch(mappedItem, normalizedCode);
         if (mappedMatch) {
-          const parentQuantity = (item as any).quantity || 1;
           const mappedQuantity = mappedItem.quantity || 1;
-          const totalQuantity = parentQuantity * mappedQuantity;
 
           return {
             item: {
               ...item,
-              quantity: totalQuantity,
               cf_box_barcode: mappedItem.cf_box_barcode,
               cf_box_qty: mappedItem.cf_box_qty,
               cf_package_qty: mappedItem.cf_package_qty,
@@ -112,7 +109,7 @@ export const findItemByCode = <T extends ItemWithMappedItems>(
             } as T,
             isBoxBarcode: mappedMatch.isBoxBarcode,
             isMappedItem: true,
-            mappedItemQuantity: totalQuantity,
+            mappedItemQuantity: mappedQuantity,
             mappedItemId: mappedItem.line_item_id,
           };
         }
