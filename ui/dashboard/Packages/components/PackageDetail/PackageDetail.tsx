@@ -153,7 +153,7 @@ export function PackageDetail({
       if (item.mapped_items && item.mapped_items.length > 0) {
         const mappedTotal = item.mapped_items.reduce(
           (mappedSum: number, mappedItem: any) =>
-            mappedSum + item.quantity * mappedItem.quantity,
+            mappedSum + mappedItem.quantity,
           0
         );
         return sum + mappedTotal;
@@ -169,7 +169,7 @@ export function PackageDetail({
       if (item.mapped_items && item.mapped_items.length > 0) {
         return item.mapped_items.every((mappedItem: any) => {
           const scanned = state.scannedItems.get(mappedItem.line_item_id) || 0;
-          const expected = item.quantity * mappedItem.quantity;
+          const expected = mappedItem.quantity;
           return scanned >= expected;
         });
       }

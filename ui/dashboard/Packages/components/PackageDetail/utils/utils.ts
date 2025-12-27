@@ -36,7 +36,7 @@ export const getMappedItemStatus = (
   scannedItems: Map<string, number> | undefined
 ) => {
   const scanned = scannedItems?.get(mappedItem.line_item_id) || 0;
-  const expectedQuantity = parentItem.quantity * mappedItem.quantity;
+  const expectedQuantity = mappedItem.quantity;
 
   if (scanned === 0) return "pending";
   if (scanned < expectedQuantity) return "partial";
@@ -71,7 +71,7 @@ export const getItemStatus = (
   let expectedQuantity = item.quantity;
   if (item.mapped_items && item.mapped_items.length > 0) {
     expectedQuantity = item.mapped_items.reduce(
-      (sum, mappedItem) => sum + item.quantity * mappedItem.quantity,
+      (sum, mappedItem) => sum + mappedItem.quantity,
       0
     );
   }

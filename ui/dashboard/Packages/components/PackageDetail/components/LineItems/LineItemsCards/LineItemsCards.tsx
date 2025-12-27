@@ -35,7 +35,7 @@ export const LineItemsCards = ({ items, state }: PackageDetailCardsProps) => {
             (mappedItem) => {
               const mappedScanned =
                 state.scannedItems.get(mappedItem.line_item_id) || 0;
-              const mappedExpected = item.quantity * mappedItem.quantity;
+              const mappedExpected = mappedItem.quantity;
               return mappedScanned >= mappedExpected;
             }
           ).length;
@@ -109,7 +109,7 @@ export const LineItemsCards = ({ items, state }: PackageDetailCardsProps) => {
                   );
                   const mappedScanned =
                     state.scannedItems.get(mappedItem.line_item_id) || 0;
-                  const mappedExpected = item.quantity * mappedItem.quantity;
+                  const mappedExpected = mappedItem.quantity;
 
                   return (
                     <div

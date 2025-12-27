@@ -47,7 +47,7 @@ export const LineItemsTable = ({ state, items }: PackageDetailTableProps) => {
                 (mappedItem) => {
                   const mappedScanned =
                     state.scannedItems.get(mappedItem.line_item_id) || 0;
-                  const mappedExpected = item.quantity * mappedItem.quantity;
+                  const mappedExpected = mappedItem.quantity;
                   return mappedScanned >= mappedExpected;
                 }
               ).length;
@@ -122,7 +122,7 @@ export const LineItemsTable = ({ state, items }: PackageDetailTableProps) => {
                     );
                     const mappedScanned =
                       state.scannedItems.get(mappedItem.line_item_id) || 0;
-                    const mappedExpected = item.quantity * mappedItem.quantity;
+                    const mappedExpected = mappedItem.quantity;
 
                     return (
                       <tr
