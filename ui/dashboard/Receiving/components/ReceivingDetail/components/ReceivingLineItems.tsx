@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { OnlyIf } from "@components/layout";
 import { PurchaseReceive, ItemDetails } from "../../../../../../types";
 import { ScannerState } from "../state/scannerTypes";
+import { Card } from "../../../../../components/layout/Card/Card";
 
 interface LineItemProps {
   purchaseReceive: PurchaseReceive;
@@ -128,7 +129,7 @@ export const ReceivingLineItemsMobile = ({
             <div className="card-body p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h4 className="card-title text-base">{item.name}</h4>
+                  <Card.Title className="text-base">{item.name}</Card.Title>
                   {item.sku && (
                     <p className="text-xs opacity-70">SKU: {item.sku}</p>
                   )}

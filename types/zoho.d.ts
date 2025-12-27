@@ -318,6 +318,29 @@ type MapBoxLocationResponse = {
   }[];
 };
 
+export interface MappedItem {
+  line_item_id: string;
+  item_id: string;
+  name: string;
+  rate: number;
+  purchase_rate: number;
+  sku: string;
+  unit: string;
+  description: string;
+  quantity: number;
+  stock_on_hand: number;
+  available_stock: number;
+  actual_available_stock: number;
+  is_combo_product: boolean;
+  upc?: string;
+  ean?: string;
+  isbn?: string;
+  part_number?: string;
+  cf_box_barcode?: string;
+  cf_box_qty?: string;
+  cf_package_qty?: string;
+}
+
 export interface PackageLineItem {
   line_item_id: string;
   so_line_item_id: string;
@@ -336,6 +359,7 @@ export interface PackageLineItem {
   cf_box_qty?: string;
   cf_package_qty?: string;
   item_custom_fields: CustomField[];
+  mapped_items?: MappedItem[];
 }
 
 export interface PackageDetail {

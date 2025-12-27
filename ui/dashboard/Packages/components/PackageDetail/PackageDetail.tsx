@@ -47,14 +47,21 @@ export function PackageDetail({
 
       dispatch(setLastScannedCode(barcode));
 
-      const { item, isBoxBarcode } = findItemByCode(barcode, data?.line_items);
+      const {
+        item,
+        isBoxBarcode,
+        isMappedItem,
+        mappedItemQuantity,
+        mappedItemId,
+      } = findItemByCode(barcode, data?.line_items);
 
       if (!item) {
         dispatch(setScanError(barcode));
         return;
       }
 
-      const currentScanned = state.scannedItems.get(item.line_item_id) || 0;
+      const itemIdToTrack = mappedItemId || item.line_item_id;
+      const currentScanned = state.scannedItems.get(itemIdToTrack) || 0;
 
       const boxQuantity = isBoxBarcode
         ? Number(item.cf_box_qty || item.cf_package_qty || 1)
@@ -62,18 +69,28 @@ export function PackageDetail({
 
       const newScanned = currentScanned + boxQuantity;
 
-      if (newScanned > item.quantity) {
+      const expectedQuantity =
+        isMappedItem && mappedItemQuantity ? mappedItemQuantity : item.quantity;
+
+      if (newScanned > expectedQuantity) {
         return dispatch({
           type: "SHOW_MAX_QUANTITY_MODAL",
           payload: {
             itemName: item.name,
-            maxQuantity: item.quantity,
+            maxQuantity: expectedQuantity,
             scannedQuantity: newScanned,
           },
         });
       }
 
-      dispatch(scanItem({ ...item, newScanned }));
+      dispatch(
+        scanItem({
+          ...item,
+          line_item_id: itemIdToTrack,
+          newScanned,
+          quantity: expectedQuantity,
+        })
+      );
     },
     [findItemByCode, state.scannedItems, state.maxQuantityModal?.isOpen, data]
   );
@@ -132,21 +149,33 @@ export function PackageDetail({
         allItemsScanned: false,
       };
 
-    const total: number = data.line_items.reduce(
-      (sum: number, item: { quantity: number }) => sum + item.quantity,
-      0
-    );
+    const total: number = data.line_items.reduce((sum: number, item: any) => {
+      if (item.mapped_items && item.mapped_items.length > 0) {
+        const mappedTotal = item.mapped_items.reduce(
+          (mappedSum: number, mappedItem: any) =>
+            mappedSum + item.quantity * mappedItem.quantity,
+          0
+        );
+        return sum + mappedTotal;
+      }
+      return sum + item.quantity;
+    }, 0);
     const completed = Array.from(state.scannedItems.values()).reduce(
       (sum, qty) => sum + qty,
       0
     );
 
-    const allItemsScanned = data.line_items.every(
-      (item: { line_item_id: string; quantity: number }) => {
-        const scanned = state.scannedItems.get(item.line_item_id) || 0;
-        return scanned >= item.quantity;
+    const allItemsScanned = data.line_items.every((item: any) => {
+      if (item.mapped_items && item.mapped_items.length > 0) {
+        return item.mapped_items.every((mappedItem: any) => {
+          const scanned = state.scannedItems.get(mappedItem.line_item_id) || 0;
+          const expected = item.quantity * mappedItem.quantity;
+          return scanned >= expected;
+        });
       }
-    );
+      const scanned = state.scannedItems.get(item.line_item_id) || 0;
+      return scanned >= item.quantity;
+    });
 
     return {
       completed,

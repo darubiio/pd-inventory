@@ -66,6 +66,29 @@ interface PackageDetail {
   custom_fields: CustomField[];
 }
 
+interface MappedItem {
+  line_item_id: string;
+  item_id: string;
+  name: string;
+  rate: number;
+  purchase_rate: number;
+  sku: string;
+  unit: string;
+  description: string;
+  quantity: number;
+  stock_on_hand: number;
+  available_stock: number;
+  actual_available_stock: number;
+  is_combo_product: boolean;
+  upc?: string;
+  ean?: string;
+  isbn?: string;
+  part_number?: string;
+  cf_box_barcode?: string;
+  cf_box_qty?: string;
+  cf_package_qty?: string;
+}
+
 interface PackageLineItem {
   line_item_id: string;
   so_line_item_id: string;
@@ -81,6 +104,7 @@ interface PackageLineItem {
   unit: string;
   is_invoiced: boolean;
   item_custom_fields: CustomField[];
+  mapped_items?: MappedItem[];
 }
 
 interface ContactPerson {
@@ -111,6 +135,22 @@ interface ItemResponse {
   };
 }
 
+interface BulkItemDetailsResponse {
+  code: number;
+  message: string;
+  items?: Array<{
+    item_id: string;
+    custom_fields: Array<{
+      api_name: string;
+      value: string;
+    }>;
+    upc?: string;
+    ean?: string;
+    isbn?: string;
+    part_number?: string;
+  }>;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ packageId: string }> }
@@ -136,40 +176,89 @@ export async function GET(
       }
     );
 
-    const enrichedLineItems = await Promise.all(
-      packageData.line_items.map(async (lineItem) => {
-        try {
-          const itemUrl = `${ZOHO_INVENTORY_URL}/items/${lineItem.item_id}?organization_id=${ZOHO_ORG_ID}`;
-          const itemData = await apiFetch<ItemResponse["item"], ItemResponse>(
-            itemUrl,
-            {
-              method: "GET",
-              auth: await getUserAuth(),
-              transform: (response) => response.item,
-            }
-          );
+    const allItemIds = new Set<string>();
 
-          const customFields = itemData.custom_fields.reduce((acc, field) => {
-            if (CUSTOM_FIELDS_IDS.includes(field.api_name)) {
-              acc[field.api_name] = field.value;
-            }
-            return acc;
-          }, {} as Record<string, any>);
+    packageData.line_items.forEach((lineItem) => {
+      allItemIds.add(lineItem.item_id);
+      lineItem.mapped_items?.forEach((mappedItem) => {
+        allItemIds.add(mappedItem.item_id);
+      });
+    });
 
-          return {
-            ...lineItem,
-            ...customFields,
-            upc: itemData.upc,
-            ean: itemData.ean,
-            isbn: itemData.isbn,
-            part_number: itemData.part_number,
-          };
-        } catch (error) {
-          console.warn(`Failed to enrich item ${lineItem.item_id}:`, error);
-          return lineItem;
-        }
-      })
-    );
+    const itemDetailsMap = new Map<
+      string,
+      {
+        custom_fields: Record<string, string>;
+        upc?: string;
+        ean?: string;
+        isbn?: string;
+        part_number?: string;
+      }
+    >();
+
+    if (allItemIds.size > 0) {
+      try {
+        const itemIdsParam = Array.from(allItemIds).join(",");
+        const bulkUrl = `${ZOHO_INVENTORY_URL}/itemdetails?item_ids=${itemIdsParam}&organization_id=${ZOHO_ORG_ID}`;
+
+        const bulkResponse = await apiFetch<
+          BulkItemDetailsResponse,
+          BulkItemDetailsResponse
+        >(bulkUrl, {
+          method: "GET",
+          auth: await getUserAuth(),
+        });
+
+        const bulkItemDetails = bulkResponse.items || [];
+
+        bulkItemDetails.forEach((itemDetail) => {
+          const customFields =
+            itemDetail.custom_fields?.reduce((acc, field) => {
+              if (CUSTOM_FIELDS_IDS.includes(field.api_name)) {
+                acc[field.api_name] = field.value;
+              }
+              return acc;
+            }, {} as Record<string, string>) || {};
+
+          itemDetailsMap.set(itemDetail.item_id, {
+            custom_fields: customFields,
+            upc: itemDetail.upc,
+            ean: itemDetail.ean,
+            isbn: itemDetail.isbn,
+            part_number: itemDetail.part_number,
+          });
+        });
+      } catch (error) {
+        console.warn("Failed to fetch bulk item details:", error);
+      }
+    }
+
+    const enrichedLineItems = packageData.line_items.map((lineItem) => {
+      const itemDetails = itemDetailsMap.get(lineItem.item_id);
+
+      const enrichedMappedItems = lineItem.mapped_items?.map((mappedItem) => {
+        const mappedItemDetails = itemDetailsMap.get(mappedItem.item_id);
+
+        return {
+          ...mappedItem,
+          ...mappedItemDetails?.custom_fields,
+          upc: mappedItemDetails?.upc,
+          ean: mappedItemDetails?.ean,
+          isbn: mappedItemDetails?.isbn,
+          part_number: mappedItemDetails?.part_number,
+        };
+      });
+
+      return {
+        ...lineItem,
+        ...itemDetails?.custom_fields,
+        upc: itemDetails?.upc,
+        ean: itemDetails?.ean,
+        isbn: itemDetails?.isbn,
+        part_number: itemDetails?.part_number,
+        mapped_items: enrichedMappedItems,
+      };
+    });
 
     const data = {
       ...packageData,

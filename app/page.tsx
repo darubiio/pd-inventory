@@ -9,6 +9,7 @@ import {
   CubeIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
+import { Card } from "../ui/components/layout/Card/Card";
 
 export default function Home() {
   return (
@@ -40,9 +41,9 @@ export default function Home() {
               <div className="card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-100 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700">
                 <div className="card-body items-center text-center p-6">
                   <ChartBarIcon className="w-12 h-12 text-blue-700 dark:text-blue-400 mb-2" />
-                  <h3 className="card-title text-lg text-slate-900 dark:text-slate-100">
+                  <Card.Title className="text-lg">
                     Inventory Tracking
-                  </h3>
+                  </Card.Title>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     Track stock levels, item details and availability across
                     locations
@@ -53,9 +54,9 @@ export default function Home() {
               <div className="card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 border border-red-100 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-700">
                 <div className="card-body items-center text-center p-6">
                   <CubeIcon className="w-12 h-12 text-red-600 dark:text-red-400 mb-2" />
-                  <h3 className="card-title text-lg text-slate-900 dark:text-slate-100">
+                  <Card.Title className="text-lg">
                     Warehouse Management
-                  </h3>
+                  </Card.Title>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     Efficiently organize multiple warehouse locations
                   </p>
@@ -65,9 +66,7 @@ export default function Home() {
               <div className="card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-100 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700">
                 <div className="card-body items-center text-center p-6">
                   <ShieldCheckIcon className="w-12 h-12 text-blue-800 dark:text-blue-300 mb-2" />
-                  <h3 className="card-title text-lg text-slate-900 dark:text-slate-100">
-                    Secure Access
-                  </h3>
+                  <Card.Title className="text-lg">Secure Access</Card.Title>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     Enterprise-grade security with role-based permissions
                   </p>

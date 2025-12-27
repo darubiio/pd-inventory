@@ -30,14 +30,55 @@ export const getStatusColor = (status: string) => {
   }
 };
 
+export const getMappedItemStatus = (
+  parentItem: PackageLineItem,
+  mappedItem: { line_item_id: string; quantity: number },
+  scannedItems: Map<string, number> | undefined
+) => {
+  const scanned = scannedItems?.get(mappedItem.line_item_id) || 0;
+  const expectedQuantity = parentItem.quantity * mappedItem.quantity;
+
+  if (scanned === 0) return "pending";
+  if (scanned < expectedQuantity) return "partial";
+  if (scanned === expectedQuantity) return "complete";
+  return "excess";
+};
+
+export const getParentStatus = (
+  item: PackageLineItem,
+  scannedItems: Map<string, number> | undefined
+) => {
+  if (!item.mapped_items || item.mapped_items.length === 0) {
+    return getItemStatus(item, scannedItems);
+  }
+
+  const mappedStatuses = item.mapped_items.map((mappedItem) =>
+    getMappedItemStatus(item, mappedItem, scannedItems)
+  );
+
+  if (mappedStatuses.every((s) => s === "complete")) return "complete";
+  if (mappedStatuses.every((s) => s === "pending")) return "pending";
+  if (mappedStatuses.some((s) => s === "excess")) return "excess";
+  return "partial";
+};
+
 export const getItemStatus = (
   item: PackageLineItem,
   scannedItems: Map<string, number> | undefined
 ) => {
   const scanned = scannedItems?.get(item.line_item_id) || 0;
+
+  let expectedQuantity = item.quantity;
+  if (item.mapped_items && item.mapped_items.length > 0) {
+    expectedQuantity = item.mapped_items.reduce(
+      (sum, mappedItem) => sum + item.quantity * mappedItem.quantity,
+      0
+    );
+  }
+
   if (scanned === 0) return "pending";
-  if (scanned < item.quantity) return "partial";
-  if (scanned === item.quantity) return "complete";
+  if (scanned < expectedQuantity) return "partial";
+  if (scanned === expectedQuantity) return "complete";
   return "excess";
 };
 

@@ -1,6 +1,9 @@
 export interface FindItemByCodeResult<T> {
   item: T | null;
   isBoxBarcode: boolean;
+  isMappedItem?: boolean;
+  mappedItemQuantity?: number;
+  mappedItemId?: string;
 }
 
 interface IdentifiableItem {
@@ -10,6 +13,19 @@ interface IdentifiableItem {
   isbn?: string;
   part_number?: string;
   cf_box_barcode?: string;
+}
+
+interface MappedItem extends IdentifiableItem {
+  line_item_id: string;
+  item_id: string;
+  name: string;
+  quantity: number;
+  cf_box_qty?: string;
+  cf_package_qty?: string;
+}
+
+interface ItemWithMappedItems extends IdentifiableItem {
+  mapped_items?: MappedItem[];
 }
 
 const normalizeForComparison = (value: string | undefined | null): string => {
@@ -59,7 +75,7 @@ const checkItemMatch = <T extends IdentifiableItem>(
   return null;
 };
 
-export const findItemByCode = <T extends IdentifiableItem>(
+export const findItemByCode = <T extends ItemWithMappedItems>(
   code: string,
   items?: T[]
 ): FindItemByCodeResult<T> => {
@@ -73,6 +89,35 @@ export const findItemByCode = <T extends IdentifiableItem>(
   for (const item of items) {
     const match = checkItemMatch(item, normalizedCode);
     if (match) return match;
+
+    if (item.mapped_items && item.mapped_items.length > 0) {
+      for (const mappedItem of item.mapped_items) {
+        const mappedMatch = checkItemMatch(mappedItem, normalizedCode);
+        if (mappedMatch) {
+          const parentQuantity = (item as any).quantity || 1;
+          const mappedQuantity = mappedItem.quantity || 1;
+          const totalQuantity = parentQuantity * mappedQuantity;
+
+          return {
+            item: {
+              ...item,
+              quantity: totalQuantity,
+              cf_box_barcode: mappedItem.cf_box_barcode,
+              cf_box_qty: mappedItem.cf_box_qty,
+              cf_package_qty: mappedItem.cf_package_qty,
+              upc: mappedItem.upc,
+              ean: mappedItem.ean,
+              isbn: mappedItem.isbn,
+              part_number: mappedItem.part_number,
+            } as T,
+            isBoxBarcode: mappedMatch.isBoxBarcode,
+            isMappedItem: true,
+            mappedItemQuantity: totalQuantity,
+            mappedItemId: mappedItem.line_item_id,
+          };
+        }
+      }
+    }
   }
 
   return defaultResult;
